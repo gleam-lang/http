@@ -114,3 +114,41 @@ pub fn parse_method_test() {
   |> http:parse_method
   |> expect:equal(_, Error(Nil))
 }
+
+pub fn method_to_string_test() {
+  http:Connect
+  |> http:method_to_string
+  |> expect:equal(_, "connect")
+
+  http:Delete
+  |> http:method_to_string
+  |> expect:equal(_, "delete")
+
+  http:Get
+  |> http:method_to_string
+  |> expect:equal(_, "get")
+
+  http:Head
+  |> http:method_to_string
+  |> expect:equal(_, "head")
+
+  http:Options
+  |> http:method_to_string
+  |> expect:equal(_, "options")
+
+  http:Patch
+  |> http:method_to_string
+  |> expect:equal(_, "patch")
+
+  http:Post
+  |> http:method_to_string
+  |> expect:equal(_, "post")
+
+  http:Put
+  |> http:method_to_string
+  |> expect:equal(_, "put")
+
+  http:Trace
+  |> http:method_to_string
+  |> expect:equal(_, "trace")
+}
