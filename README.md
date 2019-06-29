@@ -1,6 +1,7 @@
 # gleam_http
 
-A Gleam library
+A Gleam library that provides HTTP types to be used by HTTP servers and
+clients written in Gleam.
 
 
 ## Quick start
