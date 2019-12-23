@@ -3,7 +3,7 @@ import gleam/string
 // HTTP standard method as defined by RFC 2616, and PATCH which is defined by
 // RFC 5789.
 //
-pub enum Method {
+pub type Method {
   Get
   Post
   Head
