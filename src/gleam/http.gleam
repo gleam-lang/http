@@ -44,5 +44,5 @@ pub fn method_to_string(method) {
   }
 }
 
-pub external fn method_from_erlang(anything) -> Result(Method, Nil)
-  = "gleam_http_native" "method_from_erlang"
+pub external fn method_from_erlang(anything) -> Result(Method, Nil) =
+  "gleam_http_native" "method_from_erlang"
