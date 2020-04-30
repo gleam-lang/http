@@ -1,8 +1,8 @@
 import gleam/string
 
-// HTTP standard method as defined by RFC 2616, and PATCH which is defined by
-// RFC 5789.
-//
+/// HTTP methods as defined by RFC 2616, and PATCH which is defined by RFC
+/// 5789.
+///
 pub type Method {
   Get
   Post
@@ -13,8 +13,13 @@ pub type Method {
   Connect
   Options
   Patch
+
+  /// Non-standard but valid HTTP methods.
+  Other(String)
 }
 
+// TODO: check if the a is a valid HTTP method (i.e. it is a token, as per the
+// spec) and return Ok(Other(s)) if so.
 pub fn parse_method(s) {
   case string.lowercase(s) {
     "connect" -> Ok(Connect)
@@ -41,6 +46,7 @@ pub fn method_to_string(method) {
     Post -> "post"
     Put -> "put"
     Trace -> "trace"
+    Other(s) -> s
   }
 }
 

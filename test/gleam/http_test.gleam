@@ -549,4 +549,12 @@ pub fn method_to_string_test() {
   http.Trace
   |> http.method_to_string
   |> should.equal("trace")
+
+  http.Other("ok")
+  |> http.method_to_string
+  |> should.equal("ok")
+
+  http.Other("nope")
+  |> http.method_to_string
+  |> should.equal("nope")
 }
