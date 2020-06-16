@@ -1,10 +1,10 @@
 import gleam/atom
 import gleam/iodata
+import gleam/uri.{Uri}
 import gleam/http
 import gleam/http.{Message, Get}
 import gleam/option.{Some, None}
 import gleam/should
-
 
 pub fn parse_method_test() {
   "Connect"
@@ -561,6 +561,14 @@ pub fn method_to_string_test() {
   http.Other("nope")
   |> http.method_to_string
   |> should.equal("nope")
+}
+
+pub fn request_uri_test() {
+  let request = http.request(Get, "//example.com/foo/bar")
+  http.request_uri(request, True)
+  |> should.equal(
+    Uri(Some("https"), None, Some("example.com"), None, "/foo/bar", None, None),
+  )
 }
 
 pub fn redirect_test() {

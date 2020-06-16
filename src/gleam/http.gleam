@@ -10,7 +10,7 @@ import gleam/iodata.{Iodata}
 import gleam/list
 import gleam/option.{Option, Some, None}
 import gleam/string
-import gleam/uri
+import gleam/uri.{Uri}
 
 /// HTTP standard method as defined by [RFC 2616](https://tools.ietf.org/html/rfc2616),
 /// and PATCH which is defined by [RFC 5789](https://tools.ietf.org/html/rfc5789).
@@ -25,8 +25,10 @@ pub type Method {
   Options
   Patch
 
-  /// Non-standard but valid HTTP methods.
-  Other(String)
+  Other(
+    /// Non-standard but valid HTTP methods.
+    String,
+  )
 }
 
 // TODO: check if the a is a valid HTTP method (i.e. it is a token, as per the
@@ -63,7 +65,6 @@ pub fn method_to_string(method) {
 
 pub external fn method_from_erlang(anything) -> Result(Method, Nil) =
   "gleam_http_native" "method_from_erlang"
-
 
 /// Data type containing an attribute value pair that constitute an HTTP header.
 pub type Header =
@@ -112,6 +113,18 @@ pub fn request(method: Method, uri_string: String) -> Request(Nil) {
     headers: [],
     body: Nil,
   )
+}
+
+/// Return the uri that a request was sent to.
+///
+pub fn request_uri(request: Request(a), secure: Bool) -> Uri {
+  let scheme = case secure {
+    True -> "https"
+    False -> "http"
+  }
+
+  let Message(head: RequestHead(_, host, port, path, query), ..) = request
+  Uri(Some(scheme), None, Some(host), port, path, query, None)
 }
 
 /// Construct a `Response` type.
