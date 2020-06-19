@@ -171,10 +171,9 @@ pub fn get_query(
 }
 
 /// Get the value associated with a header field, if one was set.
-pub fn get_header(message: Message(head, body), key: String) -> Option(String) {
+pub fn get_header(message: Message(head, body), key: String) -> Result(String, Nil) {
   let Message(headers: headers, ..) = message
   list.key_find(headers, string.lowercase(key))
-  |> option.from_result()
 }
 
 /// Set the value of a header field.

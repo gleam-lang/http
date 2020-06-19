@@ -575,7 +575,7 @@ pub fn redirect_test() {
   let response = http.redirect("/other")
 
   should.equal(303, response.head.status)
-  should.equal(Some("/other"), http.get_header(response, "location"))
+  should.equal(Ok("/other"), http.get_header(response, "location"))
 }
 
 pub fn path_segments_test() {
@@ -597,9 +597,9 @@ pub fn get_query_test() {
 pub fn get_header_test() {
   let message = Message(Nil, [tuple("x-foo", "x")], Nil)
 
-  should.equal(Some("x"), http.get_header(message, "x-foo"))
-  should.equal(Some("x"), http.get_header(message, "X-Foo"))
-  should.equal(None, http.get_header(message, "x-bar"))
+  should.equal(Ok("x"), http.get_header(message, "x-foo"))
+  should.equal(Ok("x"), http.get_header(message, "X-Foo"))
+  should.equal(Error(Nil), http.get_header(message, "x-bar"))
 }
 
 pub fn set_header_test() {
@@ -619,7 +619,7 @@ pub fn set_body_test() {
   let message = Message(Nil, [], Nil)
     |> http.set_body("Hello, World!")
 
-  should.equal(Some("13"), http.get_header(message, "content-length"))
+  should.equal(Ok("13"), http.get_header(message, "content-length"))
 }
 
 pub fn get_body_test() {
@@ -634,7 +634,7 @@ pub fn set_form_test() {
 
   should.equal("foo=x+y&bar=%25%26", iodata.to_string(message.body))
   should.equal(
-    Some("application/x-www-form-urlencoded"),
+    Ok("application/x-www-form-urlencoded"),
     http.get_header(message, "content-type"),
   )
 }
