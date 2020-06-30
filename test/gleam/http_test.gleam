@@ -1,5 +1,5 @@
 import gleam/atom
-import gleam/iodata
+import gleam/string_builder
 import gleam/uri.{Uri}
 import gleam/http
 import gleam/http.{Message, Get}
@@ -623,7 +623,7 @@ pub fn set_body_test() {
 }
 
 pub fn get_body_test() {
-  let message = Message(Nil, [], iodata.from_strings(["Hello, ", "World!"]))
+  let message = Message(Nil, [], string_builder.from_strings(["Hello, ", "World!"]))
 
   should.equal("Hello, World!", http.get_body(message))
 }
@@ -632,7 +632,7 @@ pub fn set_form_test() {
   let message = Message(Nil, [], Nil)
     |> http.set_form([tuple("foo", "x y"), tuple("bar", "%&")])
 
-  should.equal("foo=x+y&bar=%25%26", iodata.to_string(message.body))
+  should.equal("foo=x+y&bar=%25%26", string_builder.to_string(message.body))
   should.equal(
     Ok("application/x-www-form-urlencoded"),
     http.get_header(message, "content-type"),
@@ -640,7 +640,7 @@ pub fn set_form_test() {
 }
 
 pub fn get_form_test() {
-  let message = Message(Nil, [], iodata.from_strings(["foo=x+y&bar=%25%26"]))
+  let message = Message(Nil, [], string_builder.from_strings(["foo=x+y&bar=%25%26"]))
 
   should.equal(
     Ok([tuple("foo", "x y"), tuple("bar", "%&")]),

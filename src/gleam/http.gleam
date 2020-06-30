@@ -6,7 +6,7 @@
 //// This module does not implement a HTTP client or HTTP server, but it can be as a base for them.
 
 import gleam/int
-import gleam/iodata.{Iodata}
+import gleam/string_builder.{StringBuilder}
 import gleam/list
 import gleam/option.{Option, Some, None}
 import gleam/string
@@ -190,20 +190,20 @@ pub fn set_header(
 /// Fetch the HTTP body as a string.
 ///
 /// This method returns the body as a `String` for simplicity.
-/// Internally the body of HTTP messages is represented as `Iodata`.
-pub fn get_body(message: Message(head, Iodata)) -> String {
+/// Internally the body of HTTP messages is represented as `StringBuilder`.
+pub fn get_body(message: Message(head, StringBuilder)) -> String {
   let Message(body: body, ..) = message
-  iodata.to_string(body)
+  string_builder.to_string(body)
 }
 
 /// Add the body to a HTTP message.
 pub fn set_body(
   message: Message(head, Nil),
   body: String,
-) -> Message(head, Iodata) {
+) -> Message(head, StringBuilder) {
   let Message(head: head, headers: headers, body: _nil) = message
-  let body = iodata.from_strings([body])
-  let content_length = iodata.byte_size(body)
+  let body = string_builder.from_strings([body])
+  let content_length = string_builder.byte_size(body)
   let headers = list.append(
     headers,
     [tuple("content-length", int.to_string(content_length))],
@@ -213,10 +213,10 @@ pub fn set_body(
 
 /// Fetch the body content decoded as a form.
 pub fn get_form(
-  message: Message(head, Iodata),
+  message: Message(head, StringBuilder),
 ) -> Result(List(tuple(String, String)), Nil) {
   let Message(body: body, ..) = message
-  uri.parse_query(iodata.to_string(body))
+  uri.parse_query(string_builder.to_string(body))
 }
 
 /// Set the body serialized as a form.
@@ -227,7 +227,7 @@ pub fn set_form(message, form) {
 }
 
 /// Create a response that redirects to the given uri.
-pub fn redirect(uri: String) -> Response(Iodata) {
+pub fn redirect(uri: String) -> Response(StringBuilder) {
   response(303)
   |> set_header("location", uri)
   |> set_body("")
