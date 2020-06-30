@@ -1,6 +1,6 @@
 {application, gleam_http,
- [{description, "A Gleam library"},
-  {vsn, "0.1.0"},
+ [{description, "Common HTTP types for Gleam"},
+  {vsn, "1.0.0"},
   {registered, []},
   {applications,
    [kernel,
