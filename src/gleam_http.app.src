@@ -1,5 +1,5 @@
 {application, gleam_http,
- [{description, "A Gleam library"},
+ [{description, "Common HTTP types for Gleam"},
   {vsn, "1.0.0"},
   {registered, []},
   {applications,
