@@ -71,12 +71,12 @@ pub type Header =
   tuple(String, String)
 
 /// A general data type that can be be parameterised as a `Request` or `Response`
-pub type Message(head, body) {
+pub opaque type Message(head, body) {
   Message(head: head, headers: List(Header), body: body)
 }
 
 /// Data structure containing the deserialized components of an HTTP request start line.
-pub type RequestHead {
+pub opaque type RequestHead {
   RequestHead(
     method: Method,
     host: String,
@@ -87,7 +87,7 @@ pub type RequestHead {
 }
 
 /// Data structure containing the deserialized components of an HTTP response status line.
-pub type ResponseHead {
+pub opaque type ResponseHead {
   ResponseHead(status: Int)
 }
 
@@ -153,6 +153,12 @@ pub fn port(message: Message(RequestHead, body)) -> Option(Int) {
   port
 }
 
+/// Get the path of a request.
+pub fn path(message: Message(RequestHead, body)) -> String {
+    let Message(RequestHead(path: path, ..), ..) = message
+    path
+}
+
 /// Return the none-empty segments of a request path.
 pub fn path_segments(message: Message(RequestHead, body)) -> List(String) {
   let Message(RequestHead(path: path, ..), ..) = message
@@ -168,6 +174,12 @@ pub fn get_query(
     Some(query_string) -> uri.parse_query(query_string)
     None -> Ok([])
   }
+}
+
+/// Get the status of a response.
+pub fn status(message: Message(ResponseHead, body)) -> Int {
+    let Message(ResponseHead(status: status), ..) = message
+    status
 }
 
 /// Get the value associated with a header field, if one was set.
