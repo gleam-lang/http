@@ -3,10 +3,8 @@
 //// This module makes it easy to create and modify Requests and Responses, data types.
 //// A general HTTP message type is defined that enables functions to work on both requests and responses.
 ////
-//// This module does not implement a HTTP client or HTTP server, but it can be as a base for them.
+//// This module does not implement a HTTP client or HTTP server, but it can be used as a base for them.
 
-import gleam/int
-import gleam/string_builder.{StringBuilder}
 import gleam/list
 import gleam/option.{None, Option, Some}
 import gleam/string
@@ -25,10 +23,8 @@ pub type Method {
   Options
   Patch
 
-  Other(
-    /// Non-standard but valid HTTP methods.
-    String,
-  )
+  /// Non-standard but valid HTTP methods.
+  Other(String)
 }
 
 // TODO: check if the a is a valid HTTP method (i.e. it is a token, as per the
