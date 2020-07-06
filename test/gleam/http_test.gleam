@@ -564,7 +564,7 @@ pub fn method_to_string_test() {
 }
 
 pub fn request_uri_test() {
-  let request = http.request(Get, "//example.com/foo/bar")
+  let request = http.request(Get, "example.com", None, "/foo/bar", None)
   http.request_uri(request, True)
   |> should.equal(
     Uri(Some("https"), None, Some("example.com"), None, "/foo/bar", None, None),
@@ -579,18 +579,18 @@ pub fn redirect_test() {
 }
 
 pub fn path_segments_test() {
-  let request = http.request(Get, "//example.com/foo/bar")
+  let request = http.request(Get, "example.com", None, "/foo/bar", None)
   should.equal(["foo", "bar"], http.path_segments(request))
 }
 
 pub fn get_query_test() {
-  let request = http.request(Get, "//example.com/?foo=x%20y")
+  let request = http.request(Get, "example.com", None, "/", Some("foo=x%20y"))
   should.equal(Ok([tuple("foo", "x y")]), http.get_query(request))
 
-  let request = http.request(Get, "//example.com/")
+  let request = http.request(Get, "example.com", None, "/", None)
   should.equal(Ok([]), http.get_query(request))
 
-  let request = http.request(Get, "//example.com/?foo=%!2")
+  let request = http.request(Get, "example.com", None, "/", Some("foo=%!2"))
   should.equal(Error(Nil), http.get_query(request))
 }
 

@@ -96,14 +96,7 @@ pub type Response(body) =
   Message(ResponseHead, body)
 
 /// Construct a `Request` type.
-///
-/// The provided `uri_string` should be an absolure uri, including the scheme and host.
-/// The body type of the returned request is `Nil`,
-/// and should be set with a call to `set_body`.
-pub fn request(method: Method, uri_string: String) -> Request(Nil) {
-  let Ok(
-    uri.Uri(host: Some(host), port: port, path: path, query: query, ..),
-  ) = uri.parse(uri_string)
+pub fn request(method: Method, host: String, port: Option(Int), path: String, query: Option(String)) -> Request(Nil) {
   Message(
     head: RequestHead(method, host, port, path, query),
     headers: [],
