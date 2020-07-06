@@ -3,7 +3,7 @@ import gleam/string_builder
 import gleam/uri.{Uri}
 import gleam/http
 import gleam/http.{Get}
-import gleam/option.{Some, None}
+import gleam/option.{None, Some}
 import gleam/should
 
 pub fn parse_method_test() {
@@ -596,14 +596,12 @@ pub fn get_query_test() {
 
 pub fn header_test() {
   let message = http.response(200)
-  |> http.set_header("x-foo", "x")
+    |> http.set_header("x-foo", "x")
 
   should.equal(Ok("x"), http.get_header(message, "x-foo"))
   should.equal(Ok("x"), http.get_header(message, "X-Foo"))
   should.equal(Error(Nil), http.get_header(message, "x-bar"))
 }
-
-
 // pub fn set_body_test() {
 //   let message = Message(Nil, [], Nil)
 //     |> http.set_body("Hello, World!")

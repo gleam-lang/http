@@ -8,7 +8,7 @@
 import gleam/int
 import gleam/string_builder.{StringBuilder}
 import gleam/list
-import gleam/option.{Option, Some, None}
+import gleam/option.{None, Option, Some}
 import gleam/string
 import gleam/uri.{Uri}
 
@@ -155,8 +155,8 @@ pub fn port(message: Message(RequestHead, body)) -> Option(Int) {
 
 /// Get the path of a request.
 pub fn path(message: Message(RequestHead, body)) -> String {
-    let Message(RequestHead(path: path, ..), ..) = message
-    path
+  let Message(RequestHead(path: path, ..), ..) = message
+  path
 }
 
 /// Return the none-empty segments of a request path.
@@ -178,12 +178,15 @@ pub fn get_query(
 
 /// Get the status of a response.
 pub fn status(message: Message(ResponseHead, body)) -> Int {
-    let Message(ResponseHead(status: status), ..) = message
-    status
+  let Message(ResponseHead(status: status), ..) = message
+  status
 }
 
 /// Get the value associated with a header field, if one was set.
-pub fn get_header(message: Message(head, body), key: String) -> Result(String, Nil) {
+pub fn get_header(
+  message: Message(head, body),
+  key: String,
+) -> Result(String, Nil) {
   let Message(headers: headers, ..) = message
   list.key_find(headers, string.lowercase(key))
 }
