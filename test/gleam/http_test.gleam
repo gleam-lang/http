@@ -602,35 +602,12 @@ pub fn header_test() {
   should.equal(Ok("x"), http.get_header(message, "X-Foo"))
   should.equal(Error(Nil), http.get_header(message, "x-bar"))
 }
-// pub fn set_body_test() {
-//   let message = Message(Nil, [], Nil)
-//     |> http.set_body("Hello, World!")
-//
-//   should.equal(Ok("13"), http.get_header(message, "content-length"))
-// }
-//
-// pub fn get_body_test() {
-//   let message = Message(Nil, [], string_builder.from_strings(["Hello, ", "World!"]))
-//
-//   should.equal("Hello, World!", http.get_body(message))
-// }
-//
-// pub fn set_form_test() {
-//   let message = Message(Nil, [], Nil)
-//     |> http.set_form([tuple("foo", "x y"), tuple("bar", "%&")])
-//
-//   should.equal("foo=x+y&bar=%25%26", string_builder.to_string(message.body))
-//   should.equal(
-//     Ok("application/x-www-form-urlencoded"),
-//     http.get_header(message, "content-type"),
-//   )
-// }
-//
-// pub fn get_form_test() {
-//   let message = Message(Nil, [], string_builder.from_strings(["foo=x+y&bar=%25%26"]))
-//
-//   should.equal(
-//     Ok([tuple("foo", "x y"), tuple("bar", "%&")]),
-//     http.get_form(message),
-//   )
-// }
+
+pub fn body_test() {
+  let message = http.response(200)
+    |> http.set_body("Hello, World!")
+
+  message
+  |> http.get_body
+  |> should.equal("Hello, World!")
+}

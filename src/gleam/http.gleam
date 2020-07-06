@@ -203,46 +203,19 @@ pub fn set_header(
 }
 
 /// Fetch the HTTP body as a string.
-///
-/// This method returns the body as a `String` for simplicity.
-/// Internally the body of HTTP messages is represented as `StringBuilder`.
-pub fn get_body(message: Message(head, StringBuilder)) -> String {
+pub fn get_body(message: Message(head, t)) -> t {
   let Message(body: body, ..) = message
-  string_builder.to_string(body)
+  body
 }
 
 /// Add the body to a HTTP message.
-pub fn set_body(
-  message: Message(head, Nil),
-  body: String,
-) -> Message(head, StringBuilder) {
+pub fn set_body(message: Message(head, Nil), body: t) -> Message(head, t) {
   let Message(head: head, headers: headers, body: _nil) = message
-  let body = string_builder.from_strings([body])
-  let content_length = string_builder.byte_size(body)
-  let headers = list.append(
-    headers,
-    [tuple("content-length", int.to_string(content_length))],
-  )
   Message(head: head, headers: headers, body: body)
 }
 
-/// Fetch the body content decoded as a form.
-pub fn get_form(
-  message: Message(head, StringBuilder),
-) -> Result(List(tuple(String, String)), Nil) {
-  let Message(body: body, ..) = message
-  uri.parse_query(string_builder.to_string(body))
-}
-
-/// Set the body serialized as a form.
-pub fn set_form(message, form) {
-  message
-  |> set_header("content-type", "application/x-www-form-urlencoded")
-  |> set_body(uri.query_to_string(form))
-}
-
 /// Create a response that redirects to the given uri.
-pub fn redirect(uri: String) -> Response(StringBuilder) {
+pub fn redirect(uri: String) -> Response(String) {
   response(303)
   |> set_header("location", uri)
   |> set_body("")
