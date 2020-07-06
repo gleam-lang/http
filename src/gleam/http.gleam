@@ -96,7 +96,13 @@ pub type Response(body) =
   Message(ResponseHead, body)
 
 /// Construct a `Request` type.
-pub fn request(method: Method, host: String, port: Option(Int), path: String, query: Option(String)) -> Request(Nil) {
+pub fn request(
+  method: Method,
+  host: String,
+  port: Option(Int),
+  path: String,
+  query: Option(String),
+) -> Request(Nil) {
   Message(
     head: RequestHead(method, host, port, path, query),
     headers: [],
@@ -178,6 +184,12 @@ pub fn get_header(
 ) -> Result(String, Nil) {
   let Message(headers: headers, ..) = message
   list.key_find(headers, string.lowercase(key))
+}
+
+/// Get all the headers fields
+pub fn get_headers(message: Message(head, body)) -> List(Header) {
+  let Message(headers: headers, ..) = message
+  headers
 }
 
 /// Set the value of a header field.

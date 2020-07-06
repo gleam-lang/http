@@ -5,8 +5,8 @@
 - Add `Message`, `RequestHead` and `ResponseHead` types.
 - `http` module gains `request`, `request_uri`, `response`,
   `method`, `host`, `port`, `path`, `path_segments`,
-  `get_query`, `status`, `get_header`, `set_header`, `get_body`,
-  `set_body` and `redirect`.
+  `get_query`, `status`, `get_header`, `get_headers`, `set_header`,
+  `get_body`, `set_body` and `redirect`.
 
 ## v1.0.0 - 2020-06-30
 

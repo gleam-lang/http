@@ -597,10 +597,13 @@ pub fn get_query_test() {
 pub fn header_test() {
   let message = http.response(200)
     |> http.set_header("x-foo", "x")
+    |> http.set_header("x-BAR", "y")
 
   should.equal(Ok("x"), http.get_header(message, "x-foo"))
   should.equal(Ok("x"), http.get_header(message, "X-Foo"))
-  should.equal(Error(Nil), http.get_header(message, "x-bar"))
+  should.equal(Error(Nil), http.get_header(message, "x-baz"))
+  http.get_headers(message)
+  |> should.equal([tuple("x-foo", "x"), tuple("x-bar", "y")])
 }
 
 pub fn body_test() {
