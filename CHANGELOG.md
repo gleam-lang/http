@@ -1,12 +1,13 @@
 # Changelog
 
-## v1.1.0 - 2020-07-xx
+## v1.1.0 - unreleased
 
-- Add `Message`, `RequestHead` and `ResponseHead` types.
-- `http` module gains `request`, `request_uri`, `response`,
-  `method`, `host`, `port`, `path`, `path_segments`,
-  `get_query`, `status`, `get_header`, `get_headers`, `set_header`,
-  `get_body`, `set_body` and `redirect`.
+- Add the `Scheme`, `Request`, and `Response` types, along with associated
+  functions `scheme_to_string`, `scheme_from_string`, `request_uri`,
+  `response`, `request_segments`, `request_query`, `request_header`,
+  `response_header`, `prepend_request_header`, `prepend_response_header`,
+  `set_response_body`, `map_response_body`, `try_map_response_body`, and
+  `redirect`.
 
 ## v1.0.0 - 2020-06-30
 
