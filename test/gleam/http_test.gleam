@@ -2,7 +2,6 @@ import gleam/atom
 import gleam/string_builder
 import gleam/uri.{Uri}
 import gleam/http
-import gleam/http.{Get}
 import gleam/option.{None, Some}
 import gleam/should
 
@@ -564,53 +563,93 @@ pub fn method_to_string_test() {
 }
 
 pub fn request_uri_test() {
-  let request = http.request(Get, "example.com", None, "/foo/bar", None)
-  http.request_uri(request, True)
+  let request = http.Request(
+    method: http.Get,
+    host: "sky.net",
+    port: None,
+    path: "/sarah/connor",
+    query: None,
+    headers: [],
+    body: Nil,
+  )
+
+  http.request_uri(request, http.Https)
   |> should.equal(
-    Uri(Some("https"), None, Some("example.com"), None, "/foo/bar", None, None),
+    Uri(Some("https"), None, Some("sky.net"), None, "/sarah/connor", None, None),
+  )
+
+  http.request_uri(request, http.Http)
+  |> should.equal(
+    Uri(Some("http"), None, Some("sky.net"), None, "/sarah/connor", None, None),
   )
 }
 
 pub fn redirect_test() {
   let response = http.redirect("/other")
 
-  should.equal(303, http.status(response))
-  should.equal(Ok("/other"), http.get_header(response, "location"))
+  should.equal(303, response.status)
+  should.equal(Ok("/other"), http.response_header(response, "location"))
 }
 
-pub fn path_segments_test() {
-  let request = http.request(Get, "example.com", None, "/foo/bar", None)
-  should.equal(["foo", "bar"], http.path_segments(request))
+pub fn request_segments_test() {
+  let request = http.Request(
+    method: http.Get,
+    host: "nostromo.ship",
+    port: None,
+    path: "/ellen/ripley",
+    query: None,
+    headers: [],
+    body: Nil,
+  )
+
+  should.equal(["ellen", "ripley"], http.request_segments(request))
 }
 
-pub fn get_query_test() {
-  let request = http.request(Get, "example.com", None, "/", Some("foo=x%20y"))
-  should.equal(Ok([tuple("foo", "x y")]), http.get_query(request))
+pub fn request_query_test() {
+  let make_request = fn(query) {
+    http.Request(
+      method: http.Get,
+      host: "example.com",
+      port: None,
+      path: "/",
+      query: query,
+      headers: [],
+      body: Nil,
+    )
+  }
 
-  let request = http.request(Get, "example.com", None, "/", None)
-  should.equal(Ok([]), http.get_query(request))
+  let request = make_request(Some("foo=x%20y"))
+  should.equal(Ok([tuple("foo", "x y")]), http.request_query(request))
 
-  let request = http.request(Get, "example.com", None, "/", Some("foo=%!2"))
-  should.equal(Error(Nil), http.get_query(request))
+  let request = make_request(None)
+  should.equal(Ok([]), http.request_query(request))
+
+  let request = make_request(Some("foo=%!2"))
+  should.equal(Error(Nil), http.request_query(request))
 }
 
-pub fn header_test() {
-  let message = http.response(200)
-    |> http.set_header("x-foo", "x")
-    |> http.set_header("x-BAR", "y")
+pub fn response_header_test() {
+  let response = http.response(200)
+    |> http.prepend_response_header("x-foo", "x")
+    |> http.prepend_response_header("x-BAR", "y")
 
-  should.equal(Ok("x"), http.get_header(message, "x-foo"))
-  should.equal(Ok("x"), http.get_header(message, "X-Foo"))
-  should.equal(Error(Nil), http.get_header(message, "x-baz"))
-  http.get_headers(message)
-  |> should.equal([tuple("x-foo", "x"), tuple("x-bar", "y")])
+  http.response_header(response, "x-foo")
+  |> should.equal(Ok("x"))
+
+  http.response_header(response, "X-Foo")
+  |> should.equal(Ok("x"))
+
+  http.response_header(response, "x-baz")
+  |> should.equal(Error(Nil))
+
+  response.headers
+  |> should.equal([tuple("x-bar", "y"), tuple("x-foo", "x")])
 }
 
-pub fn body_test() {
-  let message = http.response(200)
-    |> http.set_body("Hello, World!")
+pub fn response_body_test() {
+  let response = http.response(200)
+    |> http.set_response_body("Hello, World!")
 
-  message
-  |> http.get_body
+  response.body
   |> should.equal("Hello, World!")
 }
