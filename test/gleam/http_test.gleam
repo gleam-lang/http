@@ -562,7 +562,7 @@ pub fn method_to_string_test() {
   |> should.equal("nope")
 }
 
-pub fn request_uri_test() {
+pub fn req_uri_test() {
   let request = http.Request(
     method: http.Get,
     host: "sky.net",
@@ -573,12 +573,12 @@ pub fn request_uri_test() {
     body: Nil,
   )
 
-  http.request_uri(request, http.Https)
+  http.req_uri(request, http.Https)
   |> should.equal(
     Uri(Some("https"), None, Some("sky.net"), None, "/sarah/connor", None, None),
   )
 
-  http.request_uri(request, http.Http)
+  http.req_uri(request, http.Http)
   |> should.equal(
     Uri(Some("http"), None, Some("sky.net"), None, "/sarah/connor", None, None),
   )
@@ -588,10 +588,10 @@ pub fn redirect_test() {
   let response = http.redirect("/other")
 
   should.equal(303, response.status)
-  should.equal(Ok("/other"), http.response_header(response, "location"))
+  should.equal(Ok("/other"), http.resp_header(response, "location"))
 }
 
-pub fn request_segments_test() {
+pub fn req_segments_test() {
   let request = http.Request(
     method: http.Get,
     host: "nostromo.ship",
@@ -602,10 +602,10 @@ pub fn request_segments_test() {
     body: Nil,
   )
 
-  should.equal(["ellen", "ripley"], http.request_segments(request))
+  should.equal(["ellen", "ripley"], http.req_segments(request))
 }
 
-pub fn request_query_test() {
+pub fn req_query_test() {
   let make_request = fn(query) {
     http.Request(
       method: http.Get,
@@ -619,36 +619,36 @@ pub fn request_query_test() {
   }
 
   let request = make_request(Some("foo=x%20y"))
-  should.equal(Ok([tuple("foo", "x y")]), http.request_query(request))
+  should.equal(Ok([tuple("foo", "x y")]), http.req_query(request))
 
   let request = make_request(None)
-  should.equal(Ok([]), http.request_query(request))
+  should.equal(Ok([]), http.req_query(request))
 
   let request = make_request(Some("foo=%!2"))
-  should.equal(Error(Nil), http.request_query(request))
+  should.equal(Error(Nil), http.req_query(request))
 }
 
-pub fn response_header_test() {
+pub fn resp_header_test() {
   let response = http.response(200)
-    |> http.prepend_response_header("x-foo", "x")
-    |> http.prepend_response_header("x-BAR", "y")
+    |> http.prepend_resp_header("x-foo", "x")
+    |> http.prepend_resp_header("x-BAR", "y")
 
-  http.response_header(response, "x-foo")
+  http.resp_header(response, "x-foo")
   |> should.equal(Ok("x"))
 
-  http.response_header(response, "X-Foo")
+  http.resp_header(response, "X-Foo")
   |> should.equal(Ok("x"))
 
-  http.response_header(response, "x-baz")
+  http.resp_header(response, "x-baz")
   |> should.equal(Error(Nil))
 
   response.headers
   |> should.equal([tuple("x-bar", "y"), tuple("x-foo", "x")])
 }
 
-pub fn response_body_test() {
+pub fn resp_body_test() {
   let response = http.response(200)
-    |> http.set_response_body("Hello, World!")
+    |> http.set_resp_body("Hello, World!")
 
   response.body
   |> should.equal("Hello, World!")
