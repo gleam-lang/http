@@ -114,6 +114,10 @@ pub type Response(body) {
   Response(status: Int, headers: List(Header), body: body)
 }
 
+// TODO: document
+pub type Service(in, out) =
+  fn(Request(in)) -> Response(out)
+
 /// Return the uri that a request was sent to.
 ///
 pub fn req_uri(request: Request(a), scheme: Scheme) -> Uri {
