@@ -13,6 +13,7 @@ import gleam/list
 import gleam/option.{None, Option, Some}
 import gleam/string
 import gleam/uri.{Uri}
+import gleam/dynamic.{Dynamic}
 
 /// HTTP standard method as defined by [RFC 2616](https://tools.ietf.org/html/rfc2616),
 /// and PATCH which is defined by [RFC 5789](https://tools.ietf.org/html/rfc5789).
@@ -63,14 +64,23 @@ pub fn method_to_string(method) {
   }
 }
 
-// TODO: document
+/// The two URI schemes for HTTP
+///
 pub type Scheme {
   Http
   Https
 }
 
-// TODO: test
-// TODO: document
+/// Convert a scheme into a string.
+///
+/// # Examples
+///
+///    > scheme_to_string(Http)
+///    "http"
+///
+///    > scheme_to_string(Https)
+///    "https"
+///
 pub fn scheme_to_string(scheme: Scheme) -> String {
   case scheme {
     Http -> "http"
@@ -78,8 +88,16 @@ pub fn scheme_to_string(scheme: Scheme) -> String {
   }
 }
 
-// TODO: test
-// TODO: document
+/// Parse a HTTP scheme from a string
+///
+/// # Examples
+///
+///    > scheme_to_string("http")
+///    Ok(Http)
+///
+///    > scheme_to_string("ftp")
+///    Error(Nil)
+///
 pub fn scheme_from_string(scheme: String) -> Result(Scheme, Nil) {
   case string.lowercase(scheme) {
     "http" -> Ok(Http)
@@ -88,7 +106,7 @@ pub fn scheme_from_string(scheme: String) -> Result(Scheme, Nil) {
   }
 }
 
-pub external fn method_from_erlang(anything) -> Result(Method, Nil) =
+pub external fn method_from_dynamic(Dynamic) -> Result(Method, Nil) =
   "gleam_http_native" "method_from_erlang"
 
 /// A HTTP header is a key-value pair. Header keys should be all lowercase
