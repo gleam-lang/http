@@ -1,5 +1,5 @@
 {application, gleam_http,
- [{description, "Common HTTP types for Gleam"},
+ [{description, "Types and functions for HTTP clients and servers!"},
   {vsn, "1.0.0"},
   {registered, []},
   {applications,
