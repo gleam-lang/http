@@ -16,3 +16,17 @@ pub fn map_response_body(
     |> http.map_resp_body(mapper)
   }
 }
+
+/// A middleware that prepends a header to the request.
+///
+pub fn prepend_resp_header(
+  service: Service(req, resp),
+  key: String,
+  value: String,
+) -> Service(req, resp) {
+  fn(req) {
+    req
+    |> service
+    |> http.prepend_resp_header(key, value)
+  }
+}

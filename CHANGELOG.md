@@ -9,7 +9,7 @@
   `prepend_response_header`, `set_resp_body`, `map_response_body`,
   `try_map_response_body`, and `redirect`.
 - Created the `gleam/http/middleware` module with the `Middleware` type and
-  the `map_response_body` type.
+  the `prepend_resp_header`, `map_response_body` type.
 
 ## v1.0.0 - 2020-06-30
 
