@@ -234,6 +234,17 @@ pub fn set_resp_body(
 }
 
 // TODO: test
+/// Set the body of the request, overwriting any existing body.
+///
+pub fn set_req_body(
+  req: Request(old_body),
+  body: new_body,
+) -> Request(new_body) {
+  let Request(scheme, method, host, port, path, query, headers, ..) = req
+  Request(scheme, method, host, port, path, query, headers, body)
+}
+
+// TODO: test
 /// Update the body of a response using a given function.
 ///
 pub fn map_resp_body(
@@ -243,6 +254,18 @@ pub fn map_resp_body(
   response.body
   |> transform
   |> set_resp_body(response, _)
+}
+
+// TODO: test
+/// Update the body of a request using a given function.
+///
+pub fn map_req_body(
+  request: Request(old_body),
+  transform: fn(old_body) -> new_body,
+) -> Request(new_body) {
+  request.body
+  |> transform
+  |> set_req_body(request, _)
 }
 
 // TODO: test

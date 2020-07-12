@@ -5,11 +5,11 @@
 - The `gleam/http` module gains the `Scheme`, `Service`, `Request`, and
   `Response` types, along with associated functions `scheme_to_string`,
   `scheme_from_string`, `req_uri`, `response`, `req_segments`, `req_query`,
-  `req_header`, `resp_header`, `prepend_req_header`,
-  `prepend_response_header`, `set_resp_body`, `map_response_body`,
-  `try_map_response_body`, and `redirect`.
+  `req_header`, `resp_header`, `prepend_req_header`, `prepend_resp_header`,
+  `set_req_body`, `set_resp_body`, `map_resp_body`, `map_req_body`
+  `try_map_resp_body`, and `redirect`.
 - Created the `gleam/http/middleware` module with the `Middleware` type and
-  the `prepend_resp_header`, `map_response_body` type.
+  the `prepend_resp_header`, `map_resp_body` type.
 
 ## v1.0.0 - 2020-06-30
 
