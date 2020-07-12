@@ -647,30 +647,30 @@ pub fn method_to_string_test() {
   |> should.equal("nope")
 }
 
-pub fn req_uri_test() {
-  let make_request = fn(scheme) {
+pub fn req_to_uri_test() {
+  let make_request = fn(scheme) -> http.Request(Nil) {
     http.Request(
-      scheme: scheme,
       method: http.Get,
+      headers: [],
+      body: Nil,
+      scheme: scheme,
       host: "sky.net",
       port: None,
       path: "/sarah/connor",
       query: None,
-      headers: [],
-      body: Nil,
     )
   }
 
   http.Https
   |> make_request
-  |> http.req_uri
+  |> http.req_to_uri
   |> should.equal(
     Uri(Some("https"), None, Some("sky.net"), None, "/sarah/connor", None, None),
   )
 
   http.Http
   |> make_request
-  |> http.req_uri
+  |> http.req_to_uri
   |> should.equal(
     Uri(Some("http"), None, Some("sky.net"), None, "/sarah/connor", None, None),
   )
@@ -685,14 +685,14 @@ pub fn redirect_test() {
 
 pub fn req_segments_test() {
   let request = http.Request(
-    scheme: http.Https,
     method: http.Get,
+    headers: [],
+    body: Nil,
+    scheme: http.Https,
     host: "nostromo.ship",
     port: None,
     path: "/ellen/ripley",
     query: None,
-    headers: [],
-    body: Nil,
   )
 
   should.equal(["ellen", "ripley"], http.req_segments(request))
@@ -701,14 +701,14 @@ pub fn req_segments_test() {
 pub fn req_query_test() {
   let make_request = fn(query) {
     http.Request(
-      scheme: http.Https,
       method: http.Get,
+      headers: [],
+      body: Nil,
+      scheme: http.Https,
       host: "example.com",
       port: None,
       path: "/",
       query: query,
-      headers: [],
-      body: Nil,
     )
   }
 

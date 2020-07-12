@@ -117,14 +117,14 @@ pub type Header =
 // TODO: document
 pub type Request(body) {
   Request(
-    scheme: Scheme,
     method: Method,
+    headers: List(Header),
+    body: body,
+    scheme: Scheme,
     host: String,
     port: Option(Int),
     path: String,
     query: Option(String),
-    headers: List(Header),
-    body: body,
   )
 }
 
@@ -139,7 +139,7 @@ pub type Service(in, out) =
 
 /// Return the uri that a request was sent to.
 ///
-pub fn req_uri(request: Request(a)) -> Uri {
+pub fn req_to_uri(request: Request(a)) -> Uri {
   Uri(
     scheme: Some(scheme_to_string(request.scheme)),
     userinfo: None,
@@ -149,6 +149,32 @@ pub fn req_uri(request: Request(a)) -> Uri {
     query: request.query,
     fragment: None,
   )
+}
+
+/// Construct a request from a URI.
+///
+pub fn req_from_uri(uri: Uri) -> Result(Request(String), Nil) {
+  try scheme = uri.scheme
+    |> option.unwrap("")
+    |> scheme_from_string
+  try host = uri.host
+    |> option.to_result(Nil)
+  let req = Request(
+    method: Get,
+    headers: [],
+    body: "",
+    scheme: scheme,
+    host: host,
+    port: uri.port,
+    path: uri.path,
+    query: uri.query,
+  )
+  Ok(req)
+}
+
+pub fn request(url: String) -> Result(Request(String), Nil) {
+  try uri = uri.parse(url)
+  req_from_uri(uri)
 }
 
 /// Construct an empty Response.
@@ -205,9 +231,9 @@ pub fn prepend_req_header(
   key: String,
   value: String,
 ) -> Request(body) {
-  let Request(scheme, method, host, port, path, query, headers, body) = request
+  let Request(method, headers, body, scheme, host, port, path, query) = request
   let headers = [tuple(string.lowercase(key), value), ..headers]
-  Request(scheme, method, host, port, path, query, headers, body)
+  Request(method, headers, body, scheme, host, port, path, query)
 }
 
 // TODO: use record update syntax
@@ -240,8 +266,26 @@ pub fn set_req_body(
   req: Request(old_body),
   body: new_body,
 ) -> Request(new_body) {
-  let Request(scheme, method, host, port, path, query, headers, ..) = req
-  Request(scheme, method, host, port, path, query, headers, body)
+  let Request(
+    method: method,
+    headers: headers,
+    scheme: scheme,
+    host: host,
+    port: port,
+    path: path,
+    query: query,
+    ..,
+  ) = req
+  Request(
+    method: method,
+    headers: headers,
+    body: body,
+    scheme: scheme,
+    host: host,
+    port: port,
+    path: path,
+    query: query,
+  )
 }
 
 // TODO: test
