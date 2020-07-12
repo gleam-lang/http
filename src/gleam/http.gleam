@@ -172,11 +172,6 @@ pub fn req_from_uri(uri: Uri) -> Result(Request(String), Nil) {
   Ok(req)
 }
 
-pub fn request(url: String) -> Result(Request(String), Nil) {
-  try uri = uri.parse(url)
-  req_from_uri(uri)
-}
-
 /// Construct an empty Response.
 ///
 /// The body type of the returned response is `Nil`, and should be set with a
@@ -260,6 +255,7 @@ pub fn set_resp_body(
 }
 
 // TODO: test
+// TODO: record update syntax
 /// Set the body of the request, overwriting any existing body.
 ///
 pub fn set_req_body(
@@ -275,6 +271,33 @@ pub fn set_req_body(
     path: path,
     query: query,
     ..,
+  ) = req
+  Request(
+    method: method,
+    headers: headers,
+    body: body,
+    scheme: scheme,
+    host: host,
+    port: port,
+    path: path,
+    query: query,
+  )
+}
+
+// TODO: test
+// TODO: recod update syntax
+/// Set the method of the request.
+///
+pub fn set_req_method(req: Request(body), method: Method) -> Request(body) {
+  let Request(
+    method: _,
+    headers: headers,
+    body: body,
+    scheme: scheme,
+    host: host,
+    port: port,
+    path: path,
+    query: query,
   ) = req
   Request(
     method: method,
@@ -334,4 +357,12 @@ pub fn redirect(uri: String) -> Response(String) {
     headers: [tuple("location", uri)],
     body: string.append("You are being redirected to ", uri),
   )
+}
+
+pub fn request(method: Method, url: String) -> Result(Request(String), Nil) {
+  try uri = uri.parse(url)
+  try req = req_from_uri(uri)
+  req
+  |> set_req_method(method)
+  |> Ok
 }
