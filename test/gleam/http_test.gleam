@@ -680,7 +680,7 @@ pub fn redirect_test() {
   let response = http.redirect("/other")
 
   should.equal(303, response.status)
-  should.equal(Ok("/other"), http.resp_header(response, "location"))
+  should.equal(Ok("/other"), http.get_resp_header(response, "location"))
 }
 
 pub fn req_segments_test() {
@@ -722,18 +722,18 @@ pub fn req_query_test() {
   should.equal(Error(Nil), http.req_query(request))
 }
 
-pub fn resp_header_test() {
+pub fn get_resp_header_test() {
   let response = http.response(200)
     |> http.prepend_resp_header("x-foo", "x")
     |> http.prepend_resp_header("x-BAR", "y")
 
-  http.resp_header(response, "x-foo")
+  http.get_resp_header(response, "x-foo")
   |> should.equal(Ok("x"))
 
-  http.resp_header(response, "X-Foo")
+  http.get_resp_header(response, "X-Foo")
   |> should.equal(Ok("x"))
 
-  http.resp_header(response, "x-baz")
+  http.get_resp_header(response, "x-baz")
   |> should.equal(Error(Nil))
 
   response.headers

@@ -202,7 +202,10 @@ pub fn req_query(
 ///
 /// If the request does not have that header then `Error(Nil)` is returned.
 ///
-pub fn req_header(request: Request(body), key: String) -> Result(String, Nil) {
+pub fn get_req_header(
+  request: Request(body),
+  key: String,
+) -> Result(String, Nil) {
   list.key_find(request.headers, string.lowercase(key))
 }
 
@@ -210,7 +213,7 @@ pub fn req_header(request: Request(body), key: String) -> Result(String, Nil) {
 ///
 /// If the request does not have that header then `Error(Nil)` is returned.
 ///
-pub fn resp_header(
+pub fn get_resp_header(
   response: Response(body),
   key: String,
 ) -> Result(String, Nil) {
