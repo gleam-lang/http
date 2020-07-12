@@ -648,22 +648,29 @@ pub fn method_to_string_test() {
 }
 
 pub fn req_uri_test() {
-  let request = http.Request(
-    method: http.Get,
-    host: "sky.net",
-    port: None,
-    path: "/sarah/connor",
-    query: None,
-    headers: [],
-    body: Nil,
-  )
+  let make_request = fn(scheme) {
+    http.Request(
+      scheme: scheme,
+      method: http.Get,
+      host: "sky.net",
+      port: None,
+      path: "/sarah/connor",
+      query: None,
+      headers: [],
+      body: Nil,
+    )
+  }
 
-  http.req_uri(request, http.Https)
+  http.Https
+  |> make_request
+  |> http.req_uri
   |> should.equal(
     Uri(Some("https"), None, Some("sky.net"), None, "/sarah/connor", None, None),
   )
 
-  http.req_uri(request, http.Http)
+  http.Http
+  |> make_request
+  |> http.req_uri
   |> should.equal(
     Uri(Some("http"), None, Some("sky.net"), None, "/sarah/connor", None, None),
   )
@@ -678,6 +685,7 @@ pub fn redirect_test() {
 
 pub fn req_segments_test() {
   let request = http.Request(
+    scheme: http.Https,
     method: http.Get,
     host: "nostromo.ship",
     port: None,
@@ -693,6 +701,7 @@ pub fn req_segments_test() {
 pub fn req_query_test() {
   let make_request = fn(query) {
     http.Request(
+      scheme: http.Https,
       method: http.Get,
       host: "example.com",
       port: None,

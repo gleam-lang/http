@@ -117,6 +117,7 @@ pub type Header =
 // TODO: document
 pub type Request(body) {
   Request(
+    scheme: Scheme,
     method: Method,
     host: String,
     port: Option(Int),
@@ -138,9 +139,9 @@ pub type Service(in, out) =
 
 /// Return the uri that a request was sent to.
 ///
-pub fn req_uri(request: Request(a), scheme: Scheme) -> Uri {
+pub fn req_uri(request: Request(a)) -> Uri {
   Uri(
-    scheme: Some(scheme_to_string(scheme)),
+    scheme: Some(scheme_to_string(request.scheme)),
     userinfo: None,
     host: Some(request.host),
     port: request.port,
@@ -204,9 +205,9 @@ pub fn prepend_req_header(
   key: String,
   value: String,
 ) -> Request(body) {
-  let Request(method, host, port, path, query, headers, body) = request
+  let Request(scheme, method, host, port, path, query, headers, body) = request
   let headers = [tuple(string.lowercase(key), value), ..headers]
-  Request(method, host, port, path, query, headers, body)
+  Request(scheme, method, host, port, path, query, headers, body)
 }
 
 // TODO: use record update syntax
