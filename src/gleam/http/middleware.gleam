@@ -6,7 +6,7 @@ pub type Middleware(before_req, before_resp, after_req, after_resp) =
 /// A middleware that transform the response body returned by the service using
 /// a given function.
 ///
-pub fn map_response_body(
+pub fn map_resp_body(
   service: Service(req, a),
   with mapper: fn(a) -> b,
 ) -> Service(req, b) {
