@@ -5,6 +5,7 @@
 ////
 //// This module does not implement a HTTP client or HTTP server, but it can be used as a base for them.
 
+// TODO: validate_req
 // TODO: set_resp_header
 // https://github.com/elixir-plug/plug/blob/dfebbebeb716c43c7dee4915a061bede06ec45f1/lib/plug/conn.ex#L776
 // TODO: set_req_header
@@ -360,14 +361,6 @@ pub fn redirect(uri: String) -> Response(String) {
     headers: [tuple("location", uri)],
     body: string.append("You are being redirected to ", uri),
   )
-}
-
-pub fn request(method: Method, url: String) -> Result(Request(String), Nil) {
-  try uri = uri.parse(url)
-  try req = req_from_uri(uri)
-  req
-  |> set_req_method(method)
-  |> Ok
 }
 
 /// A request with commonly used default values. This request can be used as a
