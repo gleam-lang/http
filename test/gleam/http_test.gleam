@@ -683,7 +683,7 @@ pub fn redirect_test() {
   should.equal(Ok("/other"), http.get_resp_header(response, "location"))
 }
 
-pub fn req_segments_test() {
+pub fn path_segments_test() {
   let request = http.Request(
     method: http.Get,
     headers: [],
@@ -695,7 +695,7 @@ pub fn req_segments_test() {
     query: None,
   )
 
-  should.equal(["ellen", "ripley"], http.req_segments(request))
+  should.equal(["ellen", "ripley"], http.path_segments(request))
 }
 
 pub fn get_query_test() {

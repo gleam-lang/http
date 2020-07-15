@@ -185,7 +185,7 @@ pub fn response(status: Int) -> Response(Nil) {
 
 /// Return the non-empty segments of a request path.
 ///
-pub fn req_segments(request: Request(body)) -> List(String) {
+pub fn path_segments(request: Request(body)) -> List(String) {
   request.path
   |> uri.path_segments
 }
@@ -424,7 +424,7 @@ pub fn default_req() -> Request(String) {
 // TODO: record update syntax
 /// Set the method of the request.
 ///
-pub fn set_req_host(req: Request(body), host: String) -> Request(body) {
+pub fn set_host(req: Request(body), host: String) -> Request(body) {
   let Request(
     method: method,
     headers: headers,
@@ -451,7 +451,7 @@ pub fn set_req_host(req: Request(body), host: String) -> Request(body) {
 // TODO: record update syntax
 /// Set the method of the request.
 ///
-pub fn set_req_path(req: Request(body), path: String) -> Request(body) {
+pub fn set_path(req: Request(body), path: String) -> Request(body) {
   let Request(
     method: method,
     headers: headers,
