@@ -449,7 +449,7 @@ pub fn set_host(req: Request(body), host: String) -> Request(body) {
 
 // TODO: test
 // TODO: record update syntax
-/// Set the method of the request.
+/// Set the path of the request.
 ///
 pub fn set_path(req: Request(body), path: String) -> Request(body) {
   let Request(
