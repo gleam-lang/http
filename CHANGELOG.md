@@ -8,7 +8,7 @@
   `get_req_header`, `get_resp_header`, `prepend_req_header`,
   `prepend_resp_header`, `set_req_method`, `set_req_body`, `set_resp_body`,
   `map_resp_body`, `map_req_body` `try_map_resp_body`, `req_from_uri`,
-  `request`, and `redirect`.
+  `default_req`, `request`, and `redirect`.
 - Created the `gleam/http/middleware` module with the `Middleware` type and
   the `prepend_resp_header`, `map_resp_body` type.
 

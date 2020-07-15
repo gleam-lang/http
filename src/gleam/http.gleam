@@ -369,3 +369,19 @@ pub fn request(method: Method, url: String) -> Result(Request(String), Nil) {
   |> set_req_method(method)
   |> Ok
 }
+
+/// A request with commonly used default values. This request can be used as a
+/// an initial value and then update to create the desired request.
+///
+pub fn default_req() -> Request(String) {
+  Request(
+    method: Get,
+    headers: [],
+    body: "",
+    scheme: Https,
+    host: "localhost",
+    port: None,
+    path: "",
+    query: None,
+  )
+}
