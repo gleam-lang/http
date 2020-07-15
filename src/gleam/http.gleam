@@ -288,7 +288,7 @@ pub fn set_req_body(
 }
 
 // TODO: test
-// TODO: recod update syntax
+// TODO: record update syntax
 /// Set the method of the request.
 ///
 pub fn set_req_method(req: Request(body), method: Method) -> Request(body) {
@@ -383,5 +383,59 @@ pub fn default_req() -> Request(String) {
     port: None,
     path: "",
     query: None,
+  )
+}
+
+// TODO: test
+// TODO: record update syntax
+/// Set the method of the request.
+///
+pub fn set_req_host(req: Request(body), host: String) -> Request(body) {
+  let Request(
+    method: method,
+    headers: headers,
+    body: body,
+    scheme: scheme,
+    host: _,
+    port: port,
+    path: path,
+    query: query,
+  ) = req
+  Request(
+    method: method,
+    headers: headers,
+    body: body,
+    scheme: scheme,
+    host: host,
+    port: port,
+    path: path,
+    query: query,
+  )
+}
+
+// TODO: test
+// TODO: record update syntax
+/// Set the method of the request.
+///
+pub fn set_req_path(req: Request(body), path: String) -> Request(body) {
+  let Request(
+    method: method,
+    headers: headers,
+    body: body,
+    scheme: scheme,
+    host: host,
+    port: port,
+    path: _,
+    query: query,
+  ) = req
+  Request(
+    method: method,
+    headers: headers,
+    body: body,
+    scheme: scheme,
+    host: host,
+    port: port,
+    path: path,
+    query: query,
   )
 }
