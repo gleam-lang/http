@@ -13,6 +13,7 @@
 import gleam/list
 import gleam/option.{None, Option, Some}
 import gleam/string
+import gleam/string_builder
 import gleam/uri.{Uri}
 import gleam/dynamic.{Dynamic}
 
@@ -420,6 +421,46 @@ pub fn set_req_path(req: Request(body), path: String) -> Request(body) {
     port: port,
     path: _,
     query: query,
+  ) = req
+  Request(
+    method: method,
+    headers: headers,
+    body: body,
+    scheme: scheme,
+    host: host,
+    port: port,
+    path: path,
+    query: query,
+  )
+}
+
+// TODO: test
+// TODO: escape
+// TODO: record update syntax
+/// Set the query of the request.
+///
+pub fn set_req_query(
+  req: Request(body),
+  query: List(tuple(String, String)),
+) -> Request(body) {
+  let pair = fn(t: tuple(String, String)) {
+    string_builder.from_strings([t.0, "=", t.1])
+  }
+  let query = query
+    |> list.map(pair)
+    |> list.intersperse(string_builder.from_string("&"))
+    |> string_builder.concat
+    |> string_builder.to_string
+    |> Some
+  let Request(
+    method: method,
+    headers: headers,
+    body: body,
+    scheme: scheme,
+    host: host,
+    port: port,
+    path: path,
+    query: _,
   ) = req
   Request(
     method: method,
