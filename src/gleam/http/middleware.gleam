@@ -41,7 +41,7 @@ fn ensure_post(req: Request(a)) {
 }
 
 fn get_override_method(req) {
-  try query_params = http.req_query(req)
+  try query_params = http.get_query(req)
   try method = list.key_find(query_params, "_method")
   try method = http.parse_method(method)
   case method {
@@ -69,7 +69,7 @@ pub fn method_override(service: Service(req, resp)) -> Service(req, resp) {
     req
     |> ensure_post
     |> result.then(get_override_method)
-    |> result.map(http.set_req_method(req, _))
+    |> result.map(http.set_method(req, _))
     |> result.unwrap(req)
     |> service
   }

@@ -191,13 +191,53 @@ pub fn req_segments(request: Request(body)) -> List(String) {
 }
 
 /// Decode the query of a request.
-pub fn req_query(
+pub fn get_query(
   request: Request(body),
 ) -> Result(List(tuple(String, String)), Nil) {
   case request.query {
     Some(query_string) -> uri.parse_query(query_string)
     None -> Ok([])
   }
+}
+
+// TODO: test
+// TODO: escape
+// TODO: record update syntax
+/// Set the query of the request.
+///
+pub fn set_query(
+  req: Request(body),
+  query: List(tuple(String, String)),
+) -> Request(body) {
+  let pair = fn(t: tuple(String, String)) {
+    string_builder.from_strings([t.0, "=", t.1])
+  }
+  let query = query
+    |> list.map(pair)
+    |> list.intersperse(string_builder.from_string("&"))
+    |> string_builder.concat
+    |> string_builder.to_string
+    |> Some
+  let Request(
+    method: method,
+    headers: headers,
+    body: body,
+    scheme: scheme,
+    host: host,
+    port: port,
+    path: path,
+    query: _,
+  ) = req
+  Request(
+    method: method,
+    headers: headers,
+    body: body,
+    scheme: scheme,
+    host: host,
+    port: port,
+    path: path,
+    query: query,
+  )
 }
 
 /// Get the value for a given header.
@@ -293,7 +333,7 @@ pub fn set_req_body(
 // TODO: record update syntax
 /// Set the method of the request.
 ///
-pub fn set_req_method(req: Request(body), method: Method) -> Request(body) {
+pub fn set_method(req: Request(body), method: Method) -> Request(body) {
   let Request(
     method: _,
     headers: headers,
@@ -421,46 +461,6 @@ pub fn set_req_path(req: Request(body), path: String) -> Request(body) {
     port: port,
     path: _,
     query: query,
-  ) = req
-  Request(
-    method: method,
-    headers: headers,
-    body: body,
-    scheme: scheme,
-    host: host,
-    port: port,
-    path: path,
-    query: query,
-  )
-}
-
-// TODO: test
-// TODO: escape
-// TODO: record update syntax
-/// Set the query of the request.
-///
-pub fn set_req_query(
-  req: Request(body),
-  query: List(tuple(String, String)),
-) -> Request(body) {
-  let pair = fn(t: tuple(String, String)) {
-    string_builder.from_strings([t.0, "=", t.1])
-  }
-  let query = query
-    |> list.map(pair)
-    |> list.intersperse(string_builder.from_string("&"))
-    |> string_builder.concat
-    |> string_builder.to_string
-    |> Some
-  let Request(
-    method: method,
-    headers: headers,
-    body: body,
-    scheme: scheme,
-    host: host,
-    port: port,
-    path: path,
-    query: _,
   ) = req
   Request(
     method: method,

@@ -698,7 +698,7 @@ pub fn req_segments_test() {
   should.equal(["ellen", "ripley"], http.req_segments(request))
 }
 
-pub fn req_query_test() {
+pub fn get_query_test() {
   let make_request = fn(query) {
     http.Request(
       method: http.Get,
@@ -713,13 +713,13 @@ pub fn req_query_test() {
   }
 
   let request = make_request(Some("foo=x%20y"))
-  should.equal(Ok([tuple("foo", "x y")]), http.req_query(request))
+  should.equal(Ok([tuple("foo", "x y")]), http.get_query(request))
 
   let request = make_request(None)
-  should.equal(Ok([]), http.req_query(request))
+  should.equal(Ok([]), http.get_query(request))
 
   let request = make_request(Some("foo=%!2"))
-  should.equal(Error(Nil), http.req_query(request))
+  should.equal(Error(Nil), http.get_query(request))
 }
 
 pub fn get_resp_header_test() {

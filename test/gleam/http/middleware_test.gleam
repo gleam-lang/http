@@ -11,44 +11,44 @@ pub fn method_override_test() {
 
   // No overriding without the query param
   http.default_req()
-  |> http.set_req_method(Get)
+  |> http.set_method(Get)
   |> service
   |> should.equal(Response(200, [], Get))
 
   http.default_req()
-  |> http.set_req_method(Post)
+  |> http.set_method(Post)
   |> service
   |> should.equal(Response(200, [], Post))
 
   // Can override
   http.default_req()
-  |> http.set_req_method(Post)
-  |> http.set_req_query([tuple("_method", "DELETE")])
+  |> http.set_method(Post)
+  |> http.set_query([tuple("_method", "DELETE")])
   |> service
   |> should.equal(Response(200, [], Delete))
 
   http.default_req()
-  |> http.set_req_method(Post)
-  |> http.set_req_query([tuple("_method", "PATCH")])
+  |> http.set_method(Post)
+  |> http.set_query([tuple("_method", "PATCH")])
   |> service
   |> should.equal(Response(200, [], Patch))
 
   http.default_req()
-  |> http.set_req_method(Post)
-  |> http.set_req_query([tuple("_method", "PUT")])
+  |> http.set_method(Post)
+  |> http.set_query([tuple("_method", "PUT")])
   |> service
   |> should.equal(Response(200, [], Put))
 
   // Cannot override with other methods
   http.default_req()
-  |> http.set_req_method(Post)
-  |> http.set_req_query([tuple("_method", "OPTIONS")])
+  |> http.set_method(Post)
+  |> http.set_query([tuple("_method", "OPTIONS")])
   |> service
   |> should.equal(Response(200, [], Post))
 
   http.default_req()
-  |> http.set_req_method(Post)
-  |> http.set_req_query([tuple("_method", "SOMETHING")])
+  |> http.set_method(Post)
+  |> http.set_query([tuple("_method", "SOMETHING")])
   |> service
   |> should.equal(Response(200, [], Post))
 }
