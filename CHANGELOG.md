@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.1.0 - unreleased
+## v1.1.0 - 2020-07-19
 
 - The `gleam/http` module gains the `Scheme`, `Service`, `Request`, and
   `Response` types, along with associated functions `scheme_to_string`,
