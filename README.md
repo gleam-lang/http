@@ -28,3 +28,13 @@ pub fn start() {
   elli.start(my_service, on_port: 3000)
 }
 ```
+
+In the example above the Elli Erlang web server is used to run the Gleam HTTP
+service. Here's a full list of the adapters available:
+
+| Adapter              | About                                                  |
+| ---                  | ---                                                    |
+| [Elli][elli-adapter] | [Elli][elli] is a HTTP1.1 web server written in Erlang |
+
+[elli]:https://github.com/elli-lib/elli
+[elli-adapter]: https://github.com/gleam-experiments/elli
