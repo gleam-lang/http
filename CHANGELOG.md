@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.1.1 - 2020-07-21
+
+- Relax dependency requirements on stdlib
+
 ## v1.1.0 - 2020-07-19
 
 - The `gleam/http` module gains the `Scheme`, `Service`, `Request`, and
