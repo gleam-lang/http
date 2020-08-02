@@ -806,3 +806,30 @@ pub fn get_req_cookies_test() {
   |> http.get_req_cookies()
   |> should.equal([])
 }
+
+pub fn set_req_cookies_test() {
+  let request = http.default_req()
+    |> http.set_req_cookie("k1", "v1")
+
+  request
+  |> http.get_req_header("cookie")
+  |> should.equal(Ok("k1=v1"))
+
+  request
+  |> http.set_req_cookie("k2", "v2")
+  |> http.get_req_header("cookie")
+  |> should.equal(Ok("k1=v1; k2=v2"))
+}
+
+pub fn set_resp_cookie_test() {
+    http.response(200)
+    |> http.set_resp_cookie("k1", "v1", [])
+    |> http.get_resp_header("set-cookie")
+    |> should.equal(Ok("k1=v1; k2=v2"))
+    todo
+}
+
+pub fn expire_resp_cookie_test() {
+    todo
+
+}
