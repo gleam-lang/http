@@ -14,10 +14,12 @@ import gleam/bit_string
 import gleam/list
 import gleam/option.{None, Option, Some}
 import gleam/regex
+import gleam/result
 import gleam/string
 import gleam/string_builder
 import gleam/uri.{Uri}
 import gleam/dynamic.{Dynamic}
+import gleam/http/set_cookie
 
 /// HTTP standard method as defined by [RFC 2616](https://tools.ietf.org/html/rfc2616),
 /// and PATCH which is defined by [RFC 5789](https://tools.ietf.org/html/rfc5789).
@@ -479,12 +481,12 @@ pub fn set_path(req: Request(body), path: String) -> Request(body) {
 fn check_token(token: BitString) {
   case token {
     <<"":utf8>> -> Ok(Nil)
-    <<"\s":utf8, _>>  -> Error(Nil)
-    <<"\t":utf8, _>>  -> Error(Nil)
-    <<"\r":utf8, _>>  -> Error(Nil)
-    <<"\n":utf8, _>>  -> Error(Nil)
-    <<"\c":utf8, _>>  -> Error(Nil)
-    <<"\f":utf8, _>>  -> Error(Nil)
+    <<"\s":utf8, _>> -> Error(Nil)
+    <<"\t":utf8, _>> -> Error(Nil)
+    <<"\r":utf8, _>> -> Error(Nil)
+    <<"\n":utf8, _>> -> Error(Nil)
+    <<"\c":utf8, _>> -> Error(Nil)
+    <<"\f":utf8, _>> -> Error(Nil)
     <<_, rest:bit_string>> -> check_token(rest)
   }
 }
@@ -515,11 +517,58 @@ pub fn get_req_cookies(req) -> List(tuple(String, String)) {
   |> list.filter_map(
     fn(header) {
       let tuple(key, value) = header
-      case string.lowercase(key) {
+      case key {
         "cookie" -> Ok(parse_cookie_list(value))
         _ -> Error(Nil)
       }
     },
   )
   |> list.flatten()
+}
+
+pub fn set_req_cookie(req, key, value) {
+  let Request(
+    method: method,
+    headers: headers,
+    body: body,
+    scheme: scheme,
+    host: host,
+    port: port,
+    path: path,
+    query: query,
+  ) = req
+  let new_cookie_string = string.join([key, value], "=")
+
+  let tuple(cookies_string, headers) = case list.key_pop(headers, "cookie") {
+    Ok(tuple(cookies_string, headers)) -> {
+      let cookies_string = string.join(
+        [cookies_string, new_cookie_string],
+        "; ",
+      )
+      tuple(cookies_string, headers)
+    }
+    Error(Nil) -> tuple(new_cookie_string, headers)
+  }
+
+  Request(
+    method: method,
+    headers: [tuple("cookie", cookies_string), ..headers],
+    body: body,
+    scheme: scheme,
+    host: host,
+    port: port,
+    path: path,
+    query: query,
+  )
+}
+
+pub fn set_resp_cookie(resp, key, value, attributes) {
+    let new_cookie_string = string.join([key, value], "=")
+    let attributes = list.map(attributes, fn(attribute) {
+        case attribute {
+            set_cookie.Domain(domain) -> string.append("Domain=", domain)
+        }
+    })
+    string.join([new_cookie_string, ..attributes], "; ")
+    |> prepend_resp_header(resp, "set-cookie", _)
 }
