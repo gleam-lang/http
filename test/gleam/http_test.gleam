@@ -771,3 +771,38 @@ pub fn scheme_from_string_test() {
   |> http.scheme_from_string
   |> should.equal(Error(Nil))
 }
+
+pub fn get_req_cookies_test() {
+  http.default_req()
+  |> http.prepend_req_header("cookie", "k1=v1; k2=v2")
+  |> http.get_req_cookies()
+  |> should.equal([tuple("k1", "v1"), tuple("k2", "v2")])
+
+  // Standard Header list syntax
+  http.default_req()
+  |> http.prepend_req_header("cookie", "k1=v1, k2=v2")
+  |> http.get_req_cookies()
+  |> should.equal([tuple("k1", "v1"), tuple("k2", "v2")])
+
+  // Spread over multiple headers
+  http.default_req()
+  |> http.prepend_req_header("cookie", "k2=v2")
+  |> http.prepend_req_header("cookie", "k1=v1")
+  |> http.get_req_cookies()
+  |> should.equal([tuple("k1", "v1"), tuple("k2", "v2")])
+
+  http.default_req()
+  |> http.prepend_req_header("cookie", " k1=v1 ; k2=v2 ")
+  |> http.get_req_cookies()
+  |> should.equal([tuple("k1", "v1"), tuple("k2", "v2")])
+
+  http.default_req()
+  |> http.prepend_req_header("cookie", "k1; =; =123")
+  |> http.get_req_cookies()
+  |> should.equal([])
+
+  http.default_req()
+  |> http.prepend_req_header("cookie", "k\r1=v2; k1=v\r2")
+  |> http.get_req_cookies()
+  |> should.equal([])
+}
