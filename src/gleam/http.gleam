@@ -10,8 +10,10 @@
 // https://github.com/elixir-plug/plug/blob/dfebbebeb716c43c7dee4915a061bede06ec45f1/lib/plug/conn.ex#L776
 // TODO: set_req_header
 // https://github.com/elixir-plug/plug/blob/dfebbebeb716c43c7dee4915a061bede06ec45f1/lib/plug/conn.ex#L776
+import gleam/bit_string
 import gleam/list
 import gleam/option.{None, Option, Some}
+import gleam/regex
 import gleam/string
 import gleam/string_builder
 import gleam/uri.{Uri}
@@ -472,4 +474,52 @@ pub fn set_path(req: Request(body), path: String) -> Request(body) {
     path: path,
     query: query,
   )
+}
+
+fn check_token(token: BitString) {
+  case token {
+    <<"":utf8>> -> Ok(Nil)
+    <<"\s":utf8, _>>  -> Error(Nil)
+    <<"\t":utf8, _>>  -> Error(Nil)
+    <<"\r":utf8, _>>  -> Error(Nil)
+    <<"\n":utf8, _>>  -> Error(Nil)
+    <<"\c":utf8, _>>  -> Error(Nil)
+    <<"\f":utf8, _>>  -> Error(Nil)
+    <<_, rest:bit_string>> -> check_token(rest)
+  }
+}
+
+fn parse_cookie_list(cookie_string) {
+  assert Ok(re) = regex.from_string("[,;]")
+  regex.split(re, cookie_string)
+  |> list.filter_map(
+    fn(pair) {
+      case string.split_once(string.trim(pair), "=") {
+        Ok(tuple("", _)) -> Error(Nil)
+        Ok(tuple(key, value)) -> {
+          try _ = check_token(bit_string.from_string(key))
+          try _ = check_token(bit_string.from_string(value))
+          Ok(tuple(key, value))
+        }
+        Error(Nil) -> Error(Nil)
+      }
+    },
+  )
+}
+
+/// Fetch the cookies sent in a request.
+pub fn get_req_cookies(req) -> List(tuple(String, String)) {
+  let Request(headers: headers, ..) = req
+
+  headers
+  |> list.filter_map(
+    fn(header) {
+      let tuple(key, value) = header
+      case string.lowercase(key) {
+        "cookie" -> Ok(parse_cookie_list(value))
+        _ -> Error(Nil)
+      }
+    },
+  )
+  |> list.flatten()
 }
