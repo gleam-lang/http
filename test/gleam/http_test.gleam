@@ -859,6 +859,6 @@ pub fn expire_resp_cookie_test() {
   |> http.expire_resp_cookie("k1", cookie.default_attributes())
   |> http.get_resp_header("set-cookie")
   |> should.equal(
-    Ok("k1=; expires=Thu, 01 Jan 1970 00:00:00 GMT; MaxAge=0; Path=/; HttpOnly"),
+    Ok("k1=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; MaxAge=0; Path=/; HttpOnly"),
   )
 }
