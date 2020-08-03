@@ -793,7 +793,7 @@ pub fn get_req_cookies_test() {
   |> should.equal([tuple("k1", "v1"), tuple("k2", "v2")])
 
   http.default_req()
-  |> http.prepend_req_header("cookie", " k1=v1 ; k2=v2 ")
+  |> http.prepend_req_header("cookie", " k1  =  v1 ; k2=v2 ")
   |> http.get_req_cookies()
   |> should.equal([tuple("k1", "v1"), tuple("k2", "v2")])
 
@@ -855,8 +855,10 @@ pub fn set_resp_cookie_test() {
 }
 
 pub fn expire_resp_cookie_test() {
-    http.response(200)
-    |> http.expire_resp_cookie("k1" , cookie.default_attributes())
-    |> http.get_resp_header("set-cookie")
-    |> should.equal(Ok("k1=; expires=Thu, 01 Jan 1970 00:00:00 GMT; MaxAge=0; Path=/; HttpOnly"))
+  http.response(200)
+  |> http.expire_resp_cookie("k1", cookie.default_attributes())
+  |> http.get_resp_header("set-cookie")
+  |> should.equal(
+    Ok("k1=; expires=Thu, 01 Jan 1970 00:00:00 GMT; MaxAge=0; Path=/; HttpOnly"),
+  )
 }

@@ -13,7 +13,6 @@ pub type SameSitePolicy {
 
 pub type Attributes {
   Attributes(
-    // Expires is deprecated, we can still serialize a value for max compatibility
     max_age: Option(Int),
     domain: Option(String),
     path: Option(String),
@@ -47,34 +46,33 @@ pub fn default_attributes() {
 }
 
 fn same_site_to_string(policy) {
-    case policy {
-        Lax ->  "Lax"
-        Strict -> "Strict"
-        None -> "None"
-    }
+  case policy {
+    Lax -> "Lax"
+    Strict -> "Strict"
+    None -> "None"
+  }
 }
 
 pub fn expire_attributes(attributes) {
-    let Attributes(
-      max_age: _max_age,
-      domain: domain,
-      path: path,
-      secure: secure,
-      http_only: http_only,
-      same_site: same_site,
-    ) = attributes
-    Attributes(
-      max_age: Some(0),
-      domain: domain,
-      path: path,
-      secure: secure,
-      http_only: http_only,
-      same_site: same_site,
-    )
+  let Attributes(
+    max_age: _max_age,
+    domain: domain,
+    path: path,
+    secure: secure,
+    http_only: http_only,
+    same_site: same_site,
+  ) = attributes
+  Attributes(
+    max_age: Some(0),
+    domain: domain,
+    path: path,
+    secure: secure,
+    http_only: http_only,
+    same_site: same_site,
+  )
 }
 
-
-pub fn attributes_to_list(attributes) {
+fn attributes_to_list(attributes) {
   let Attributes(
     max_age: max_age,
     domain: domain,
@@ -84,9 +82,13 @@ pub fn attributes_to_list(attributes) {
     same_site: same_site,
   ) = attributes
   [
+    // Expires is a deprecated attribute for cookies, it has been replaced with MaxAge
+    // MaxAge is widely supported and so Expires values are not set.
+    // Only when deleting cookies is the exception made to use the old format,
+    // to ensure complete clearup of cookies if required by an application.
     case max_age {
-        Some(0) -> Some(["expires=Thu, 01 Jan 1970 00:00:00 GMT"])
-        _ -> option.None
+      Some(0) -> Some(["Expires=Thu, 01 Jan 1970 00:00:00 GMT"])
+      _ -> option.None
     },
     option.map(max_age, fn(max_age) { ["MaxAge=", int.to_string(max_age)] }),
     option.map(domain, fn(domain) { ["Domain=", domain] }),
@@ -112,5 +114,3 @@ pub fn set_cookie_string(key, value, attributes) {
   |> list.map(string.join(_, ""))
   |> string.join("; ")
 }
-// // Plug sets secure true automatically if request/conn is https
-// // https://github.com/elixir-plug/plug/blob/v1.10.3/lib/plug/conn.ex#L1464

@@ -499,6 +499,8 @@ fn parse_cookie_list(cookie_string) {
       case string.split_once(string.trim(pair), "=") {
         Ok(tuple("", _)) -> Error(Nil)
         Ok(tuple(key, value)) -> {
+            let key = string.trim(key)
+            let value = string.trim(value)
           try _ = check_token(bit_string.from_string(key))
           try _ = check_token(bit_string.from_string(value))
           Ok(tuple(key, value))
@@ -571,5 +573,5 @@ pub fn set_resp_cookie(resp, key, value, attributes) {
 }
 
 pub fn expire_resp_cookie(resp, key, attributes) {
-    set_resp_cookie(resp, key, "", cookie.expire_attributes(attributes))
+  set_resp_cookie(resp, key, "", cookie.expire_attributes(attributes))
 }
