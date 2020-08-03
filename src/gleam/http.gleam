@@ -499,8 +499,8 @@ fn parse_cookie_list(cookie_string) {
       case string.split_once(string.trim(pair), "=") {
         Ok(tuple("", _)) -> Error(Nil)
         Ok(tuple(key, value)) -> {
-            let key = string.trim(key)
-            let value = string.trim(value)
+          let key = string.trim(key)
+          let value = string.trim(value)
           try _ = check_token(bit_string.from_string(key))
           try _ = check_token(bit_string.from_string(value))
           Ok(tuple(key, value))
@@ -512,14 +512,16 @@ fn parse_cookie_list(cookie_string) {
 }
 
 /// Fetch the cookies sent in a request.
+///
+/// Note badly formed cookie pairs will be ignored.
 pub fn get_req_cookies(req) -> List(tuple(String, String)) {
   let Request(headers: headers, ..) = req
 
   headers
   |> list.filter_map(
     fn(header) {
-      let tuple(key, value) = header
-      case key {
+      let tuple(name, value) = header
+      case name {
         "cookie" -> Ok(parse_cookie_list(value))
         _ -> Error(Nil)
       }
@@ -528,7 +530,10 @@ pub fn get_req_cookies(req) -> List(tuple(String, String)) {
   |> list.flatten()
 }
 
-pub fn set_req_cookie(req, key, value) {
+/// Send a cookie with a request
+///
+/// Multiple cookies are added to the same cookie header.
+pub fn set_req_cookie(req, name, value) {
   let Request(
     method: method,
     headers: headers,
@@ -539,7 +544,7 @@ pub fn set_req_cookie(req, key, value) {
     path: path,
     query: query,
   ) = req
-  let new_cookie_string = string.join([key, value], "=")
+  let new_cookie_string = string.join([name, value], "=")
 
   let tuple(cookies_string, headers) = case list.key_pop(headers, "cookie") {
     Ok(tuple(cookies_string, headers)) -> {
@@ -564,14 +569,20 @@ pub fn set_req_cookie(req, key, value) {
   )
 }
 
-pub fn set_resp_cookie(resp, key, value, attributes) {
+/// Set a cookie value for a client
+///
+/// The attributes record is defined in `gleam/http/cookie`
+pub fn set_resp_cookie(resp, name, value, attributes) {
   prepend_resp_header(
     resp,
     "set-cookie",
-    cookie.set_cookie_string(key, value, attributes),
+    cookie.set_cookie_string(name, value, attributes),
   )
 }
 
-pub fn expire_resp_cookie(resp, key, attributes) {
-  set_resp_cookie(resp, key, "", cookie.expire_attributes(attributes))
+/// Expire a cookie value for a client
+///
+/// Not the attributes value should be the same as when the response cookie was set.
+pub fn expire_resp_cookie(resp, name, attributes) {
+  set_resp_cookie(resp, name, "", cookie.expire_attributes(attributes))
 }

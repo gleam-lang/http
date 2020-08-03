@@ -3,14 +3,18 @@ import gleam/list
 import gleam/option.{Option, Some}
 import gleam/string
 
-const epoch = "aa"
+const epoch = "Expires=Thu, 01 Jan 1970 00:00:00 GMT"
 
+/// Policy options for the SameSite cookie attribute
+///
+/// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
 pub type SameSitePolicy {
   Lax
   Strict
   None
 }
 
+/// Attributes of a cookie when sent to a client in the `set-cookie` header.
 pub type Attributes {
   Attributes(
     max_age: Option(Int),
@@ -18,11 +22,11 @@ pub type Attributes {
     path: Option(String),
     secure: Bool,
     http_only: Bool,
-    // TODO I don't think it needs Option
     same_site: Option(SameSitePolicy),
   )
 }
 
+/// Helper to create empty `Attributes` for a cookie.
 pub fn empty_attributes() {
   Attributes(
     max_age: option.None,
@@ -34,6 +38,7 @@ pub fn empty_attributes() {
   )
 }
 
+/// Helper to create sensible default attributes for a set cookie.
 pub fn default_attributes() {
   Attributes(
     max_age: option.None,
@@ -53,6 +58,8 @@ fn same_site_to_string(policy) {
   }
 }
 
+/// Update the MaxAge of a set of attributes to 0.
+/// This informes the client that the cookie should be expired.
 pub fn expire_attributes(attributes) {
   let Attributes(
     max_age: _max_age,
@@ -87,7 +94,7 @@ fn attributes_to_list(attributes) {
     // Only when deleting cookies is the exception made to use the old format,
     // to ensure complete clearup of cookies if required by an application.
     case max_age {
-      Some(0) -> Some(["Expires=Thu, 01 Jan 1970 00:00:00 GMT"])
+      Some(0) -> Some([epoch])
       _ -> option.None
     },
     option.map(max_age, fn(max_age) { ["MaxAge=", int.to_string(max_age)] }),
@@ -109,8 +116,11 @@ fn attributes_to_list(attributes) {
   |> list.filter_map(option.to_result(_, Nil))
 }
 
-pub fn set_cookie_string(key, value, attributes) {
-  [[key, "=", value], ..attributes_to_list(attributes)]
+/// Serialize a cookie and attributes.
+///
+/// This is the serialization of a cookie for the `set-cookie` header
+pub fn set_cookie_string(name, value, attributes) {
+  [[name, "=", value], ..attributes_to_list(attributes)]
   |> list.map(string.join(_, ""))
   |> string.join("; ")
 }
