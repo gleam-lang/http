@@ -1,5 +1,12 @@
 # Changelog
 
+- The `gleam/http` module gains the `get_req_cookies`, `set_req_cookie`
+  `set_resp_cookie` and `expire_resp_cookie` functions.
+- Created the `gleam/http/cookie` module with `SameSitePolicy` and `Attributes`
+  types, along with associated functions `empty_attributes`,
+  `default_attributes`, `expire_attributes` and `set_cookie_string`.
+
+
 ## v1.1.1 - 2020-07-21
 
 - Relax dependency requirements on stdlib
