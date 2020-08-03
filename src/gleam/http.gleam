@@ -19,7 +19,7 @@ import gleam/string
 import gleam/string_builder
 import gleam/uri.{Uri}
 import gleam/dynamic.{Dynamic}
-import gleam/http/set_cookie
+import gleam/http/cookie
 
 /// HTTP standard method as defined by [RFC 2616](https://tools.ietf.org/html/rfc2616),
 /// and PATCH which is defined by [RFC 5789](https://tools.ietf.org/html/rfc5789).
@@ -563,12 +563,13 @@ pub fn set_req_cookie(req, key, value) {
 }
 
 pub fn set_resp_cookie(resp, key, value, attributes) {
-    let new_cookie_string = string.join([key, value], "=")
-    let attributes = list.map(attributes, fn(attribute) {
-        case attribute {
-            set_cookie.Domain(domain) -> string.append("Domain=", domain)
-        }
-    })
-    string.join([new_cookie_string, ..attributes], "; ")
-    |> prepend_resp_header(resp, "set-cookie", _)
+  prepend_resp_header(
+    resp,
+    "set-cookie",
+    cookie.set_cookie_string(key, value, attributes),
+  )
+}
+
+pub fn expire_resp_cookie(resp, key, attributes) {
+    set_resp_cookie(resp, key, "", cookie.expire_attributes(attributes))
 }
