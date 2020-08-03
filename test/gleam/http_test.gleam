@@ -3,6 +3,7 @@ import gleam/dynamic
 import gleam/string_builder
 import gleam/uri.{Uri}
 import gleam/http
+import gleam/http/cookie
 import gleam/option.{None, Some}
 import gleam/should
 
@@ -822,14 +823,40 @@ pub fn set_req_cookies_test() {
 }
 
 pub fn set_resp_cookie_test() {
-    http.response(200)
-    |> http.set_resp_cookie("k1", "v1", [])
-    |> http.get_resp_header("set-cookie")
-    |> should.equal(Ok("k1=v1; k2=v2"))
-    todo
+  http.response(200)
+  |> http.set_resp_cookie("k1", "v1", cookie.empty_attributes())
+  |> http.get_resp_header("set-cookie")
+  |> should.equal(Ok("k1=v1"))
+
+  http.response(200)
+  |> http.set_resp_cookie("k1", "v1", cookie.default_attributes())
+  |> http.get_resp_header("set-cookie")
+  |> should.equal(Ok("k1=v1; Path=/; HttpOnly"))
+
+  http.response(200)
+  |> http.set_resp_cookie(
+    "k1",
+    "v1",
+    cookie.Attributes(
+      max_age: Some(100),
+      domain: Some("domain.test"),
+      path: Some("/foo"),
+      secure: True,
+      http_only: True,
+      same_site: Some(cookie.Strict),
+    ),
+  )
+  |> http.get_resp_header("set-cookie")
+  |> should.equal(
+    Ok(
+      "k1=v1; MaxAge=100; Domain=domain.test; Path=/foo; Secure; HttpOnly; SameSite=Strict",
+    ),
+  )
 }
 
 pub fn expire_resp_cookie_test() {
-    todo
-
+    http.response(200)
+    |> http.expire_resp_cookie("k1" , cookie.default_attributes())
+    |> http.get_resp_header("set-cookie")
+    |> should.equal(Ok("k1=; expires=Thu, 01 Jan 1970 00:00:00 GMT; MaxAge=0; Path=/; HttpOnly"))
 }
