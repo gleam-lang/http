@@ -514,6 +514,7 @@ fn parse_cookie_list(cookie_string) {
 /// Fetch the cookies sent in a request.
 ///
 /// Note badly formed cookie pairs will be ignored.
+/// RFC6265 specifies that invalid cookie names/attributes should be ignored.
 pub fn get_req_cookies(req) -> List(tuple(String, String)) {
   let Request(headers: headers, ..) = req
 

@@ -39,6 +39,12 @@ pub fn empty_attributes() {
 }
 
 /// Helper to create sensible default attributes for a set cookie.
+///
+/// NOTE these defaults ensure you cookie is always available to you application.
+/// However this is not a fully secure solution.
+/// You should consider setting a Secure and/or SameSite attribute.
+///
+/// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#Attributes
 pub fn default_attributes() {
   Attributes(
     max_age: option.None,
