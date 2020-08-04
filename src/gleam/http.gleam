@@ -603,17 +603,16 @@ pub type CookieAttributes {
 
 /// Helper to create sensible default attributes for a set cookie.
 ///
-/// NOTE these defaults ensure you cookie is always available to you application.
-/// However this is not a fully secure solution.
-/// You should consider setting a Secure and/or SameSite attribute.
+/// Note these defaults may not be sufficient to secure your application.
+/// You should consider setting the SameSite field.
 ///
 /// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#Attributes
-pub fn cookie_defaults() {
+pub fn cookie_defaults(scheme: Scheme) {
   CookieAttributes(
     max_age: option.None,
     domain: option.None,
     path: Some("/"),
-    secure: False,
+    secure: scheme == Https,
     http_only: True,
     same_site: option.None,
   )

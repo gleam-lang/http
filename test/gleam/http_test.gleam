@@ -2,7 +2,7 @@ import gleam/atom
 import gleam/dynamic
 import gleam/string_builder
 import gleam/uri.{Uri}
-import gleam/http
+import gleam/http.{Http, Https}
 import gleam/option.{None, Some}
 import gleam/should
 
@@ -836,7 +836,7 @@ pub fn set_resp_cookie_test() {
   |> should.equal(Ok("k1=v1"))
 
   http.response(200)
-  |> http.set_resp_cookie("k1", "v1", http.cookie_defaults())
+  |> http.set_resp_cookie("k1", "v1", http.cookie_defaults(Http))
   |> http.get_resp_header("set-cookie")
   |> should.equal(Ok("k1=v1; Path=/; HttpOnly"))
 
@@ -860,7 +860,7 @@ pub fn set_resp_cookie_test() {
 
 pub fn expire_resp_cookie_test() {
   http.response(200)
-  |> http.expire_resp_cookie("k1", http.cookie_defaults())
+  |> http.expire_resp_cookie("k1", http.cookie_defaults(Http))
   |> http.get_resp_header("set-cookie")
   |> should.equal(
     Ok("k1=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; MaxAge=0; Path=/; HttpOnly"),
