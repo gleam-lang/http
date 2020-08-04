@@ -1,5 +1,7 @@
 # Changelog
 
+## v1.2.0 - 2020-08-04
+
 - The `gleam/http` module gains the `get_req_cookies`, `set_req_cookie`
   `set_resp_cookie` and `expire_resp_cookie` functions.
 - Created the `gleam/http/cookie` module with `SameSitePolicy` and `Attributes`
