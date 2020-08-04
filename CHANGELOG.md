@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.3.0 - 2020-08-04
+
+- The `gleam/http/cookie` module has been merged into the `gleam/http` module.
+
 ## v1.2.0 - 2020-08-04
 
 - The `gleam/http` module gains the `get_req_cookies`, `set_req_cookie`
