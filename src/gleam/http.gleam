@@ -11,6 +11,8 @@
 // TODO: set_req_header
 // https://github.com/elixir-plug/plug/blob/dfebbebeb716c43c7dee4915a061bede06ec45f1/lib/plug/conn.ex#L776
 import gleam/bit_string
+import gleam/dynamic.{Dynamic}
+import gleam/int
 import gleam/list
 import gleam/option.{None, Option, Some}
 import gleam/regex
@@ -18,8 +20,6 @@ import gleam/result
 import gleam/string
 import gleam/string_builder
 import gleam/uri.{Uri}
-import gleam/dynamic.{Dynamic}
-import gleam/http/cookie
 
 /// HTTP standard method as defined by [RFC 2616](https://tools.ietf.org/html/rfc2616),
 /// and PATCH which is defined by [RFC 5789](https://tools.ietf.org/html/rfc5789).
@@ -531,6 +531,25 @@ pub fn get_req_cookies(req) -> List(tuple(String, String)) {
   |> list.flatten()
 }
 
+const epoch = "Expires=Thu, 01 Jan 1970 00:00:00 GMT"
+
+/// Policy options for the SameSite cookie attribute
+///
+/// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
+pub type SameSitePolicy {
+  Lax
+  Strict
+  None
+}
+
+fn same_site_to_string(policy) {
+  case policy {
+    Lax -> "Lax"
+    Strict -> "Strict"
+    None -> "None"
+  }
+}
+
 /// Send a cookie with a request
 ///
 /// Multiple cookies are added to the same cookie header.
@@ -570,20 +589,105 @@ pub fn set_req_cookie(req, name, value) {
   )
 }
 
+/// Attributes of a cookie when sent to a client in the `set-cookie` header.
+pub type CookieAttributes {
+  CookieAttributes(
+    max_age: Option(Int),
+    domain: Option(String),
+    path: Option(String),
+    secure: Bool,
+    http_only: Bool,
+    same_site: Option(SameSitePolicy),
+  )
+}
+
+/// Helper to create sensible default attributes for a set cookie.
+///
+/// NOTE these defaults ensure you cookie is always available to you application.
+/// However this is not a fully secure solution.
+/// You should consider setting a Secure and/or SameSite attribute.
+///
+/// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#Attributes
+pub fn cookie_defaults() {
+  CookieAttributes(
+    max_age: option.None,
+    domain: option.None,
+    path: Some("/"),
+    secure: False,
+    http_only: True,
+    same_site: option.None,
+  )
+}
+
+fn cookie_attributes_to_list(attributes) {
+  let CookieAttributes(
+    max_age: max_age,
+    domain: domain,
+    path: path,
+    secure: secure,
+    http_only: http_only,
+    same_site: same_site,
+  ) = attributes
+  [
+    // Expires is a deprecated attribute for cookies, it has been replaced with MaxAge
+    // MaxAge is widely supported and so Expires values are not set.
+    // Only when deleting cookies is the exception made to use the old format,
+    // to ensure complete clearup of cookies if required by an application.
+    case max_age {
+      Some(0) -> Some([epoch])
+      _ -> option.None
+    },
+    option.map(max_age, fn(max_age) { ["MaxAge=", int.to_string(max_age)] }),
+    option.map(domain, fn(domain) { ["Domain=", domain] }),
+    option.map(path, fn(path) { ["Path=", path] }),
+    case secure {
+      True -> Some(["Secure"])
+      False -> option.None
+    },
+    case http_only {
+      True -> Some(["HttpOnly"])
+      False -> option.None
+    },
+    option.map(
+      same_site,
+      fn(same_site) { ["SameSite=", same_site_to_string(same_site)] },
+    ),
+  ]
+  |> list.filter_map(option.to_result(_, Nil))
+}
+
 /// Set a cookie value for a client
 ///
 /// The attributes record is defined in `gleam/http/cookie`
 pub fn set_resp_cookie(resp, name, value, attributes) {
-  prepend_resp_header(
-    resp,
-    "set-cookie",
-    cookie.set_cookie_string(name, value, attributes),
-  )
+  let header_value = [
+      [name, "=", value],
+      ..cookie_attributes_to_list(attributes)
+    ]
+    |> list.map(string.join(_, ""))
+    |> string.join("; ")
+  prepend_resp_header(resp, "set-cookie", header_value)
 }
 
 /// Expire a cookie value for a client
 ///
 /// Not the attributes value should be the same as when the response cookie was set.
 pub fn expire_resp_cookie(resp, name, attributes) {
-  set_resp_cookie(resp, name, "", cookie.expire_attributes(attributes))
+  let CookieAttributes(
+    max_age: _max_age,
+    domain: domain,
+    path: path,
+    secure: secure,
+    http_only: http_only,
+    same_site: same_site,
+  ) = attributes
+  let attrs = CookieAttributes(
+    max_age: Some(0),
+    domain: domain,
+    path: path,
+    secure: secure,
+    http_only: http_only,
+    same_site: same_site,
+  )
+  set_resp_cookie(resp, name, "", attrs)
 }
