@@ -34,9 +34,9 @@ service. Here's a full list of the adapters available, sorted alphabetically.
 
 | Adapter                  | About                                                    |
 | ---                      | ---                                                      |
-| [Cowboy][cowboy-adapter] | [Cowboy][cowboy] is an Erlang HTTP2 & HTTP1.1 web server |
-| [Elli][elli-adapter]     | [Elli][elli] is an Erlang HTTP1.1 web server             |
-| [Plug][plug-adapter]     | [Plug][plug] is an Elixir web application interface      |
+| [gleam_cowboy][cowboy-adapter] | [Cowboy][cowboy] is an Erlang HTTP2 & HTTP1.1 web server |
+| [gleam_elli][elli-adapter]     | [Elli][elli] is an Erlang HTTP1.1 web server             |
+| [gleam_plug][plug-adapter]     | [Plug][plug] is an Elixir web application interface      |
 
 [cowboy]:https://github.com/ninenines/cowboy
 [cowboy-adapter]: https://github.com/gleam-experiments/cowboy
