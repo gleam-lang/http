@@ -32,12 +32,15 @@ pub fn start() {
 In the example above the Elli Erlang web server is used to run the Gleam HTTP
 service. Here's a full list of the adapters available, sorted alphabetically.
 
-| Adapter                  | About                                                              |
-| ---                      | ---                                                                |
-| [Cowboy][cowboy-adapter] | [Cowboy][cowboy] is a HTTP2 & HTTP1.1 web server written in Erlang |
-| [Elli][elli-adapter]     | [Elli][elli] is a HTTP1.1 web server written in Erlang             |
+| Adapter                  | About                                                    |
+| ---                      | ---                                                      |
+| [Cowboy][cowboy-adapter] | [Cowboy][cowboy] is an Erlang HTTP2 & HTTP1.1 web server |
+| [Elli][elli-adapter]     | [Elli][elli] is an Erlang HTTP1.1 web server             |
+| [Plug][plug-adapter]     | [Plug][plug] is an Elixir web application interface      |
 
 [cowboy]:https://github.com/ninenines/cowboy
 [cowboy-adapter]: https://github.com/gleam-experiments/cowboy
 [elli]:https://github.com/elli-lib/elli
-[elli-adapter]: https://github.com/gleam-experiments/elli
+[elli-adapter]: https://github.com/elixir-plug/plug
+[plug]:https://github.com/elli-lib/elli
+[plug-adapter]: https://github.com/gleam-experiments/plug
