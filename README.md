@@ -5,7 +5,7 @@ Types and functions for HTTP clients and servers!
 ## HTTP Service Example
 
 ```rust
-import gleam/elli
+import gleam/http/elli
 import gleam/http.{Request, Response}
 import gleam/bit_builder.{BitBuilder}
 import gleam/bit_string
