@@ -1,4 +1,4 @@
-import gleam/http.{Delete, Patch, Post, Put, Request, Response, Service}
+import gleam/http.{Delete, Patch, Post, Put, Request, Service}
 import gleam/list
 import gleam/result
 
