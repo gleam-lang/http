@@ -766,6 +766,34 @@ pub fn set_query_test() {
   |> should.equal(Some(""))
 }
 
+pub fn get_req_header_test() {
+  let make_request = fn(headers) {
+    http.Request(
+      method: http.Get,
+      headers: headers,
+      body: Nil,
+      scheme: http.Https,
+      host: "example.com",
+      port: None,
+      path: "/",
+      query: None,
+    )
+  }
+
+  let header_key = "GLEAM"
+  let request = make_request([tuple("answer", "42"), tuple("gleam", "awesome")])
+  should.equal(
+    Ok("awesome"),
+    request
+    |> http.get_req_header(header_key))
+
+  let request = make_request([tuple("answer", "42")])
+  should.equal(
+    Error(Nil),
+    request
+    |> http.get_req_header(header_key))
+}
+
 pub fn get_resp_header_test() {
   let response = http.response(200)
     |> http.prepend_resp_header("x-foo", "x")
