@@ -743,6 +743,29 @@ pub fn get_query_test() {
   should.equal(Error(Nil), http.get_query(request))
 }
 
+pub fn set_query_test() {
+  let request = http.Request(
+    method: http.Get,
+    headers: [],
+    body: Nil,
+    scheme: http.Https,
+    host: "example.com",
+    port: None,
+    path: "/",
+    query: None,
+  )
+
+  let query = [tuple("answer", "42"), tuple("test", "123")]
+  let updated_request = http.set_query(request, query)
+  updated_request.query
+  |> should.equal(Some("answer=42&test=123"))
+
+  let empty_query = []
+  let updated_request = http.set_query(request, empty_query)
+  updated_request.query
+  |> should.equal(Some(""))
+}
+
 pub fn get_resp_header_test() {
   let response = http.response(200)
     |> http.prepend_resp_header("x-foo", "x")
