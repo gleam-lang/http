@@ -844,6 +844,30 @@ pub fn scheme_from_string_test() {
   |> should.equal(Error(Nil))
 }
 
+pub fn prepend_req_header_test() {
+  let headers = []
+  let request = http.Request(
+    method: http.Get,
+    headers: headers,
+    body: Nil,
+    scheme: http.Https,
+    host: "example.com",
+    port: None,
+    path: "/",
+    query: None
+  )
+  |> http.prepend_req_header("answer", "42")
+
+  request.headers
+  |> should.equal([tuple("answer", "42")])
+
+  let request = request
+  |> http.prepend_req_header("gleam", "awesome")
+
+  request.headers
+  |> should.equal([tuple("gleam", "awesome"), tuple("answer", "42"),])
+}
+
 pub fn get_req_cookies_test() {
   http.default_req()
   |> http.prepend_req_header("cookie", "k1=v1; k2=v2")
