@@ -676,6 +676,27 @@ pub fn req_to_uri_test() {
   )
 }
 
+pub fn req_from_uri_test() {
+  let uri = Uri(Some("https"), None, Some("sky.net"), None, "/sarah/connor", None, None)
+ 
+  uri
+  |> http.req_from_uri
+  |> should.equal(
+    Ok(
+      http.Request(
+        method: http.Get,
+        headers: [],
+        body: "",
+        scheme: http.Https,
+        host: "sky.net",
+        port: None,
+        path: "/sarah/connor",
+        query: None
+      )
+    )
+  )
+}
+
 pub fn redirect_test() {
   let response = http.redirect("/other")
 
