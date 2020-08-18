@@ -794,6 +794,33 @@ pub fn get_req_header_test() {
     |> http.get_req_header(header_key))
 }
 
+pub fn set_req_body_test() {
+  let body = """
+    <html>
+      <body>
+        <title>Gleam is the best!</title>
+      </body>
+    </html>
+  """
+
+  let request = http.Request(
+    method: http.Get,
+    headers: [],
+    body: Nil,
+    scheme: http.Https,
+    host: "example.com",
+    port: None,
+    path: "/",
+    query: None,
+  )
+
+  let updated_request = request
+   |> http.set_req_body(body)
+
+  updated_request.body
+  |> should.equal(body)
+}
+
 pub fn get_resp_header_test() {
   let response = http.response(200)
     |> http.prepend_resp_header("x-foo", "x")
@@ -864,6 +891,7 @@ pub fn prepend_req_header_test() {
   let request = request
   |> http.prepend_req_header("gleam", "awesome")
 
+  // request should have two headers now
   request.headers
   |> should.equal([tuple("gleam", "awesome"), tuple("answer", "42"),])
 }

@@ -204,7 +204,6 @@ pub fn get_query(
   }
 }
 
-// TODO: test
 // TODO: escape
 // TODO: record update syntax
 /// Set the query of the request.
@@ -268,7 +267,6 @@ pub fn get_resp_header(
 
 // TODO: use record update syntax
 // TODO: document
-// TODO: test
 // https://github.com/elixir-plug/plug/blob/dfebbebeb716c43c7dee4915a061bede06ec45f1/lib/plug/conn.ex#L809
 pub fn prepend_req_header(
   request: Request(body),
@@ -303,7 +301,6 @@ pub fn set_resp_body(
   Response(status: status, headers: headers, body: body)
 }
 
-// TODO: test
 // TODO: record update syntax
 /// Set the body of the request, overwriting any existing body.
 ///
