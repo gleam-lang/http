@@ -330,7 +330,6 @@ pub fn set_req_body(
   )
 }
 
-// TODO: test
 // TODO: record update syntax
 /// Set the method of the request.
 ///
