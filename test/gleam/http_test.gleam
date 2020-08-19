@@ -842,22 +842,34 @@ pub fn set_method_test() {
   |> should.equal(http.Post)
 }
 
-pub fn map_resp_body_test() {
-  let map_body = fn(old_body: String) {
-    string.reverse(old_body)
-  }
+fn reverse_body(old_body: String) {
+  string.reverse(old_body)
+}
 
+pub fn map_resp_body_test() {
   let response = http.Response(
     status: 200,
     headers: [],
     body: "abcd"
   )
+  
   let expected_updated_body = "dcba"
-
   let updated_response = response
-  |> http.map_resp_body(map_body)
+  |> http.map_resp_body(reverse_body)
 
   updated_response.body
+  |> should.equal(expected_updated_body)
+}
+
+pub fn map_req_body_test() {
+  let request = http.default_req()
+  |> http.set_req_body("abcd")
+
+  let expected_updated_body = "dcba"
+  let updated_request = request
+  |> http.map_req_body(reverse_body)
+
+  updated_request.body
   |> should.equal(expected_updated_body)
 }
 

@@ -367,7 +367,6 @@ pub fn map_resp_body(
   |> set_resp_body(response, _)
 }
 
-// TODO: test
 /// Update the body of a request using a given function.
 ///
 pub fn map_req_body(
