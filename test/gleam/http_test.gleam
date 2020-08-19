@@ -821,6 +821,26 @@ pub fn set_req_body_test() {
   |> should.equal(body)
 }
 
+pub fn set_method_test() {
+  let request = http.Request(
+    method: http.Get,
+    headers: [],
+    body: "",
+    scheme: http.Https,
+    host: "example.com",
+    port: None,
+    path: "/",
+    query: None
+  )
+
+  let updated_request_method = http.Post
+  let updated_request = request
+  |> http.set_method(updated_request_method)
+
+  updated_request.method
+  |> should.equal(http.Post)
+}
+
 pub fn get_resp_header_test() {
   let response = http.response(200)
     |> http.prepend_resp_header("x-foo", "x")
