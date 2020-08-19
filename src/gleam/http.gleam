@@ -356,7 +356,6 @@ pub fn set_method(req: Request(body), method: Method) -> Request(body) {
   )
 }
 
-// TODO: test
 /// Update the body of a response using a given function.
 ///
 pub fn map_resp_body(

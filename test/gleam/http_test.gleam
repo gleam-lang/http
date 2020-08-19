@@ -1,6 +1,7 @@
 import gleam/atom
 import gleam/dynamic
 import gleam/string_builder
+import gleam/string
 import gleam/uri.{Uri}
 import gleam/http.{Http, Https}
 import gleam/option.{None, Some}
@@ -839,6 +840,25 @@ pub fn set_method_test() {
 
   updated_request.method
   |> should.equal(http.Post)
+}
+
+pub fn map_resp_body_test() {
+  let map_body = fn(old_body: String) {
+    string.reverse(old_body)
+  }
+
+  let response = http.Response(
+    status: 200,
+    headers: [],
+    body: "abcd"
+  )
+  let expected_updated_body = "dcba"
+
+  let updated_response = response
+  |> http.map_resp_body(map_body)
+
+  updated_response.body
+  |> should.equal(expected_updated_body)
 }
 
 pub fn get_resp_header_test() {
