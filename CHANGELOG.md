@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.3.1 - TBC
+
+- The `gleam/http.default_req` function returns a `Request(BitString)` instead
+  `Request(String)`
+
 ## v1.3.0 - 2020-08-04
 
 - The `gleam/http/cookie` module has been merged into the `gleam/http` module.
