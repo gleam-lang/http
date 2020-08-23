@@ -906,6 +906,20 @@ pub fn default_request_test() {
   ))
 }
 
+pub fn set_host_test() {
+  let new_host = "github"
+  let original_request = http.default_req()
+  original_request.host
+  |> should.equal("localhost")
+
+  let updated_request = http.default_req()
+  |> http.set_host(new_host)
+
+  // host should be updated
+  updated_request.host
+  |> should.equal(new_host)
+}
+
 pub fn get_resp_header_test() {
   let response = http.response(200)
     |> http.prepend_resp_header("x-foo", "x")
