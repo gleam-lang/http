@@ -417,7 +417,6 @@ pub fn default_req() -> Request(BitString) {
   )
 }
 
-// TODO: test
 // TODO: record update syntax
 /// Set the method of the request.
 ///
