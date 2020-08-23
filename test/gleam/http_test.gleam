@@ -679,8 +679,15 @@ pub fn req_to_uri_test() {
 }
 
 pub fn req_from_uri_test() {
-  let uri = Uri(Some("https"), None, Some("sky.net"), None, "/sarah/connor", None, None)
- 
+  let uri = Uri(
+    Some("https"),
+    None,
+    Some("sky.net"),
+    None,
+    "/sarah/connor",
+    None,
+    None,
+  )
   uri
   |> http.req_from_uri
   |> should.equal(
@@ -693,9 +700,9 @@ pub fn req_from_uri_test() {
         host: "sky.net",
         port: None,
         path: "/sarah/connor",
-        query: None
-      )
-    )
+        query: None,
+      ),
+    ),
   )
 }
 
@@ -784,26 +791,26 @@ pub fn get_req_header_test() {
 
   let header_key = "GLEAM"
   let request = make_request([tuple("answer", "42"), tuple("gleam", "awesome")])
-  should.equal(
-    Ok("awesome"),
-    request
-    |> http.get_req_header(header_key))
+  request
+  |> http.get_req_header(header_key)
+  |> should.equal(Ok("awesome"))
 
   let request = make_request([tuple("answer", "42")])
-  should.equal(
-    Error(Nil),
-    request
-    |> http.get_req_header(header_key))
+  request
+  |> http.get_req_header(header_key)
+  |> should.equal(Error(Nil))
 }
 
 pub fn set_req_body_test() {
-  let body = """
+  let body = ""
+  "
     <html>
       <body>
         <title>Gleam is the best!</title>
       </body>
     </html>
-  """
+  "
+  ""
 
   let request = http.Request(
     method: http.Get,
@@ -817,7 +824,7 @@ pub fn set_req_body_test() {
   )
 
   let updated_request = request
-   |> http.set_req_body(body)
+    |> http.set_req_body(body)
 
   updated_request.body
   |> should.equal(body)
@@ -832,12 +839,12 @@ pub fn set_method_test() {
     host: "example.com",
     port: None,
     path: "/",
-    query: None
+    query: None,
   )
 
   let updated_request_method = http.Post
   let updated_request = request
-  |> http.set_method(updated_request_method)
+    |> http.set_method(updated_request_method)
 
   updated_request.method
   |> should.equal(http.Post)
@@ -848,15 +855,10 @@ fn reverse_body(old_body: String) {
 }
 
 pub fn map_resp_body_test() {
-  let response = http.Response(
-    status: 200,
-    headers: [],
-    body: "abcd"
-  )
-  
+  let response = http.Response(status: 200, headers: [], body: "abcd")
   let expected_updated_body = "dcba"
   let updated_response = response
-  |> http.map_resp_body(reverse_body)
+    |> http.map_resp_body(reverse_body)
 
   updated_response.body
   |> should.equal(expected_updated_body)
@@ -864,29 +866,25 @@ pub fn map_resp_body_test() {
 
 pub fn map_req_body_test() {
   let request = http.default_req()
-  |> http.set_req_body("abcd")
+    |> http.set_req_body("abcd")
 
   let expected_updated_body = "dcba"
   let updated_request = request
-  |> http.map_req_body(reverse_body)
+    |> http.map_req_body(reverse_body)
 
   updated_request.body
   |> should.equal(expected_updated_body)
 }
 
 pub fn try_map_resp_body_test() {
-  let transform = fn(old_body) {
-    Ok("new body")
-  }
+  let transform = fn(old_body) { Ok("new body") }
 
   let response = http.response(200)
   http.try_map_resp_body(response, transform)
   |> should.equal(Ok(http.Response(200, [], "new body")))
 
   // transform function which fails should propogate error
-  let transform_failure = fn(old_body) {
-    Error("transform failure")
-  }
+  let transform_failure = fn(old_body) { Error("transform failure") }
 
   http.try_map_resp_body(response, transform_failure)
   |> should.equal(Error("transform failure"))
@@ -894,16 +892,18 @@ pub fn try_map_resp_body_test() {
 
 pub fn default_request_test() {
   http.default_req()
-  |> should.equal(http.Request(
-    method: http.Get,
-    headers: [],
-    body: <<>>,
-    scheme: http.Https,
-    host: "localhost",
-    port: None,
-    path: "",
-    query: None,
-  ))
+  |> should.equal(
+    http.Request(
+      method: http.Get,
+      headers: [],
+      body: <<>>,
+      scheme: http.Https,
+      host: "localhost",
+      port: None,
+      path: "",
+      query: None,
+    ),
+  )
 }
 
 pub fn set_host_test() {
@@ -913,7 +913,7 @@ pub fn set_host_test() {
   |> should.equal("localhost")
 
   let updated_request = original_request
-  |> http.set_host(new_host)
+    |> http.set_host(new_host)
 
   // host should be updated
   updated_request.host
@@ -927,7 +927,7 @@ pub fn set_path_test() {
   |> should.equal("")
 
   let updated_request = original_request
-  |> http.set_path(new_path)
+    |> http.set_path(new_path)
 
   // path should be updated
   updated_request.path
@@ -987,26 +987,26 @@ pub fn scheme_from_string_test() {
 pub fn prepend_req_header_test() {
   let headers = []
   let request = http.Request(
-    method: http.Get,
-    headers: headers,
-    body: Nil,
-    scheme: http.Https,
-    host: "example.com",
-    port: None,
-    path: "/",
-    query: None
-  )
-  |> http.prepend_req_header("answer", "42")
+      method: http.Get,
+      headers: headers,
+      body: Nil,
+      scheme: http.Https,
+      host: "example.com",
+      port: None,
+      path: "/",
+      query: None,
+    )
+    |> http.prepend_req_header("answer", "42")
 
   request.headers
   |> should.equal([tuple("answer", "42")])
 
   let request = request
-  |> http.prepend_req_header("gleam", "awesome")
+    |> http.prepend_req_header("gleam", "awesome")
 
   // request should have two headers now
   request.headers
-  |> should.equal([tuple("gleam", "awesome"), tuple("answer", "42"),])
+  |> should.equal([tuple("gleam", "awesome"), tuple("answer", "42")])
 }
 
 pub fn get_req_cookies_test() {
