@@ -912,12 +912,26 @@ pub fn set_host_test() {
   original_request.host
   |> should.equal("localhost")
 
-  let updated_request = http.default_req()
+  let updated_request = original_request
   |> http.set_host(new_host)
 
   // host should be updated
   updated_request.host
   |> should.equal(new_host)
+}
+
+pub fn set_path_test() {
+  let new_path = "/gleam-lang"
+  let original_request = http.default_req()
+  original_request.path
+  |> should.equal("")
+
+  let updated_request = original_request
+  |> http.set_path(new_path)
+
+  // path should be updated
+  updated_request.path
+  |> should.equal("/gleam-lang")
 }
 
 pub fn get_resp_header_test() {
