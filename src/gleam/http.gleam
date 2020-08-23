@@ -443,7 +443,6 @@ pub fn set_host(req: Request(body), host: String) -> Request(body) {
   )
 }
 
-// TODO: test
 // TODO: record update syntax
 /// Set the path of the request.
 ///
