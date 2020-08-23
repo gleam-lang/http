@@ -401,7 +401,7 @@ pub fn redirect(uri: String) -> Response(String) {
   )
 }
 
-/// A request with commonly used default values. This request can be used as a
+/// A request with commonly used default values. This request can be used as
 /// an initial value and then update to create the desired request.
 ///
 pub fn default_req() -> Request(BitString) {

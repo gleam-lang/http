@@ -892,6 +892,20 @@ pub fn try_map_resp_body_test() {
   |> should.equal(Error("transform failure"))
 }
 
+pub fn default_request_test() {
+  http.default_req()
+  |> should.equal(http.Request(
+    method: http.Get,
+    headers: [],
+    body: <<>>,
+    scheme: http.Https,
+    host: "localhost",
+    port: None,
+    path: "",
+    query: None,
+  ))
+}
+
 pub fn get_resp_header_test() {
   let response = http.response(200)
     |> http.prepend_resp_header("x-foo", "x")
