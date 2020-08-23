@@ -6,6 +6,7 @@ import gleam/uri.{Uri}
 import gleam/http.{Http, Https}
 import gleam/option.{None, Some}
 import gleam/should
+import gleam/result
 
 pub fn parse_method_test() {
   "Connect"
@@ -871,6 +872,24 @@ pub fn map_req_body_test() {
 
   updated_request.body
   |> should.equal(expected_updated_body)
+}
+
+pub fn try_map_resp_body_test() {
+  let transform = fn(old_body) {
+    Ok("new body")
+  }
+
+  let response = http.response(200)
+  http.try_map_resp_body(response, transform)
+  |> should.equal(Ok(http.Response(200, [], "new body")))
+
+  // transform function which fails should propogate error
+  let transform_failure = fn(old_body) {
+    Error("transform failure")
+  }
+
+  http.try_map_resp_body(response, transform_failure)
+  |> should.equal(Error("transform failure"))
 }
 
 pub fn get_resp_header_test() {
