@@ -378,7 +378,6 @@ pub fn map_req_body(
   |> set_req_body(request, _)
 }
 
-// TODO: test
 /// Update the body of a response using a given result returning function.
 ///
 /// If the given function returns an `Ok` value the body is set, if it returns
