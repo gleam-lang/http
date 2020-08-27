@@ -26,6 +26,8 @@ pub fn start() {
 }
 ```
 
+## Adapters
+
 In the example above the Elli Erlang web server is used to run the Gleam HTTP
 service. Here's a full list of the adapters available, sorted alphabetically.
 
