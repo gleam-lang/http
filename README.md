@@ -39,11 +39,11 @@ alphabetically.
 | [gleam_plug][plug-adapter]     | [Plug][plug] is an Elixir web application interface      |
 
 [cowboy]:https://github.com/ninenines/cowboy
-[cowboy-adapter]: https://github.com/gleam-experiments/cowboy
+[cowboy-adapter]: https://github.com/gleam-lang/cowboy
 [elli]:https://github.com/elli-lib/elli
-[elli-adapter]: https://github.com/elixir-plug/plug
+[elli-adapter]: https://github.com/gleam-lang/elli
 [plug]:https://github.com/elli-lib/elli
-[plug-adapter]: https://github.com/gleam-experiments/plug
+[plug-adapter]: https://github.com/gleam-lang/plug
 
 ## Client adapters
 
