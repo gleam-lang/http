@@ -3,7 +3,8 @@ import gleam/http.{Delete, Get, Patch, Post, Put, Request, Response}
 import gleam/http/middleware
 
 pub fn method_override_test() {
-  let service = fn(req: Request(a)) {
+  let service =
+    fn(req: Request(a)) {
       http.response(200)
       |> http.set_resp_body(req.method)
     }

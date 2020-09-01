@@ -666,20 +666,7 @@ pub fn req_to_uri_test() {
   http.Https
   |> make_request
   |> http.req_to_uri
-  |> should.equal(
-    Uri(Some("https"), None, Some("sky.net"), None, "/sarah/connor", None, None),
-  )
-
-  http.Http
-  |> make_request
-  |> http.req_to_uri
-  |> should.equal(
-    Uri(Some("http"), None, Some("sky.net"), None, "/sarah/connor", None, None),
-  )
-}
-
-pub fn req_from_uri_test() {
-  let uri = Uri(
+  |> should.equal(Uri(
     Some("https"),
     None,
     Some("sky.net"),
@@ -687,23 +674,37 @@ pub fn req_from_uri_test() {
     "/sarah/connor",
     None,
     None,
-  )
+  ))
+
+  http.Http
+  |> make_request
+  |> http.req_to_uri
+  |> should.equal(Uri(
+    Some("http"),
+    None,
+    Some("sky.net"),
+    None,
+    "/sarah/connor",
+    None,
+    None,
+  ))
+}
+
+pub fn req_from_uri_test() {
+  let uri =
+    Uri(Some("https"), None, Some("sky.net"), None, "/sarah/connor", None, None)
   uri
   |> http.req_from_uri
-  |> should.equal(
-    Ok(
-      http.Request(
-        method: http.Get,
-        headers: [],
-        body: "",
-        scheme: http.Https,
-        host: "sky.net",
-        port: None,
-        path: "/sarah/connor",
-        query: None,
-      ),
-    ),
-  )
+  |> should.equal(Ok(http.Request(
+    method: http.Get,
+    headers: [],
+    body: "",
+    scheme: http.Https,
+    host: "sky.net",
+    port: None,
+    path: "/sarah/connor",
+    query: None,
+  )))
 }
 
 pub fn redirect_test() {
@@ -714,16 +715,17 @@ pub fn redirect_test() {
 }
 
 pub fn path_segments_test() {
-  let request = http.Request(
-    method: http.Get,
-    headers: [],
-    body: Nil,
-    scheme: http.Https,
-    host: "nostromo.ship",
-    port: None,
-    path: "/ellen/ripley",
-    query: None,
-  )
+  let request =
+    http.Request(
+      method: http.Get,
+      headers: [],
+      body: Nil,
+      scheme: http.Https,
+      host: "nostromo.ship",
+      port: None,
+      path: "/ellen/ripley",
+      query: None,
+    )
 
   should.equal(["ellen", "ripley"], http.path_segments(request))
 }
@@ -753,16 +755,17 @@ pub fn get_query_test() {
 }
 
 pub fn set_query_test() {
-  let request = http.Request(
-    method: http.Get,
-    headers: [],
-    body: Nil,
-    scheme: http.Https,
-    host: "example.com",
-    port: None,
-    path: "/",
-    query: None,
-  )
+  let request =
+    http.Request(
+      method: http.Get,
+      headers: [],
+      body: Nil,
+      scheme: http.Https,
+      host: "example.com",
+      port: None,
+      path: "/",
+      query: None,
+    )
 
   let query = [tuple("answer", "42"), tuple("test", "123")]
   let updated_request = http.set_query(request, query)
@@ -812,18 +815,20 @@ pub fn set_req_body_test() {
   "
   ""
 
-  let request = http.Request(
-    method: http.Get,
-    headers: [],
-    body: Nil,
-    scheme: http.Https,
-    host: "example.com",
-    port: None,
-    path: "/",
-    query: None,
-  )
+  let request =
+    http.Request(
+      method: http.Get,
+      headers: [],
+      body: Nil,
+      scheme: http.Https,
+      host: "example.com",
+      port: None,
+      path: "/",
+      query: None,
+    )
 
-  let updated_request = request
+  let updated_request =
+    request
     |> http.set_req_body(body)
 
   updated_request.body
@@ -831,19 +836,21 @@ pub fn set_req_body_test() {
 }
 
 pub fn set_method_test() {
-  let request = http.Request(
-    method: http.Get,
-    headers: [],
-    body: "",
-    scheme: http.Https,
-    host: "example.com",
-    port: None,
-    path: "/",
-    query: None,
-  )
+  let request =
+    http.Request(
+      method: http.Get,
+      headers: [],
+      body: "",
+      scheme: http.Https,
+      host: "example.com",
+      port: None,
+      path: "/",
+      query: None,
+    )
 
   let updated_request_method = http.Post
-  let updated_request = request
+  let updated_request =
+    request
     |> http.set_method(updated_request_method)
 
   updated_request.method
@@ -857,7 +864,8 @@ fn reverse_body(old_body: String) {
 pub fn map_resp_body_test() {
   let response = http.Response(status: 200, headers: [], body: "abcd")
   let expected_updated_body = "dcba"
-  let updated_response = response
+  let updated_response =
+    response
     |> http.map_resp_body(reverse_body)
 
   updated_response.body
@@ -865,11 +873,13 @@ pub fn map_resp_body_test() {
 }
 
 pub fn map_req_body_test() {
-  let request = http.default_req()
+  let request =
+    http.default_req()
     |> http.set_req_body("abcd")
 
   let expected_updated_body = "dcba"
-  let updated_request = request
+  let updated_request =
+    request
     |> http.map_req_body(reverse_body)
 
   updated_request.body
@@ -892,18 +902,16 @@ pub fn try_map_resp_body_test() {
 
 pub fn default_request_test() {
   http.default_req()
-  |> should.equal(
-    http.Request(
-      method: http.Get,
-      headers: [],
-      body: <<>>,
-      scheme: http.Https,
-      host: "localhost",
-      port: None,
-      path: "",
-      query: None,
-    ),
-  )
+  |> should.equal(http.Request(
+    method: http.Get,
+    headers: [],
+    body: <<>>,
+    scheme: http.Https,
+    host: "localhost",
+    port: None,
+    path: "",
+    query: None,
+  ))
 }
 
 pub fn set_host_test() {
@@ -912,7 +920,8 @@ pub fn set_host_test() {
   original_request.host
   |> should.equal("localhost")
 
-  let updated_request = original_request
+  let updated_request =
+    original_request
     |> http.set_host(new_host)
 
   // host should be updated
@@ -926,7 +935,8 @@ pub fn set_path_test() {
   original_request.path
   |> should.equal("")
 
-  let updated_request = original_request
+  let updated_request =
+    original_request
     |> http.set_path(new_path)
 
   // path should be updated
@@ -935,7 +945,8 @@ pub fn set_path_test() {
 }
 
 pub fn get_resp_header_test() {
-  let response = http.response(200)
+  let response =
+    http.response(200)
     |> http.prepend_resp_header("x-foo", "x")
     |> http.prepend_resp_header("x-BAR", "y")
 
@@ -953,7 +964,8 @@ pub fn get_resp_header_test() {
 }
 
 pub fn resp_body_test() {
-  let response = http.response(200)
+  let response =
+    http.response(200)
     |> http.set_resp_body("Hello, World!")
 
   response.body
@@ -986,7 +998,8 @@ pub fn scheme_from_string_test() {
 
 pub fn prepend_req_header_test() {
   let headers = []
-  let request = http.Request(
+  let request =
+    http.Request(
       method: http.Get,
       headers: headers,
       body: Nil,
@@ -1001,7 +1014,8 @@ pub fn prepend_req_header_test() {
   request.headers
   |> should.equal([tuple("answer", "42")])
 
-  let request = request
+  let request =
+    request
     |> http.prepend_req_header("gleam", "awesome")
 
   // request should have two headers now
@@ -1045,7 +1059,8 @@ pub fn get_req_cookies_test() {
 }
 
 pub fn set_req_cookies_test() {
-  let request = http.default_req()
+  let request =
+    http.default_req()
     |> http.set_req_cookie("k1", "v1")
 
   request
@@ -1059,14 +1074,15 @@ pub fn set_req_cookies_test() {
 }
 
 pub fn set_resp_cookie_test() {
-  let empty = http.CookieAttributes(
-    max_age: None,
-    domain: None,
-    path: None,
-    secure: False,
-    http_only: False,
-    same_site: None,
-  )
+  let empty =
+    http.CookieAttributes(
+      max_age: None,
+      domain: None,
+      path: None,
+      secure: False,
+      http_only: False,
+      same_site: None,
+    )
   http.response(200)
   |> http.set_resp_cookie("k1", "v1", empty)
   |> http.get_resp_header("set-cookie")
@@ -1077,29 +1093,28 @@ pub fn set_resp_cookie_test() {
   |> http.get_resp_header("set-cookie")
   |> should.equal(Ok("k1=v1; Path=/; HttpOnly"))
 
-  let secure = http.CookieAttributes(
-    max_age: Some(100),
-    domain: Some("domain.test"),
-    path: Some("/foo"),
-    secure: True,
-    http_only: True,
-    same_site: Some(http.Strict),
-  )
+  let secure =
+    http.CookieAttributes(
+      max_age: Some(100),
+      domain: Some("domain.test"),
+      path: Some("/foo"),
+      secure: True,
+      http_only: True,
+      same_site: Some(http.Strict),
+    )
   http.response(200)
   |> http.set_resp_cookie("k1", "v1", secure)
   |> http.get_resp_header("set-cookie")
-  |> should.equal(
-    Ok(
-      "k1=v1; MaxAge=100; Domain=domain.test; Path=/foo; Secure; HttpOnly; SameSite=Strict",
-    ),
-  )
+  |> should.equal(Ok(
+    "k1=v1; MaxAge=100; Domain=domain.test; Path=/foo; Secure; HttpOnly; SameSite=Strict",
+  ))
 }
 
 pub fn expire_resp_cookie_test() {
   http.response(200)
   |> http.expire_resp_cookie("k1", http.cookie_defaults(Http))
   |> http.get_resp_header("set-cookie")
-  |> should.equal(
-    Ok("k1=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; MaxAge=0; Path=/; HttpOnly"),
-  )
+  |> should.equal(Ok(
+    "k1=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; MaxAge=0; Path=/; HttpOnly",
+  ))
 }
