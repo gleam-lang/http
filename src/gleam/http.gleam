@@ -160,21 +160,24 @@ pub fn req_to_uri(request: Request(a)) -> Uri {
 /// Construct a request from a URI.
 ///
 pub fn req_from_uri(uri: Uri) -> Result(Request(String), Nil) {
-  try scheme = uri.scheme
+  try scheme =
+    uri.scheme
     |> option.unwrap("")
     |> scheme_from_string
-  try host = uri.host
+  try host =
+    uri.host
     |> option.to_result(Nil)
-  let req = Request(
-    method: Get,
-    headers: [],
-    body: "",
-    scheme: scheme,
-    host: host,
-    port: uri.port,
-    path: uri.path,
-    query: uri.query,
-  )
+  let req =
+    Request(
+      method: Get,
+      headers: [],
+      body: "",
+      scheme: scheme,
+      host: host,
+      port: uri.port,
+      path: uri.path,
+      query: uri.query,
+    )
   Ok(req)
 }
 
@@ -205,7 +208,6 @@ pub fn get_query(
 }
 
 // TODO: escape
-// TODO: record update syntax
 /// Set the query of the request.
 ///
 pub fn set_query(
@@ -215,32 +217,14 @@ pub fn set_query(
   let pair = fn(t: tuple(String, String)) {
     string_builder.from_strings([t.0, "=", t.1])
   }
-  let query = query
+  let query =
+    query
     |> list.map(pair)
     |> list.intersperse(string_builder.from_string("&"))
     |> string_builder.concat
     |> string_builder.to_string
     |> Some
-  let Request(
-    method: method,
-    headers: headers,
-    body: body,
-    scheme: scheme,
-    host: host,
-    port: port,
-    path: path,
-    query: _,
-  ) = req
-  Request(
-    method: method,
-    headers: headers,
-    body: body,
-    scheme: scheme,
-    host: host,
-    port: port,
-    path: path,
-    query: query,
-  )
+  Request(..req, query: query)
 }
 
 /// Get the value for a given header.
@@ -265,7 +249,6 @@ pub fn get_resp_header(
   list.key_find(response.headers, string.lowercase(key))
 }
 
-// TODO: use record update syntax
 // TODO: document
 // https://github.com/elixir-plug/plug/blob/dfebbebeb716c43c7dee4915a061bede06ec45f1/lib/plug/conn.ex#L809
 pub fn prepend_req_header(
@@ -273,12 +256,10 @@ pub fn prepend_req_header(
   key: String,
   value: String,
 ) -> Request(body) {
-  let Request(method, headers, body, scheme, host, port, path, query) = request
-  let headers = [tuple(string.lowercase(key), value), ..headers]
-  Request(method, headers, body, scheme, host, port, path, query)
+  let headers = [tuple(string.lowercase(key), value), ..request.headers]
+  Request(..request, headers: headers)
 }
 
-// TODO: use record update syntax
 // TODO: document
 // https://github.com/elixir-plug/plug/blob/dfebbebeb716c43c7dee4915a061bede06ec45f1/lib/plug/conn.ex#L809
 pub fn prepend_resp_header(
@@ -286,9 +267,8 @@ pub fn prepend_resp_header(
   key: String,
   value: String,
 ) -> Response(body) {
-  let Response(status, headers, body) = response
-  let headers = [tuple(string.lowercase(key), value), ..headers]
-  Response(status, headers, body)
+  let headers = [tuple(string.lowercase(key), value), ..response.headers]
+  Response(..response, headers: headers)
 }
 
 /// Set the body of the response, overwriting any existing body.
@@ -304,10 +284,7 @@ pub fn set_resp_body(
 // TODO: record update syntax
 /// Set the body of the request, overwriting any existing body.
 ///
-pub fn set_req_body(
-  req: Request(old_body),
-  body: new_body,
-) -> Request(new_body) {
+pub fn set_req_body(req: Request(old_body), body: new_body) -> Request(new_body) {
   let Request(
     method: method,
     headers: headers,
@@ -330,30 +307,10 @@ pub fn set_req_body(
   )
 }
 
-// TODO: record update syntax
 /// Set the method of the request.
 ///
 pub fn set_method(req: Request(body), method: Method) -> Request(body) {
-  let Request(
-    method: _,
-    headers: headers,
-    body: body,
-    scheme: scheme,
-    host: host,
-    port: port,
-    path: path,
-    query: query,
-  ) = req
-  Request(
-    method: method,
-    headers: headers,
-    body: body,
-    scheme: scheme,
-    host: host,
-    port: port,
-    path: path,
-    query: query,
-  )
+  Request(..req, method: method)
 }
 
 /// Update the body of a response using a given function.
@@ -417,56 +374,16 @@ pub fn default_req() -> Request(BitString) {
   )
 }
 
-// TODO: record update syntax
 /// Set the method of the request.
 ///
 pub fn set_host(req: Request(body), host: String) -> Request(body) {
-  let Request(
-    method: method,
-    headers: headers,
-    body: body,
-    scheme: scheme,
-    host: _,
-    port: port,
-    path: path,
-    query: query,
-  ) = req
-  Request(
-    method: method,
-    headers: headers,
-    body: body,
-    scheme: scheme,
-    host: host,
-    port: port,
-    path: path,
-    query: query,
-  )
+  Request(..req, host: host)
 }
 
-// TODO: record update syntax
 /// Set the path of the request.
 ///
 pub fn set_path(req: Request(body), path: String) -> Request(body) {
-  let Request(
-    method: method,
-    headers: headers,
-    body: body,
-    scheme: scheme,
-    host: host,
-    port: port,
-    path: _,
-    query: query,
-  ) = req
-  Request(
-    method: method,
-    headers: headers,
-    body: body,
-    scheme: scheme,
-    host: host,
-    port: port,
-    path: path,
-    query: query,
-  )
+  Request(..req, path: path)
 }
 
 fn check_token(token: BitString) {
@@ -485,21 +402,19 @@ fn check_token(token: BitString) {
 fn parse_cookie_list(cookie_string) {
   assert Ok(re) = regex.from_string("[,;]")
   regex.split(re, cookie_string)
-  |> list.filter_map(
-    fn(pair) {
-      case string.split_once(string.trim(pair), "=") {
-        Ok(tuple("", _)) -> Error(Nil)
-        Ok(tuple(key, value)) -> {
-          let key = string.trim(key)
-          let value = string.trim(value)
-          try _ = check_token(bit_string.from_string(key))
-          try _ = check_token(bit_string.from_string(value))
-          Ok(tuple(key, value))
-        }
-        Error(Nil) -> Error(Nil)
+  |> list.filter_map(fn(pair) {
+    case string.split_once(string.trim(pair), "=") {
+      Ok(tuple("", _)) -> Error(Nil)
+      Ok(tuple(key, value)) -> {
+        let key = string.trim(key)
+        let value = string.trim(value)
+        try _ = check_token(bit_string.from_string(key))
+        try _ = check_token(bit_string.from_string(value))
+        Ok(tuple(key, value))
       }
-    },
-  )
+      Error(Nil) -> Error(Nil)
+    }
+  })
 }
 
 /// Fetch the cookies sent in a request.
@@ -510,15 +425,13 @@ pub fn get_req_cookies(req) -> List(tuple(String, String)) {
   let Request(headers: headers, ..) = req
 
   headers
-  |> list.filter_map(
-    fn(header) {
-      let tuple(name, value) = header
-      case name {
-        "cookie" -> Ok(parse_cookie_list(value))
-        _ -> Error(Nil)
-      }
-    },
-  )
+  |> list.filter_map(fn(header) {
+    let tuple(name, value) = header
+    case name {
+      "cookie" -> Ok(parse_cookie_list(value))
+      _ -> Error(Nil)
+    }
+  })
   |> list.flatten()
 }
 
@@ -544,40 +457,19 @@ fn same_site_to_string(policy) {
 /// Send a cookie with a request
 ///
 /// Multiple cookies are added to the same cookie header.
-pub fn set_req_cookie(req, name, value) {
-  let Request(
-    method: method,
-    headers: headers,
-    body: body,
-    scheme: scheme,
-    host: host,
-    port: port,
-    path: path,
-    query: query,
-  ) = req
+pub fn set_req_cookie(req: Request(body), name: String, value: String) {
   let new_cookie_string = string.join([name, value], "=")
 
-  let tuple(cookies_string, headers) = case list.key_pop(headers, "cookie") {
+  let tuple(cookies_string, headers) = case list.key_pop(req.headers, "cookie") {
     Ok(tuple(cookies_string, headers)) -> {
-      let cookies_string = string.join(
-        [cookies_string, new_cookie_string],
-        "; ",
-      )
+      let cookies_string =
+        string.join([cookies_string, new_cookie_string], "; ")
       tuple(cookies_string, headers)
     }
-    Error(Nil) -> tuple(new_cookie_string, headers)
+    Error(Nil) -> tuple(new_cookie_string, req.headers)
   }
 
-  Request(
-    method: method,
-    headers: [tuple("cookie", cookies_string), ..headers],
-    body: body,
-    scheme: scheme,
-    host: host,
-    port: port,
-    path: path,
-    query: query,
-  )
+  Request(..req, headers: [tuple("cookie", cookies_string), ..headers])
 }
 
 /// Attributes of a cookie when sent to a client in the `set-cookie` header.
@@ -650,10 +542,8 @@ fn cookie_attributes_to_list(attributes) {
 ///
 /// The attributes record is defined in `gleam/http/cookie`
 pub fn set_resp_cookie(resp, name, value, attributes) {
-  let header_value = [
-      [name, "=", value],
-      ..cookie_attributes_to_list(attributes)
-    ]
+  let header_value =
+    [[name, "=", value], ..cookie_attributes_to_list(attributes)]
     |> list.map(string.join(_, ""))
     |> string.join("; ")
   prepend_resp_header(resp, "set-cookie", header_value)
@@ -671,13 +561,6 @@ pub fn expire_resp_cookie(resp, name, attributes) {
     http_only: http_only,
     same_site: same_site,
   ) = attributes
-  let attrs = CookieAttributes(
-    max_age: Some(0),
-    domain: domain,
-    path: path,
-    secure: secure,
-    http_only: http_only,
-    same_site: same_site,
-  )
+  let attrs = CookieAttributes(..attributes, max_age: Some(0))
   set_resp_cookie(resp, name, "", attrs)
 }
