@@ -553,14 +553,6 @@ pub fn set_resp_cookie(resp, name, value, attributes) {
 ///
 /// Not the attributes value should be the same as when the response cookie was set.
 pub fn expire_resp_cookie(resp, name, attributes) {
-  let CookieAttributes(
-    max_age: _max_age,
-    domain: domain,
-    path: path,
-    secure: secure,
-    http_only: http_only,
-    same_site: same_site,
-  ) = attributes
   let attrs = CookieAttributes(..attributes, max_age: Some(0))
   set_resp_cookie(resp, name, "", attrs)
 }

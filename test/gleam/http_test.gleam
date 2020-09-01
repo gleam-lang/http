@@ -805,15 +805,12 @@ pub fn get_req_header_test() {
 }
 
 pub fn set_req_body_test() {
-  let body = ""
-  "
-    <html>
+  let body =
+    "<html>
       <body>
         <title>Gleam is the best!</title>
       </body>
-    </html>
-  "
-  ""
+    </html>"
 
   let request =
     http.Request(
@@ -857,16 +854,12 @@ pub fn set_method_test() {
   |> should.equal(http.Post)
 }
 
-fn reverse_body(old_body: String) {
-  string.reverse(old_body)
-}
-
 pub fn map_resp_body_test() {
   let response = http.Response(status: 200, headers: [], body: "abcd")
   let expected_updated_body = "dcba"
   let updated_response =
     response
-    |> http.map_resp_body(reverse_body)
+    |> http.map_resp_body(string.reverse)
 
   updated_response.body
   |> should.equal(expected_updated_body)
@@ -880,21 +873,21 @@ pub fn map_req_body_test() {
   let expected_updated_body = "dcba"
   let updated_request =
     request
-    |> http.map_req_body(reverse_body)
+    |> http.map_req_body(string.reverse)
 
   updated_request.body
   |> should.equal(expected_updated_body)
 }
 
 pub fn try_map_resp_body_test() {
-  let transform = fn(old_body) { Ok("new body") }
+  let transform = fn(_old_body) { Ok("new body") }
 
   let response = http.response(200)
   http.try_map_resp_body(response, transform)
   |> should.equal(Ok(http.Response(200, [], "new body")))
 
   // transform function which fails should propogate error
-  let transform_failure = fn(old_body) { Error("transform failure") }
+  let transform_failure = fn(_old_body) { Error("transform failure") }
 
   http.try_map_resp_body(response, transform_failure)
   |> should.equal(Error("transform failure"))
