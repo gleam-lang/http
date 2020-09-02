@@ -4,7 +4,9 @@
 
 - Fix bug to correctly set cookie `Max-Age` attribute
 - The `gleam/http.default_req` function returns a `Request(BitString)` instead
-  `Request(String)`
+  of `Request(String)`
+- The `gleam/http.response` function returns a `Response(BitString)` instead
+  of `Response(Nil)`
 
 ## v1.3.0 - 2020-08-04
 
@@ -17,7 +19,6 @@
 - Created the `gleam/http/cookie` module with `SameSitePolicy` and `Attributes`
   types, along with associated functions `empty_attributes`,
   `default_attributes`, `expire_attributes` and `set_cookie_string`.
-
 
 ## v1.1.1 - 2020-07-21
 

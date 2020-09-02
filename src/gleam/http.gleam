@@ -183,11 +183,11 @@ pub fn req_from_uri(uri: Uri) -> Result(Request(String), Nil) {
 
 /// Construct an empty Response.
 ///
-/// The body type of the returned response is `Nil`, and should be set with a
+/// The body type of the returned response is `BitString`, and should be set with a
 /// call to `set_resp_body`.
 ///
-pub fn response(status: Int) -> Response(Nil) {
-  Response(status: status, headers: [], body: Nil)
+pub fn response(status: Int) -> Response(BitString) {
+  Response(status: status, headers: [], body: <<>>)
 }
 
 /// Return the non-empty segments of a request path.
