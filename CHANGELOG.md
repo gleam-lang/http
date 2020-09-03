@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Fix bug to correctly set cookie `Max-Age` attribute
+- The `gleam/http.default_req` function returns a `Request(BitString)` instead
+  `Request(String)`
+
 ## v1.4.0 - 2020-09-09
 
 - The `http.response` function returns a `Response(String)` instead
