@@ -350,11 +350,11 @@ pub fn try_map_resp_body(
 
 /// Create a response that redirects to the given uri.
 ///
-pub fn redirect(uri: String) -> Response(String) {
+pub fn redirect(uri: String) -> Response(BitString) {
   Response(
     status: 303,
     headers: [tuple("location", uri)],
-    body: string.append("You are being redirected to ", uri),
+    body: <<string.append("You are being redirected to ", uri):utf8>>,
   )
 }
 
