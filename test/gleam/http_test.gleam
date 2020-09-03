@@ -1099,7 +1099,7 @@ pub fn set_resp_cookie_test() {
   |> http.set_resp_cookie("k1", "v1", secure)
   |> http.get_resp_header("set-cookie")
   |> should.equal(Ok(
-    "k1=v1; MaxAge=100; Domain=domain.test; Path=/foo; Secure; HttpOnly; SameSite=Strict",
+    "k1=v1; Max-Age=100; Domain=domain.test; Path=/foo; Secure; HttpOnly; SameSite=Strict",
   ))
 }
 
@@ -1108,6 +1108,6 @@ pub fn expire_resp_cookie_test() {
   |> http.expire_resp_cookie("k1", http.cookie_defaults(Http))
   |> http.get_resp_header("set-cookie")
   |> should.equal(Ok(
-    "k1=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; MaxAge=0; Path=/; HttpOnly",
+    "k1=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; Path=/; HttpOnly",
   ))
 }
