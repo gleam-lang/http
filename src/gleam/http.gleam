@@ -516,7 +516,7 @@ fn cookie_attributes_to_list(attributes) {
       Some(0) -> Some([epoch])
       _ -> option.None
     },
-    option.map(max_age, fn(max_age) { ["MaxAge=", int.to_string(max_age)] }),
+    option.map(max_age, fn(max_age) { ["Max-Age=", int.to_string(max_age)] }),
     option.map(domain, fn(domain) { ["Domain=", domain] }),
     option.map(path, fn(path) { ["Path=", path] }),
     case secure {
