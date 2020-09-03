@@ -2,6 +2,7 @@
 
 ## v1.3.1 - TBC
 
+- Fix bug to correctly set cookie `Max-Age` attribute
 - The `gleam/http.default_req` function returns a `Request(BitString)` instead
   `Request(String)`
 
