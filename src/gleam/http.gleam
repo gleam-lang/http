@@ -20,6 +20,7 @@ import gleam/result
 import gleam/string
 import gleam/string_builder
 import gleam/uri.{Uri}
+import gleam/bit_builder.{BitBuilder}
 
 /// HTTP standard method as defined by [RFC 2616](https://tools.ietf.org/html/rfc2616),
 /// and PATCH which is defined by [RFC 5789](https://tools.ietf.org/html/rfc5789).
@@ -183,11 +184,11 @@ pub fn req_from_uri(uri: Uri) -> Result(Request(String), Nil) {
 
 /// Construct an empty Response.
 ///
-/// The body type of the returned response is `BitString`, and should be set with a
+/// The body type of the returned response is `BitBuilder`, and should be set with a
 /// call to `set_resp_body`.
 ///
-pub fn response(status: Int) -> Response(BitString) {
-  Response(status: status, headers: [], body: <<>>)
+pub fn response(status: Int) -> Response(BitBuilder) {
+  Response(status: status, headers: [], body: bit_builder.from_string(""))
 }
 
 /// Return the non-empty segments of a request path.
@@ -350,11 +351,12 @@ pub fn try_map_resp_body(
 
 /// Create a response that redirects to the given uri.
 ///
-pub fn redirect(uri: String) -> Response(BitString) {
+pub fn redirect(uri: String) -> Response(BitBuilder) {
   Response(
     status: 303,
     headers: [tuple("location", uri)],
-    body: <<string.append("You are being redirected to ", uri):utf8>>,
+    body: string.append("You are being redirected to ", uri)
+    |> bit_builder.from_string,
   )
 }
 
