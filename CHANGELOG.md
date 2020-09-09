@@ -1,9 +1,9 @@
 # Changelog
 
-## v1.3.1 - TBC
+## v1.4.0 - 2020-09-09
 
-- The `gleam/http.default_req` function returns a `Request(BitString)` instead
-  `Request(String)`
+- The `http.response` function returns a `Response(String)` instead
+  `Response(Nil)`
 
 ## v1.3.0 - 2020-08-04
 

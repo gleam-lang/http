@@ -183,11 +183,8 @@ pub fn req_from_uri(uri: Uri) -> Result(Request(String), Nil) {
 
 /// Construct an empty Response.
 ///
-/// The body type of the returned response is `Nil`, and should be set with a
-/// call to `set_resp_body`.
-///
-pub fn response(status: Int) -> Response(Nil) {
-  Response(status: status, headers: [], body: Nil)
+pub fn response(status: Int) -> Response(String) {
+  Response(status: status, headers: [], body: "")
 }
 
 /// Return the non-empty segments of a request path.
@@ -361,11 +358,11 @@ pub fn redirect(uri: String) -> Response(String) {
 /// A request with commonly used default values. This request can be used as
 /// an initial value and then update to create the desired request.
 ///
-pub fn default_req() -> Request(BitString) {
+pub fn default_req() -> Request(String) {
   Request(
     method: Get,
     headers: [],
-    body: <<>>,
+    body: "",
     scheme: Https,
     host: "localhost",
     port: option.None,
