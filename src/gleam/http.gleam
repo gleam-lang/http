@@ -14,7 +14,7 @@ import gleam/bit_string
 import gleam/dynamic.{Dynamic}
 import gleam/int
 import gleam/list
-import gleam/option.{None, Option, Some}
+import gleam/option.{Option, Some}
 import gleam/regex
 import gleam/result
 import gleam/string
@@ -148,12 +148,12 @@ pub type Service(in, out) =
 pub fn req_to_uri(request: Request(a)) -> Uri {
   Uri(
     scheme: Some(scheme_to_string(request.scheme)),
-    userinfo: None,
+    userinfo: option.None,
     host: Some(request.host),
     port: request.port,
     path: request.path,
     query: request.query,
-    fragment: None,
+    fragment: option.None,
   )
 }
 
@@ -203,7 +203,7 @@ pub fn get_query(
 ) -> Result(List(tuple(String, String)), Nil) {
   case request.query {
     Some(query_string) -> uri.parse_query(query_string)
-    None -> Ok([])
+    option.None -> Ok([])
   }
 }
 
@@ -368,9 +368,9 @@ pub fn default_req() -> Request(BitString) {
     body: <<>>,
     scheme: Https,
     host: "localhost",
-    port: None,
+    port: option.None,
     path: "",
-    query: None,
+    query: option.None,
   )
 }
 
