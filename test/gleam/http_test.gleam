@@ -1111,3 +1111,26 @@ pub fn expire_resp_cookie_test() {
     "k1=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; Path=/; HttpOnly",
   ))
 }
+
+pub fn get_req_origin_test() {
+  let origin = "http://example.com"
+  let referer = "http://test.com"
+
+  // with 'Origin' header
+  http.default_req()
+  |> http.prepend_req_header("Origin", origin)
+  |> http.prepend_req_header("Referer", referer)
+  |> http.get_req_origin
+  |> should.equal(Ok(origin))
+
+  // without 'Origin' header
+  http.default_req()
+  |> http.prepend_req_header("Referer", referer)
+  |> http.get_req_origin
+  |> should.equal(Ok(referer))
+
+  // with neither 'Origin' nor 'Referer' headers
+  http.default_req()
+  |> http.get_req_origin
+  |> should.equal(Error(Nil))
+}

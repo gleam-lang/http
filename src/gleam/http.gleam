@@ -553,3 +553,14 @@ pub fn expire_resp_cookie(resp, name, attributes) {
   let attrs = CookieAttributes(..attributes, max_age: Some(0))
   set_resp_cookie(resp, name, "", attrs)
 }
+
+/// Get the origin request header
+///
+/// If no "Origin" header is found in the request, falls back to the "Referer"
+/// header.
+pub fn get_req_origin(req: Request(body)) -> Result(String, Nil) {
+  case get_req_header(req, "Origin") {
+    Ok(origin) -> Ok(origin)
+    Error(Nil) -> get_req_header(req, "Referer")
+  }
+}
