@@ -1114,23 +1114,23 @@ pub fn expire_resp_cookie_test() {
 
 pub fn get_req_origin_test() {
   let origin = "http://example.com"
-  let referer = "http://test.com"
+  let referer = "http://test.com/elixir"
 
-  // with 'Origin' header
+  // with 'origin' header
   http.default_req()
-  |> http.prepend_req_header("Origin", origin)
-  |> http.prepend_req_header("Referer", referer)
+  |> http.prepend_req_header("origin", origin)
+  |> http.prepend_req_header("referer", referer)
   |> http.get_req_origin
-  |> should.equal(Ok(origin))
+  |> should.equal(Some("http://example.com"))
 
-  // without 'Origin' header
+  // without 'origin' header
   http.default_req()
-  |> http.prepend_req_header("Referer", referer)
+  |> http.prepend_req_header("referer", referer)
   |> http.get_req_origin
-  |> should.equal(Ok(referer))
+  |> should.equal(Some("http://test.com"))
 
-  // with neither 'Origin' nor 'Referer' headers
+  // with neither 'origin' nor 'referer' headers
   http.default_req()
   |> http.get_req_origin
-  |> should.equal(Error(Nil))
+  |> should.equal(None)
 }

@@ -558,9 +558,23 @@ pub fn expire_resp_cookie(resp, name, attributes) {
 ///
 /// If no "Origin" header is found in the request, falls back to the "Referer"
 /// header.
-pub fn get_req_origin(req: Request(body)) -> Result(String, Nil) {
-  case get_req_header(req, "Origin") {
-    Ok(origin) -> Ok(origin)
-    Error(Nil) -> get_req_header(req, "Referer")
+pub fn get_req_origin(req: Request(body)) -> Option(String) {
+  case get_req_header(req, "origin") {
+    Ok(origin) -> Some(origin)
+    Error(Nil) ->
+      case get_req_header(req, "referer") {
+        Ok(ref) ->
+          case ref
+          |> uri.parse {
+            Ok(uri) ->
+              Some(
+                option.unwrap(uri.scheme, "")
+                |> string.append("://")
+                |> string.append(option.unwrap(uri.host, "")),
+              )
+            Error(Nil) -> option.None
+          }
+        Error(Nil) -> option.None
+      }
   }
 }
