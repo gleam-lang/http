@@ -2,6 +2,7 @@
 
 ## v1.3.1 - TBC
 
+- The `gleam/http` module gains the `get_req_origin` function.
 - Fix bug to correctly set cookie `Max-Age` attribute
 - The `gleam/http.default_req` function returns a `Request(BitString)` instead
   `Request(String)`
@@ -17,7 +18,6 @@
 - Created the `gleam/http/cookie` module with `SameSitePolicy` and `Attributes`
   types, along with associated functions `empty_attributes`,
   `default_attributes`, `expire_attributes` and `set_cookie_string`.
-
 
 ## v1.1.1 - 2020-07-21
 
