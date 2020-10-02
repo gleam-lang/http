@@ -898,7 +898,7 @@ pub fn default_request_test() {
   |> should.equal(http.Request(
     method: http.Get,
     headers: [],
-    body: <<>>,
+    body: "",
     scheme: http.Https,
     host: "localhost",
     port: None,
