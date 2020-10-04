@@ -1,6 +1,11 @@
 # Changelog
 
-## v1.3.1 - TBC
+## v1.5.1 - TBC
+
+- The `gleam/http.default_req` function returns a `Request(String)` again, 
+  reverting the change from v1.5.0
+
+## v1.5.0 - 2020-09-23
 
 - The `gleam/http` module gains the `get_req_origin` function.
 - Fix bug to correctly set cookie `Max-Age` attribute
