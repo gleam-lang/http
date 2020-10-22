@@ -538,6 +538,23 @@ fn cookie_attributes_to_list(attributes) {
   |> list.filter_map(option.to_result(_, Nil))
 }
 
+/// Fetch the cookies sent in a response
+///
+/// Follows the same logic as fetching the cookie from the request
+/// (i.e. badly formed cookies will be ignored)
+pub fn get_resp_cookie(resp) -> List(tuple(String, String)) {
+  let Response(headers: headers, ..) = resp
+  headers
+  |> list.filter_map(fn(header) {
+    let tuple(name, value) = header
+    case name {
+      "set-cookie" -> Ok(parse_cookie_list(value))
+      _ -> Error(Nil)
+    }
+  })
+  |> list.flatten()
+}
+
 /// Set a cookie value for a client
 ///
 /// The attributes record is defined in `gleam/http/cookie`
