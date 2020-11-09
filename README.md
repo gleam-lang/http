@@ -42,7 +42,7 @@ alphabetically.
 [cowboy-adapter]: https://github.com/gleam-lang/cowboy
 [elli]:https://github.com/elli-lib/elli
 [elli-adapter]: https://github.com/gleam-lang/elli
-[plug]:https://github.com/elli-lib/elli
+[plug]:https://github.com/elixir-plug/plug
 [plug-adapter]: https://github.com/gleam-lang/plug
 
 ## Client adapters
