@@ -907,6 +907,21 @@ pub fn default_request_test() {
   ))
 }
 
+pub fn set_scheme_test() {
+  let original_request = http.default_req()
+
+  original_request.scheme
+  |> should.equal(Https)
+
+  let updated_request =
+    original_request
+    |> http.set_scheme(http.Http)
+
+  // scheme should be updated
+  updated_request.scheme
+  |> should.equal(http.Http)
+}
+
 pub fn set_host_test() {
   let new_host = "github"
   let original_request = http.default_req()
@@ -920,6 +935,21 @@ pub fn set_host_test() {
   // host should be updated
   updated_request.host
   |> should.equal(new_host)
+}
+
+pub fn set_port_test() {
+  let original_request = http.default_req()
+
+  original_request.port
+  |> should.equal(None)
+
+  let updated_request =
+    original_request
+    |> http.set_port(4000)
+
+  // port should be updated
+  updated_request.port
+  |> should.equal(Some(4000))
 }
 
 pub fn set_path_test() {

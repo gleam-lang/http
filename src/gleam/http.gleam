@@ -148,12 +148,12 @@ pub type Service(in, out) =
 pub fn req_to_uri(request: Request(a)) -> Uri {
   Uri(
     scheme: Some(scheme_to_string(request.scheme)),
-    userinfo: None,
+    userinfo: option.None,
     host: Some(request.host),
     port: request.port,
     path: request.path,
     query: request.query,
-    fragment: None,
+    fragment: option.None,
   )
 }
 
@@ -203,7 +203,7 @@ pub fn get_query(
 ) -> Result(List(tuple(String, String)), Nil) {
   case request.query {
     Some(query_string) -> uri.parse_query(query_string)
-    None -> Ok([])
+    option.None -> Ok([])
   }
 }
 
@@ -368,16 +368,28 @@ pub fn default_req() -> Request(String) {
     body: "",
     scheme: Https,
     host: "localhost",
-    port: None,
+    port: option.None,
     path: "",
-    query: None,
+    query: option.None,
   )
+}
+
+/// Set the scheme (protocol) of the request.
+///
+pub fn set_scheme(req: Request(body), scheme: Scheme) -> Request(body) {
+  Request(..req, scheme: scheme)
 }
 
 /// Set the method of the request.
 ///
 pub fn set_host(req: Request(body), host: String) -> Request(body) {
   Request(..req, host: host)
+}
+
+/// Set the port of the request.
+///
+pub fn set_port(req: Request(body), port: Int) -> Request(body) {
+  Request(..req, port: Some(port))
 }
 
 /// Set the path of the request.
