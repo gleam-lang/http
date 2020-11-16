@@ -5,6 +5,7 @@
 - The `gleam/http.default_req` function returns a `Request(String)` again, 
   reverting the change from v1.5.0
 - The `gleam/http` module gains the `get_resp_cookie` function.
+- The `gleam/http` module gains the `set_scheme` and `set_port` functions.
 
 ## v1.5.0 - 2020-09-23
 
