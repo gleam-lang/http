@@ -1096,7 +1096,7 @@ pub fn set_req_cookies_test() {
   |> should.equal(Ok("k1=v1; k2=v2"))
 }
 
-pub fn get_resp_cookie_test() {
+pub fn get_resp_cookies_test() {
   let empty =
     http.CookieAttributes(
       max_age: None,
@@ -1109,7 +1109,7 @@ pub fn get_resp_cookie_test() {
 
   http.response(200)
   |> http.set_resp_cookie("k1", "v1", empty)
-  |> http.get_resp_cookie
+  |> http.get_resp_cookies
   |> should.equal([tuple("k1", "v1")])
 
   let secure_with_attributes =
@@ -1124,7 +1124,7 @@ pub fn get_resp_cookie_test() {
 
   http.response(200)
   |> http.set_resp_cookie("k1", "v1", secure_with_attributes)
-  |> http.get_resp_cookie
+  |> http.get_resp_cookies
   |> should.equal([
     tuple("k1", "v1"),
     tuple("Max-Age", "100"),
@@ -1135,7 +1135,7 @@ pub fn get_resp_cookie_test() {
   // no response cookie
   http.response(200)
   |> http.prepend_resp_header("k1", "v1")
-  |> http.get_resp_cookie
+  |> http.get_resp_cookies
   |> should.equal([])
 }
 
