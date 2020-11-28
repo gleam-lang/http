@@ -554,7 +554,7 @@ fn cookie_attributes_to_list(attributes) {
 ///
 /// Follows the same logic as fetching the cookie from the request
 /// (i.e. badly formed cookies will be ignored)
-pub fn get_resp_cookie(resp) -> List(tuple(String, String)) {
+pub fn get_resp_cookies(resp) -> List(tuple(String, String)) {
   let Response(headers: headers, ..) = resp
   headers
   |> list.filter_map(fn(header) {
