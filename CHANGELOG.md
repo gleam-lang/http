@@ -1,11 +1,17 @@
 # Changelog
 
+## v1.7.0 - 2020-11-29
+
+- The `gleam/http` module gains the `get_resp_cookies` function.
+- The `gleam/http.get_resp_cookie` function as been deprecated in favour of
+  `gleam/http.get_resp_cookie`.
+
 ## v1.6.0 - 2020-11-19
 
 - The `gleam/http.default_req` function returns a `Request(String)` again,
   reverting the change from v1.5.0.
-- The `gleam/http` module gains the `get_resp_cookie` function.
-- The `gleam/http` module gains the `set_scheme` and `set_port` functions.
+- The `gleam/http` module gains the `get_resp_cookie`, `set_scheme` and
+  `set_port` functions.
 - The Gleam stdlib version requirement has been relaxed.
 
 ## v1.5.0 - 2020-09-23
