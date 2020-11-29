@@ -567,6 +567,11 @@ pub fn get_resp_cookies(resp) -> List(tuple(String, String)) {
   |> list.flatten()
 }
 
+/// Deprecated. Use `get_resp_cookies` instead.
+pub fn get_resp_cookie(resp) {
+  get_resp_cookies(resp)
+}
+
 /// Set a cookie value for a client
 ///
 /// The attributes record is defined in `gleam/http/cookie`
