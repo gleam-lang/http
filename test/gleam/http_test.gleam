@@ -1194,28 +1194,28 @@ pub fn get_req_origin_test() {
   |> http.prepend_req_header("origin", origin)
   |> http.prepend_req_header("referer", referer)
   |> http.get_req_origin
-  |> should.equal(Some("http://example.com"))
+  |> should.equal(Ok("http://example.com"))
 
   // without 'origin' header
   http.default_req()
   |> http.prepend_req_header("referer", referer)
   |> http.get_req_origin
-  |> should.equal(Some("http://example.com"))
+  |> should.equal(Ok("http://example.com"))
 
   // with neither 'origin' nor 'referer' headers
   http.default_req()
   |> http.get_req_origin
-  |> should.equal(None)
+  |> should.equal(Error(Nil))
 
   // with bad 'referer' header - no scheme
   http.default_req()
   |> http.prepend_req_header("referer", "example.com")
   |> http.get_req_origin
-  |> should.equal(None)
+  |> should.equal(Error(Nil))
 
   // with bad 'referer' header - no host
   http.default_req()
   |> http.prepend_req_header("referer", "ftp://")
   |> http.get_req_origin
-  |> should.equal(None)
+  |> should.equal(Error(Nil))
 }

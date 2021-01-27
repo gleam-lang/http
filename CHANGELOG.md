@@ -1,5 +1,10 @@
 # Changelog
 
+## TBD
+
+- The `gleam/http.get_req_origin` function returns a `Result(String, Nil)`
+  instead of an `Option(String)`.
+
 ## v1.7.0 - 2020-11-29
 
 - The `gleam/http` module gains the `get_resp_cookies` function.
