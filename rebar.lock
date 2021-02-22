@@ -1,8 +1,8 @@
 {"1.2.0",
-[{<<"gleam_stdlib">>,{pkg,<<"gleam_stdlib">>,<<"0.12.0">>},0}]}.
+[{<<"gleam_stdlib">>,{pkg,<<"gleam_stdlib">>,<<"0.14.0">>},0}]}.
 [
 {pkg_hash,[
- {<<"gleam_stdlib">>, <<"722B00F9A08E44D9582922B4EF6E890CA60E2CAEBEFE81192F3CC8D337F2F0CF">>}]},
+ {<<"gleam_stdlib">>, <<"765D90AC06F97D7A8E8F7AC4BEDA373879D98C78A27FD8DEACC98AA34DA2DDCE">>}]},
 {pkg_hash_ext,[
- {<<"gleam_stdlib">>, <<"C3435F25629ED5F2C0D53A1BC2FDF89ACDFFA75F036CB27396C1EF70396F644A">>}]}
+ {<<"gleam_stdlib">>, <<"9107F6A859CB96945AD9A099085DB028CA2BEBB3C8EA42EEC227B51C614CC2E0">>}]}
 ].

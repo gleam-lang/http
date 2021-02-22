@@ -1,9 +1,10 @@
 # Changelog
 
-## TBD
+## v2.0.0 - 2021-02-22
 
 - The `gleam/http.get_req_origin` function returns a `Result(String, Nil)`
   instead of an `Option(String)`.
+- Gleam v0.14 support.
 
 ## v1.7.0 - 2020-11-29
 
