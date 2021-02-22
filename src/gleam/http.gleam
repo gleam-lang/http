@@ -401,11 +401,10 @@ pub fn set_path(req: Request(body), path: String) -> Request(body) {
 fn check_token(token: BitString) {
   case token {
     <<"":utf8>> -> Ok(Nil)
-    <<"\s":utf8, _>> -> Error(Nil)
+    <<" ":utf8, _>> -> Error(Nil)
     <<"\t":utf8, _>> -> Error(Nil)
     <<"\r":utf8, _>> -> Error(Nil)
     <<"\n":utf8, _>> -> Error(Nil)
-    <<"\c":utf8, _>> -> Error(Nil)
     <<"\f":utf8, _>> -> Error(Nil)
     <<_, rest:bit_string>> -> check_token(rest)
   }
