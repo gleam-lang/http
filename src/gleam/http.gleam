@@ -118,7 +118,7 @@ pub external fn method_from_dynamic(Dynamic) -> Result(Method, Nil) =
 /// A HTTP header is a key-value pair. Header keys should be all lowercase
 /// characters.
 pub type Header =
-  tuple(String, String)
+  #(String, String)
 
 // TODO: document
 pub type Request(body) {
@@ -198,9 +198,7 @@ pub fn path_segments(request: Request(body)) -> List(String) {
 }
 
 /// Decode the query of a request.
-pub fn get_query(
-  request: Request(body),
-) -> Result(List(tuple(String, String)), Nil) {
+pub fn get_query(request: Request(body)) -> Result(List(#(String, String)), Nil) {
   case request.query {
     Some(query_string) -> uri.parse_query(query_string)
     option.None -> Ok([])
@@ -212,9 +210,9 @@ pub fn get_query(
 ///
 pub fn set_query(
   req: Request(body),
-  query: List(tuple(String, String)),
+  query: List(#(String, String)),
 ) -> Request(body) {
-  let pair = fn(t: tuple(String, String)) {
+  let pair = fn(t: #(String, String)) {
     string_builder.from_strings([t.0, "=", t.1])
   }
   let query =
@@ -256,7 +254,7 @@ pub fn prepend_req_header(
   key: String,
   value: String,
 ) -> Request(body) {
-  let headers = [tuple(string.lowercase(key), value), ..request.headers]
+  let headers = [#(string.lowercase(key), value), ..request.headers]
   Request(..request, headers: headers)
 }
 
@@ -267,7 +265,7 @@ pub fn prepend_resp_header(
   key: String,
   value: String,
 ) -> Response(body) {
-  let headers = [tuple(string.lowercase(key), value), ..response.headers]
+  let headers = [#(string.lowercase(key), value), ..response.headers]
   Response(..response, headers: headers)
 }
 
@@ -353,7 +351,7 @@ pub fn try_map_resp_body(
 pub fn redirect(uri: String) -> Response(String) {
   Response(
     status: 303,
-    headers: [tuple("location", uri)],
+    headers: [#("location", uri)],
     body: string.append("You are being redirected to ", uri),
   )
 }
@@ -415,13 +413,13 @@ fn parse_cookie_list(cookie_string) {
   regex.split(re, cookie_string)
   |> list.filter_map(fn(pair) {
     case string.split_once(string.trim(pair), "=") {
-      Ok(tuple("", _)) -> Error(Nil)
-      Ok(tuple(key, value)) -> {
+      Ok(#("", _)) -> Error(Nil)
+      Ok(#(key, value)) -> {
         let key = string.trim(key)
         let value = string.trim(value)
         try _ = check_token(bit_string.from_string(key))
         try _ = check_token(bit_string.from_string(value))
-        Ok(tuple(key, value))
+        Ok(#(key, value))
       }
       Error(Nil) -> Error(Nil)
     }
@@ -432,12 +430,12 @@ fn parse_cookie_list(cookie_string) {
 ///
 /// Note badly formed cookie pairs will be ignored.
 /// RFC6265 specifies that invalid cookie names/attributes should be ignored.
-pub fn get_req_cookies(req) -> List(tuple(String, String)) {
+pub fn get_req_cookies(req) -> List(#(String, String)) {
   let Request(headers: headers, ..) = req
 
   headers
   |> list.filter_map(fn(header) {
-    let tuple(name, value) = header
+    let #(name, value) = header
     case name {
       "cookie" -> Ok(parse_cookie_list(value))
       _ -> Error(Nil)
@@ -471,16 +469,16 @@ fn same_site_to_string(policy) {
 pub fn set_req_cookie(req: Request(body), name: String, value: String) {
   let new_cookie_string = string.join([name, value], "=")
 
-  let tuple(cookies_string, headers) = case list.key_pop(req.headers, "cookie") {
-    Ok(tuple(cookies_string, headers)) -> {
+  let #(cookies_string, headers) = case list.key_pop(req.headers, "cookie") {
+    Ok(#(cookies_string, headers)) -> {
       let cookies_string =
         string.join([cookies_string, new_cookie_string], "; ")
-      tuple(cookies_string, headers)
+      #(cookies_string, headers)
     }
-    Error(Nil) -> tuple(new_cookie_string, req.headers)
+    Error(Nil) -> #(new_cookie_string, req.headers)
   }
 
-  Request(..req, headers: [tuple("cookie", cookies_string), ..headers])
+  Request(..req, headers: [#("cookie", cookies_string), ..headers])
 }
 
 /// Attributes of a cookie when sent to a client in the `set-cookie` header.
@@ -553,11 +551,11 @@ fn cookie_attributes_to_list(attributes) {
 ///
 /// Follows the same logic as fetching the cookie from the request
 /// (i.e. badly formed cookies will be ignored)
-pub fn get_resp_cookies(resp) -> List(tuple(String, String)) {
+pub fn get_resp_cookies(resp) -> List(#(String, String)) {
   let Response(headers: headers, ..) = resp
   headers
   |> list.filter_map(fn(header) {
-    let tuple(name, value) = header
+    let #(name, value) = header
     case name {
       "set-cookie" -> Ok(parse_cookie_list(value))
       _ -> Error(Nil)

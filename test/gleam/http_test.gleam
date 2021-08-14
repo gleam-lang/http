@@ -745,7 +745,7 @@ pub fn get_query_test() {
   }
 
   let request = make_request(Some("foo=x%20y"))
-  should.equal(Ok([tuple("foo", "x y")]), http.get_query(request))
+  should.equal(Ok([#("foo", "x y")]), http.get_query(request))
 
   let request = make_request(None)
   should.equal(Ok([]), http.get_query(request))
@@ -767,7 +767,7 @@ pub fn set_query_test() {
       query: None,
     )
 
-  let query = [tuple("answer", "42"), tuple("test", "123")]
+  let query = [#("answer", "42"), #("test", "123")]
   let updated_request = http.set_query(request, query)
   updated_request.query
   |> should.equal(Some("answer=42&test=123"))
@@ -793,12 +793,12 @@ pub fn get_req_header_test() {
   }
 
   let header_key = "GLEAM"
-  let request = make_request([tuple("answer", "42"), tuple("gleam", "awesome")])
+  let request = make_request([#("answer", "42"), #("gleam", "awesome")])
   request
   |> http.get_req_header(header_key)
   |> should.equal(Ok("awesome"))
 
-  let request = make_request([tuple("answer", "42")])
+  let request = make_request([#("answer", "42")])
   request
   |> http.get_req_header(header_key)
   |> should.equal(Error(Nil))
@@ -983,7 +983,7 @@ pub fn get_resp_header_test() {
   |> should.equal(Error(Nil))
 
   response.headers
-  |> should.equal([tuple("x-bar", "y"), tuple("x-foo", "x")])
+  |> should.equal([#("x-bar", "y"), #("x-foo", "x")])
 }
 
 pub fn resp_body_test() {
@@ -1035,7 +1035,7 @@ pub fn prepend_req_header_test() {
     |> http.prepend_req_header("answer", "42")
 
   request.headers
-  |> should.equal([tuple("answer", "42")])
+  |> should.equal([#("answer", "42")])
 
   let request =
     request
@@ -1043,32 +1043,32 @@ pub fn prepend_req_header_test() {
 
   // request should have two headers now
   request.headers
-  |> should.equal([tuple("gleam", "awesome"), tuple("answer", "42")])
+  |> should.equal([#("gleam", "awesome"), #("answer", "42")])
 }
 
 pub fn get_req_cookies_test() {
   http.default_req()
   |> http.prepend_req_header("cookie", "k1=v1; k2=v2")
   |> http.get_req_cookies()
-  |> should.equal([tuple("k1", "v1"), tuple("k2", "v2")])
+  |> should.equal([#("k1", "v1"), #("k2", "v2")])
 
   // Standard Header list syntax
   http.default_req()
   |> http.prepend_req_header("cookie", "k1=v1, k2=v2")
   |> http.get_req_cookies()
-  |> should.equal([tuple("k1", "v1"), tuple("k2", "v2")])
+  |> should.equal([#("k1", "v1"), #("k2", "v2")])
 
   // Spread over multiple headers
   http.default_req()
   |> http.prepend_req_header("cookie", "k2=v2")
   |> http.prepend_req_header("cookie", "k1=v1")
   |> http.get_req_cookies()
-  |> should.equal([tuple("k1", "v1"), tuple("k2", "v2")])
+  |> should.equal([#("k1", "v1"), #("k2", "v2")])
 
   http.default_req()
   |> http.prepend_req_header("cookie", " k1  =  v1 ; k2=v2 ")
   |> http.get_req_cookies()
-  |> should.equal([tuple("k1", "v1"), tuple("k2", "v2")])
+  |> should.equal([#("k1", "v1"), #("k2", "v2")])
 
   http.default_req()
   |> http.prepend_req_header("cookie", "k1; =; =123")
@@ -1110,7 +1110,7 @@ pub fn get_resp_cookies_test() {
   http.response(200)
   |> http.set_resp_cookie("k1", "v1", empty)
   |> http.get_resp_cookies
-  |> should.equal([tuple("k1", "v1")])
+  |> should.equal([#("k1", "v1")])
 
   let secure_with_attributes =
     http.CookieAttributes(
@@ -1126,10 +1126,10 @@ pub fn get_resp_cookies_test() {
   |> http.set_resp_cookie("k1", "v1", secure_with_attributes)
   |> http.get_resp_cookies
   |> should.equal([
-    tuple("k1", "v1"),
-    tuple("Max-Age", "100"),
-    tuple("Domain", "domain.test"),
-    tuple("Path", "/foo"),
+    #("k1", "v1"),
+    #("Max-Age", "100"),
+    #("Domain", "domain.test"),
+    #("Path", "/foo"),
   ])
 
   // no response cookie
