@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Upgraded for Gleam v0.16.
+
 ## v2.0.0 - 2021-02-22
 
 - The `gleam/http.get_req_origin` function returns a `Result(String, Nil)`
