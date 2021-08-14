@@ -1,0 +1,8 @@
+{"1.2.0",
+[{<<"gleam_stdlib">>,{pkg,<<"gleam_stdlib">>,<<"0.16.0">>},0}]}.
+[
+{pkg_hash,[
+ {<<"gleam_stdlib">>, <<"A4D856EF2AA0503E82CBC9E5E75F466B6D607A3332C6590E39B161B2245E23C5">>}]},
+{pkg_hash_ext,[
+ {<<"gleam_stdlib">>, <<"288EC0C4B80AF55CADDF09A890B5800BF12227218C5D17014F8B73D213ACFD00">>}]}
+].
