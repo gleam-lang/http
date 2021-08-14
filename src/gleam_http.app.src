@@ -1,6 +1,6 @@
 {application, gleam_http,
  [{description, "Types and functions for HTTP clients and servers!"},
-  {vsn, "2.0.0"},
+  {vsn, "2.0.1"},
   {registered, []},
   {applications,
    [kernel,
