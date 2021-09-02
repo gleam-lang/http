@@ -593,17 +593,10 @@ pub fn expire_resp_cookie(resp, name, attributes) {
 /// If no "origin" header is found in the request, falls back to the "referer"
 /// header.
 pub fn get_req_origin(req: Request(body)) -> Result(String, Nil) {
-  case get_req_header(req, "origin") {
-    Ok(origin) -> Ok(origin)
-    Error(Nil) ->
-      case get_req_header(req, "referer") {
-        Ok(ref) ->
-          case ref
-          |> uri.parse {
-            Ok(ref_uri) -> uri.origin(ref_uri)
-            Error(Nil) -> Error(Nil)
-          }
-        Error(Nil) -> Error(Nil)
-      }
-  }
+  get_req_header(req, "origin")
+  |> result.lazy_or(fn() {
+    try ref = get_req_header(req, "referer")
+    try ref_uri = uri.parse(ref)
+    uri.origin(ref_uri)
+  })
 }
