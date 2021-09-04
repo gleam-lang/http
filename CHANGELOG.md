@@ -1,5 +1,9 @@
 # Changelog
 
+## Unrelease
+
+- Updated for Gleam stdlib v0.17.
+
 ## v2.0.1 - 2021-08-14
 
 - Upgraded for Gleam v0.16.

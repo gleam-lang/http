@@ -1,4 +1,3 @@
-import gleam/atom
 import gleam/dynamic
 import gleam/string_builder
 import gleam/string
@@ -125,175 +124,154 @@ pub fn parse_method_test() {
 external fn to_charlist(String) -> List(Int) =
   "unicode" "characters_to_list"
 
+if erlang {
+  external fn make_atom(String) -> dynamic.Dynamic =
+    "gleam_http_test_helper" "atom"
+
+  pub fn method_from_dynamic_atom_test() {
+    "Connect"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Connect))
+
+    "CONNECT"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Connect))
+
+    "connect"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Connect))
+
+    "Delete"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Delete))
+
+    "DELETE"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Delete))
+
+    "delete"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Delete))
+
+    "Get"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Get))
+
+    "GET"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Get))
+
+    "get"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Get))
+
+    "Head"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Head))
+
+    "HEAD"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Head))
+
+    "head"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Head))
+
+    "Options"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Options))
+
+    "OPTIONS"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Options))
+
+    "options"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Options))
+
+    "Patch"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Patch))
+
+    "PATCH"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Patch))
+
+    "patch"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Patch))
+
+    "Post"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Post))
+
+    "POST"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Post))
+
+    "post"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Post))
+
+    "Put"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Put))
+
+    "PUT"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Put))
+
+    "put"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Put))
+
+    "Trace"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Trace))
+
+    "TRACE"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Trace))
+
+    "trace"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Ok(http.Trace))
+
+    "thingy"
+    |> make_atom
+    |> http.method_from_dynamic
+    |> should.equal(Error(Nil))
+  }
+}
+
 pub fn method_from_dynamic_test() {
-  "Connect"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Connect))
-
-  "CONNECT"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Connect))
-
-  "connect"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Connect))
-
-  "Delete"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Delete))
-
-  "DELETE"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Delete))
-
-  "delete"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Delete))
-
-  "Get"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Get))
-
-  "GET"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Get))
-
-  "get"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Get))
-
-  "Head"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Head))
-
-  "HEAD"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Head))
-
-  "head"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Head))
-
-  "Options"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Options))
-
-  "OPTIONS"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Options))
-
-  "options"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Options))
-
-  "Patch"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Patch))
-
-  "PATCH"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Patch))
-
-  "patch"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Patch))
-
-  "Post"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Post))
-
-  "POST"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Post))
-
-  "post"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Post))
-
-  "Put"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Put))
-
-  "PUT"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Put))
-
-  "put"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Put))
-
-  "Trace"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Trace))
-
-  "TRACE"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Trace))
-
-  "trace"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Ok(http.Trace))
-
-  "thingy"
-  |> atom.create_from_string
-  |> dynamic.from
-  |> http.method_from_dynamic
-  |> should.equal(Error(Nil))
-
   "Connect"
   |> dynamic.from
   |> http.method_from_dynamic
@@ -1186,7 +1164,7 @@ pub fn expire_resp_cookie_test() {
 }
 
 pub fn get_req_origin_test() {
-  let origin = "http://example.com"
+  let origin = "http://example.com/"
   let referer = "http://example.com/elixir"
 
   // with 'origin' header
@@ -1194,13 +1172,13 @@ pub fn get_req_origin_test() {
   |> http.prepend_req_header("origin", origin)
   |> http.prepend_req_header("referer", referer)
   |> http.get_req_origin
-  |> should.equal(Ok("http://example.com"))
+  |> should.equal(Ok("http://example.com/"))
 
   // without 'origin' header
   http.default_req()
   |> http.prepend_req_header("referer", referer)
   |> http.get_req_origin
-  |> should.equal(Ok("http://example.com"))
+  |> should.equal(Ok("http://example.com/"))
 
   // with neither 'origin' nor 'referer' headers
   http.default_req()
