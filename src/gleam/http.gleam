@@ -396,15 +396,15 @@ pub fn set_path(req: Request(body), path: String) -> Request(body) {
   Request(..req, path: path)
 }
 
-fn check_token(token: BitString) {
-  case token {
-    <<"":utf8>> -> Ok(Nil)
-    <<" ":utf8, _>> -> Error(Nil)
-    <<"\t":utf8, _>> -> Error(Nil)
-    <<"\r":utf8, _>> -> Error(Nil)
-    <<"\n":utf8, _>> -> Error(Nil)
-    <<"\f":utf8, _>> -> Error(Nil)
-    <<_, rest:bit_string>> -> check_token(rest)
+fn check_token(token: String) {
+  case string.pop_grapheme(token) {
+    Error(Nil) -> Ok(Nil)
+    Ok(#(" ", _)) -> Error(Nil)
+    Ok(#("\t", _)) -> Error(Nil)
+    Ok(#("\r", _)) -> Error(Nil)
+    Ok(#("\n", _)) -> Error(Nil)
+    Ok(#("\f", _)) -> Error(Nil)
+    Ok(#(_, rest)) -> check_token(rest)
   }
 }
 
@@ -417,8 +417,8 @@ fn parse_cookie_list(cookie_string) {
       Ok(#(key, value)) -> {
         let key = string.trim(key)
         let value = string.trim(value)
-        try _ = check_token(bit_string.from_string(key))
-        try _ = check_token(bit_string.from_string(value))
+        try _ = check_token(key)
+        try _ = check_token(value)
         Ok(#(key, value))
       }
       Error(Nil) -> Error(Nil)
