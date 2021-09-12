@@ -1,0 +1,19 @@
+{
+  "name": "gleam_http",
+  "type": "module",
+  "author": "Louis Pilfold <louis@lpil.uk>",
+  "license": "Apache-2.0",
+  "scripts": {
+    "test": "node bin/build.js test"
+  },
+  "devDependencies": {
+    "gleam-packages": "file:./target/lib"
+  },
+  "gleamDependencies": [
+    {
+      "name": "gleam_stdlib",
+      "ref": "main",
+      "url": "https://github.com/gleam-lang/stdlib.git"
+    }
+  ]
+}

@@ -1,4 +1,3 @@
-import gleam/should
 import gleam/http.{Delete, Get, Patch, Post, Put, Request, Response}
 import gleam/http/middleware
 
@@ -11,45 +10,45 @@ pub fn method_override_test() {
     |> middleware.method_override
 
   // No overriding without the query param
-  http.default_req()
-  |> http.set_method(Get)
-  |> service
-  |> should.equal(Response(200, [], Get))
+  assert Response(200, [], Get) =
+    http.default_req()
+    |> http.set_method(Get)
+    |> service
 
-  http.default_req()
-  |> http.set_method(Post)
-  |> service
-  |> should.equal(Response(200, [], Post))
+  assert Response(200, [], Post) =
+    http.default_req()
+    |> http.set_method(Post)
+    |> service
 
   // Can override
-  http.default_req()
-  |> http.set_method(Post)
-  |> http.set_query([#("_method", "DELETE")])
-  |> service
-  |> should.equal(Response(200, [], Delete))
+  assert Response(200, [], Delete) =
+    http.default_req()
+    |> http.set_method(Post)
+    |> http.set_query([#("_method", "DELETE")])
+    |> service
 
-  http.default_req()
-  |> http.set_method(Post)
-  |> http.set_query([#("_method", "PATCH")])
-  |> service
-  |> should.equal(Response(200, [], Patch))
+  assert Response(200, [], Patch) =
+    http.default_req()
+    |> http.set_method(Post)
+    |> http.set_query([#("_method", "PATCH")])
+    |> service
 
-  http.default_req()
-  |> http.set_method(Post)
-  |> http.set_query([#("_method", "PUT")])
-  |> service
-  |> should.equal(Response(200, [], Put))
+  assert Response(200, [], Put) =
+    http.default_req()
+    |> http.set_method(Post)
+    |> http.set_query([#("_method", "PUT")])
+    |> service
 
   // Cannot override with other methods
-  http.default_req()
-  |> http.set_method(Post)
-  |> http.set_query([#("_method", "OPTIONS")])
-  |> service
-  |> should.equal(Response(200, [], Post))
+  assert Response(200, [], Post) =
+    http.default_req()
+    |> http.set_method(Post)
+    |> http.set_query([#("_method", "OPTIONS")])
+    |> service
 
-  http.default_req()
-  |> http.set_method(Post)
-  |> http.set_query([#("_method", "SOMETHING")])
-  |> service
-  |> should.equal(Response(200, [], Post))
+  assert Response(200, [], Post) =
+    http.default_req()
+    |> http.set_method(Post)
+    |> http.set_query([#("_method", "SOMETHING")])
+    |> service
 }

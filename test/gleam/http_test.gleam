@@ -4,121 +4,124 @@ import gleam/string
 import gleam/uri.{Uri}
 import gleam/http.{Http, Https}
 import gleam/option.{None, Some}
-import gleam/should
 import gleam/result
+
+fn should_equal(a: t, b: t) {
+  assert True = a == b
+}
 
 pub fn parse_method_test() {
   "Connect"
   |> http.parse_method
-  |> should.equal(Ok(http.Connect))
+  |> should_equal(Ok(http.Connect))
 
   "CONNECT"
   |> http.parse_method
-  |> should.equal(Ok(http.Connect))
+  |> should_equal(Ok(http.Connect))
 
   "connect"
   |> http.parse_method
-  |> should.equal(Ok(http.Connect))
+  |> should_equal(Ok(http.Connect))
 
   "Delete"
   |> http.parse_method
-  |> should.equal(Ok(http.Delete))
+  |> should_equal(Ok(http.Delete))
 
   "DELETE"
   |> http.parse_method
-  |> should.equal(Ok(http.Delete))
+  |> should_equal(Ok(http.Delete))
 
   "delete"
   |> http.parse_method
-  |> should.equal(Ok(http.Delete))
+  |> should_equal(Ok(http.Delete))
 
   "Get"
   |> http.parse_method
-  |> should.equal(Ok(http.Get))
+  |> should_equal(Ok(http.Get))
 
   "GET"
   |> http.parse_method
-  |> should.equal(Ok(http.Get))
+  |> should_equal(Ok(http.Get))
 
   "get"
   |> http.parse_method
-  |> should.equal(Ok(http.Get))
+  |> should_equal(Ok(http.Get))
 
   "Head"
   |> http.parse_method
-  |> should.equal(Ok(http.Head))
+  |> should_equal(Ok(http.Head))
 
   "HEAD"
   |> http.parse_method
-  |> should.equal(Ok(http.Head))
+  |> should_equal(Ok(http.Head))
 
   "head"
   |> http.parse_method
-  |> should.equal(Ok(http.Head))
+  |> should_equal(Ok(http.Head))
 
   "Options"
   |> http.parse_method
-  |> should.equal(Ok(http.Options))
+  |> should_equal(Ok(http.Options))
 
   "OPTIONS"
   |> http.parse_method
-  |> should.equal(Ok(http.Options))
+  |> should_equal(Ok(http.Options))
 
   "options"
   |> http.parse_method
-  |> should.equal(Ok(http.Options))
+  |> should_equal(Ok(http.Options))
 
   "Patch"
   |> http.parse_method
-  |> should.equal(Ok(http.Patch))
+  |> should_equal(Ok(http.Patch))
 
   "PATCH"
   |> http.parse_method
-  |> should.equal(Ok(http.Patch))
+  |> should_equal(Ok(http.Patch))
 
   "patch"
   |> http.parse_method
-  |> should.equal(Ok(http.Patch))
+  |> should_equal(Ok(http.Patch))
 
   "Post"
   |> http.parse_method
-  |> should.equal(Ok(http.Post))
+  |> should_equal(Ok(http.Post))
 
   "POST"
   |> http.parse_method
-  |> should.equal(Ok(http.Post))
+  |> should_equal(Ok(http.Post))
 
   "post"
   |> http.parse_method
-  |> should.equal(Ok(http.Post))
+  |> should_equal(Ok(http.Post))
 
   "Put"
   |> http.parse_method
-  |> should.equal(Ok(http.Put))
+  |> should_equal(Ok(http.Put))
 
   "PUT"
   |> http.parse_method
-  |> should.equal(Ok(http.Put))
+  |> should_equal(Ok(http.Put))
 
   "put"
   |> http.parse_method
-  |> should.equal(Ok(http.Put))
+  |> should_equal(Ok(http.Put))
 
   "Trace"
   |> http.parse_method
-  |> should.equal(Ok(http.Trace))
+  |> should_equal(Ok(http.Trace))
 
   "TRACE"
   |> http.parse_method
-  |> should.equal(Ok(http.Trace))
+  |> should_equal(Ok(http.Trace))
 
   "trace"
   |> http.parse_method
-  |> should.equal(Ok(http.Trace))
+  |> should_equal(Ok(http.Trace))
 
   "thingy"
   |> http.parse_method
-  |> should.equal(Error(Nil))
+  |> should_equal(Error(Nil))
 }
 
 external fn to_charlist(String) -> List(Int) =
@@ -132,142 +135,142 @@ if erlang {
     "Connect"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Connect))
+    |> should_equal(Ok(http.Connect))
 
     "CONNECT"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Connect))
+    |> should_equal(Ok(http.Connect))
 
     "connect"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Connect))
+    |> should_equal(Ok(http.Connect))
 
     "Delete"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Delete))
+    |> should_equal(Ok(http.Delete))
 
     "DELETE"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Delete))
+    |> should_equal(Ok(http.Delete))
 
     "delete"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Delete))
+    |> should_equal(Ok(http.Delete))
 
     "Get"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Get))
+    |> should_equal(Ok(http.Get))
 
     "GET"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Get))
+    |> should_equal(Ok(http.Get))
 
     "get"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Get))
+    |> should_equal(Ok(http.Get))
 
     "Head"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Head))
+    |> should_equal(Ok(http.Head))
 
     "HEAD"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Head))
+    |> should_equal(Ok(http.Head))
 
     "head"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Head))
+    |> should_equal(Ok(http.Head))
 
     "Options"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Options))
+    |> should_equal(Ok(http.Options))
 
     "OPTIONS"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Options))
+    |> should_equal(Ok(http.Options))
 
     "options"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Options))
+    |> should_equal(Ok(http.Options))
 
     "Patch"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Patch))
+    |> should_equal(Ok(http.Patch))
 
     "PATCH"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Patch))
+    |> should_equal(Ok(http.Patch))
 
     "patch"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Patch))
+    |> should_equal(Ok(http.Patch))
 
     "Post"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Post))
+    |> should_equal(Ok(http.Post))
 
     "POST"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Post))
+    |> should_equal(Ok(http.Post))
 
     "post"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Post))
+    |> should_equal(Ok(http.Post))
 
     "Put"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Put))
+    |> should_equal(Ok(http.Put))
 
     "PUT"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Put))
+    |> should_equal(Ok(http.Put))
 
     "put"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Put))
+    |> should_equal(Ok(http.Put))
 
     "Trace"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Trace))
+    |> should_equal(Ok(http.Trace))
 
     "TRACE"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Trace))
+    |> should_equal(Ok(http.Trace))
 
     "trace"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Ok(http.Trace))
+    |> should_equal(Ok(http.Trace))
 
     "thingy"
     |> make_atom
     |> http.method_from_dynamic
-    |> should.equal(Error(Nil))
+    |> should_equal(Error(Nil))
   }
 }
 
@@ -275,356 +278,356 @@ pub fn method_from_dynamic_test() {
   "Connect"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Connect))
+  |> should_equal(Ok(http.Connect))
 
   "CONNECT"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Connect))
+  |> should_equal(Ok(http.Connect))
 
   "connect"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Connect))
+  |> should_equal(Ok(http.Connect))
 
   "Delete"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Delete))
+  |> should_equal(Ok(http.Delete))
 
   "DELETE"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Delete))
+  |> should_equal(Ok(http.Delete))
 
   "delete"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Delete))
+  |> should_equal(Ok(http.Delete))
 
   "Get"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Get))
+  |> should_equal(Ok(http.Get))
 
   "GET"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Get))
+  |> should_equal(Ok(http.Get))
 
   "get"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Get))
+  |> should_equal(Ok(http.Get))
 
   "Head"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Head))
+  |> should_equal(Ok(http.Head))
 
   "HEAD"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Head))
+  |> should_equal(Ok(http.Head))
 
   "head"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Head))
+  |> should_equal(Ok(http.Head))
 
   "Options"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Options))
+  |> should_equal(Ok(http.Options))
 
   "OPTIONS"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Options))
+  |> should_equal(Ok(http.Options))
 
   "options"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Options))
+  |> should_equal(Ok(http.Options))
 
   "Patch"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Patch))
+  |> should_equal(Ok(http.Patch))
 
   "PATCH"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Patch))
+  |> should_equal(Ok(http.Patch))
 
   "patch"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Patch))
+  |> should_equal(Ok(http.Patch))
 
   "Post"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Post))
+  |> should_equal(Ok(http.Post))
 
   "POST"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Post))
+  |> should_equal(Ok(http.Post))
 
   "post"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Post))
+  |> should_equal(Ok(http.Post))
 
   "Put"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Put))
+  |> should_equal(Ok(http.Put))
 
   "PUT"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Put))
+  |> should_equal(Ok(http.Put))
 
   "put"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Put))
+  |> should_equal(Ok(http.Put))
 
   "Trace"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Trace))
+  |> should_equal(Ok(http.Trace))
 
   "TRACE"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Trace))
+  |> should_equal(Ok(http.Trace))
 
   "trace"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Trace))
+  |> should_equal(Ok(http.Trace))
 
   "thingy"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Error(Nil))
+  |> should_equal(Error(Nil))
 
   "Connect"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Connect))
+  |> should_equal(Ok(http.Connect))
 
   "CONNECT"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Connect))
+  |> should_equal(Ok(http.Connect))
 
   "connect"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Connect))
+  |> should_equal(Ok(http.Connect))
 
   "Delete"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Delete))
+  |> should_equal(Ok(http.Delete))
 
   "DELETE"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Delete))
+  |> should_equal(Ok(http.Delete))
 
   "delete"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Delete))
+  |> should_equal(Ok(http.Delete))
 
   "Get"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Get))
+  |> should_equal(Ok(http.Get))
 
   "GET"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Get))
+  |> should_equal(Ok(http.Get))
 
   "get"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Get))
+  |> should_equal(Ok(http.Get))
 
   "Head"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Head))
+  |> should_equal(Ok(http.Head))
 
   "HEAD"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Head))
+  |> should_equal(Ok(http.Head))
 
   "head"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Head))
+  |> should_equal(Ok(http.Head))
 
   "Options"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Options))
+  |> should_equal(Ok(http.Options))
 
   "OPTIONS"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Options))
+  |> should_equal(Ok(http.Options))
 
   "options"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Options))
+  |> should_equal(Ok(http.Options))
 
   "Patch"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Patch))
+  |> should_equal(Ok(http.Patch))
 
   "PATCH"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Patch))
+  |> should_equal(Ok(http.Patch))
 
   "patch"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Patch))
+  |> should_equal(Ok(http.Patch))
 
   "Post"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Post))
+  |> should_equal(Ok(http.Post))
 
   "POST"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Post))
+  |> should_equal(Ok(http.Post))
 
   "post"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Post))
+  |> should_equal(Ok(http.Post))
 
   "Put"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Put))
+  |> should_equal(Ok(http.Put))
 
   "PUT"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Put))
+  |> should_equal(Ok(http.Put))
 
   "put"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Put))
+  |> should_equal(Ok(http.Put))
 
   "Trace"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Trace))
+  |> should_equal(Ok(http.Trace))
 
   "TRACE"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Trace))
+  |> should_equal(Ok(http.Trace))
 
   "trace"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Trace))
+  |> should_equal(Ok(http.Trace))
 
   "thingy"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Error(Nil))
+  |> should_equal(Error(Nil))
 }
 
 pub fn method_to_string_test() {
   http.Connect
   |> http.method_to_string
-  |> should.equal("connect")
+  |> should_equal("connect")
 
   http.Delete
   |> http.method_to_string
-  |> should.equal("delete")
+  |> should_equal("delete")
 
   http.Get
   |> http.method_to_string
-  |> should.equal("get")
+  |> should_equal("get")
 
   http.Head
   |> http.method_to_string
-  |> should.equal("head")
+  |> should_equal("head")
 
   http.Options
   |> http.method_to_string
-  |> should.equal("options")
+  |> should_equal("options")
 
   http.Patch
   |> http.method_to_string
-  |> should.equal("patch")
+  |> should_equal("patch")
 
   http.Post
   |> http.method_to_string
-  |> should.equal("post")
+  |> should_equal("post")
 
   http.Put
   |> http.method_to_string
-  |> should.equal("put")
+  |> should_equal("put")
 
   http.Trace
   |> http.method_to_string
-  |> should.equal("trace")
+  |> should_equal("trace")
 
   http.Other("ok")
   |> http.method_to_string
-  |> should.equal("ok")
+  |> should_equal("ok")
 
   http.Other("nope")
   |> http.method_to_string
-  |> should.equal("nope")
+  |> should_equal("nope")
 }
 
 pub fn req_to_uri_test() {
@@ -644,7 +647,7 @@ pub fn req_to_uri_test() {
   http.Https
   |> make_request
   |> http.req_to_uri
-  |> should.equal(Uri(
+  |> should_equal(Uri(
     Some("https"),
     None,
     Some("sky.net"),
@@ -657,7 +660,7 @@ pub fn req_to_uri_test() {
   http.Http
   |> make_request
   |> http.req_to_uri
-  |> should.equal(Uri(
+  |> should_equal(Uri(
     Some("http"),
     None,
     Some("sky.net"),
@@ -673,7 +676,7 @@ pub fn req_from_uri_test() {
     Uri(Some("https"), None, Some("sky.net"), None, "/sarah/connor", None, None)
   uri
   |> http.req_from_uri
-  |> should.equal(Ok(http.Request(
+  |> should_equal(Ok(http.Request(
     method: http.Get,
     headers: [],
     body: "",
@@ -688,8 +691,8 @@ pub fn req_from_uri_test() {
 pub fn redirect_test() {
   let response = http.redirect("/other")
 
-  should.equal(303, response.status)
-  should.equal(Ok("/other"), http.get_resp_header(response, "location"))
+  should_equal(303, response.status)
+  should_equal(Ok("/other"), http.get_resp_header(response, "location"))
 }
 
 pub fn path_segments_test() {
@@ -705,7 +708,7 @@ pub fn path_segments_test() {
       query: None,
     )
 
-  should.equal(["ellen", "ripley"], http.path_segments(request))
+  should_equal(["ellen", "ripley"], http.path_segments(request))
 }
 
 pub fn get_query_test() {
@@ -723,13 +726,13 @@ pub fn get_query_test() {
   }
 
   let request = make_request(Some("foo=x%20y"))
-  should.equal(Ok([#("foo", "x y")]), http.get_query(request))
+  should_equal(Ok([#("foo", "x y")]), http.get_query(request))
 
   let request = make_request(None)
-  should.equal(Ok([]), http.get_query(request))
+  should_equal(Ok([]), http.get_query(request))
 
   let request = make_request(Some("foo=%!2"))
-  should.equal(Error(Nil), http.get_query(request))
+  should_equal(Error(Nil), http.get_query(request))
 }
 
 pub fn set_query_test() {
@@ -748,12 +751,12 @@ pub fn set_query_test() {
   let query = [#("answer", "42"), #("test", "123")]
   let updated_request = http.set_query(request, query)
   updated_request.query
-  |> should.equal(Some("answer=42&test=123"))
+  |> should_equal(Some("answer=42&test=123"))
 
   let empty_query = []
   let updated_request = http.set_query(request, empty_query)
   updated_request.query
-  |> should.equal(Some(""))
+  |> should_equal(Some(""))
 }
 
 pub fn get_req_header_test() {
@@ -774,12 +777,12 @@ pub fn get_req_header_test() {
   let request = make_request([#("answer", "42"), #("gleam", "awesome")])
   request
   |> http.get_req_header(header_key)
-  |> should.equal(Ok("awesome"))
+  |> should_equal(Ok("awesome"))
 
   let request = make_request([#("answer", "42")])
   request
   |> http.get_req_header(header_key)
-  |> should.equal(Error(Nil))
+  |> should_equal(Error(Nil))
 }
 
 pub fn set_req_body_test() {
@@ -807,7 +810,7 @@ pub fn set_req_body_test() {
     |> http.set_req_body(body)
 
   updated_request.body
-  |> should.equal(body)
+  |> should_equal(body)
 }
 
 pub fn set_method_test() {
@@ -829,7 +832,7 @@ pub fn set_method_test() {
     |> http.set_method(updated_request_method)
 
   updated_request.method
-  |> should.equal(http.Post)
+  |> should_equal(http.Post)
 }
 
 pub fn map_resp_body_test() {
@@ -840,7 +843,7 @@ pub fn map_resp_body_test() {
     |> http.map_resp_body(string.reverse)
 
   updated_response.body
-  |> should.equal(expected_updated_body)
+  |> should_equal(expected_updated_body)
 }
 
 pub fn map_req_body_test() {
@@ -854,7 +857,7 @@ pub fn map_req_body_test() {
     |> http.map_req_body(string.reverse)
 
   updated_request.body
-  |> should.equal(expected_updated_body)
+  |> should_equal(expected_updated_body)
 }
 
 pub fn try_map_resp_body_test() {
@@ -862,18 +865,18 @@ pub fn try_map_resp_body_test() {
 
   let response = http.response(200)
   http.try_map_resp_body(response, transform)
-  |> should.equal(Ok(http.Response(200, [], "new body")))
+  |> should_equal(Ok(http.Response(200, [], "new body")))
 
   // transform function which fails should propogate error
   let transform_failure = fn(_old_body) { Error("transform failure") }
 
   http.try_map_resp_body(response, transform_failure)
-  |> should.equal(Error("transform failure"))
+  |> should_equal(Error("transform failure"))
 }
 
 pub fn default_request_test() {
   http.default_req()
-  |> should.equal(http.Request(
+  |> should_equal(http.Request(
     method: http.Get,
     headers: [],
     body: "",
@@ -889,7 +892,7 @@ pub fn set_scheme_test() {
   let original_request = http.default_req()
 
   original_request.scheme
-  |> should.equal(Https)
+  |> should_equal(Https)
 
   let updated_request =
     original_request
@@ -897,14 +900,14 @@ pub fn set_scheme_test() {
 
   // scheme should be updated
   updated_request.scheme
-  |> should.equal(http.Http)
+  |> should_equal(http.Http)
 }
 
 pub fn set_host_test() {
   let new_host = "github"
   let original_request = http.default_req()
   original_request.host
-  |> should.equal("localhost")
+  |> should_equal("localhost")
 
   let updated_request =
     original_request
@@ -912,14 +915,14 @@ pub fn set_host_test() {
 
   // host should be updated
   updated_request.host
-  |> should.equal(new_host)
+  |> should_equal(new_host)
 }
 
 pub fn set_port_test() {
   let original_request = http.default_req()
 
   original_request.port
-  |> should.equal(None)
+  |> should_equal(None)
 
   let updated_request =
     original_request
@@ -927,14 +930,14 @@ pub fn set_port_test() {
 
   // port should be updated
   updated_request.port
-  |> should.equal(Some(4000))
+  |> should_equal(Some(4000))
 }
 
 pub fn set_path_test() {
   let new_path = "/gleam-lang"
   let original_request = http.default_req()
   original_request.path
-  |> should.equal("")
+  |> should_equal("")
 
   let updated_request =
     original_request
@@ -942,7 +945,7 @@ pub fn set_path_test() {
 
   // path should be updated
   updated_request.path
-  |> should.equal("/gleam-lang")
+  |> should_equal("/gleam-lang")
 }
 
 pub fn get_resp_header_test() {
@@ -952,16 +955,16 @@ pub fn get_resp_header_test() {
     |> http.prepend_resp_header("x-BAR", "y")
 
   http.get_resp_header(response, "x-foo")
-  |> should.equal(Ok("x"))
+  |> should_equal(Ok("x"))
 
   http.get_resp_header(response, "X-Foo")
-  |> should.equal(Ok("x"))
+  |> should_equal(Ok("x"))
 
   http.get_resp_header(response, "x-baz")
-  |> should.equal(Error(Nil))
+  |> should_equal(Error(Nil))
 
   response.headers
-  |> should.equal([#("x-bar", "y"), #("x-foo", "x")])
+  |> should_equal([#("x-bar", "y"), #("x-foo", "x")])
 }
 
 pub fn resp_body_test() {
@@ -970,31 +973,31 @@ pub fn resp_body_test() {
     |> http.set_resp_body("Hello, World!")
 
   response.body
-  |> should.equal("Hello, World!")
+  |> should_equal("Hello, World!")
 }
 
 pub fn scheme_to_string_test() {
   http.Http
   |> http.scheme_to_string
-  |> should.equal("http")
+  |> should_equal("http")
 
   http.Https
   |> http.scheme_to_string
-  |> should.equal("https")
+  |> should_equal("https")
 }
 
 pub fn scheme_from_string_test() {
   "http"
   |> http.scheme_from_string
-  |> should.equal(Ok(http.Http))
+  |> should_equal(Ok(http.Http))
 
   "https"
   |> http.scheme_from_string
-  |> should.equal(Ok(http.Https))
+  |> should_equal(Ok(http.Https))
 
   "ftp"
   |> http.scheme_from_string
-  |> should.equal(Error(Nil))
+  |> should_equal(Error(Nil))
 }
 
 pub fn prepend_req_header_test() {
@@ -1013,7 +1016,7 @@ pub fn prepend_req_header_test() {
     |> http.prepend_req_header("answer", "42")
 
   request.headers
-  |> should.equal([#("answer", "42")])
+  |> should_equal([#("answer", "42")])
 
   let request =
     request
@@ -1021,42 +1024,42 @@ pub fn prepend_req_header_test() {
 
   // request should have two headers now
   request.headers
-  |> should.equal([#("gleam", "awesome"), #("answer", "42")])
+  |> should_equal([#("gleam", "awesome"), #("answer", "42")])
 }
 
 pub fn get_req_cookies_test() {
   http.default_req()
   |> http.prepend_req_header("cookie", "k1=v1; k2=v2")
   |> http.get_req_cookies()
-  |> should.equal([#("k1", "v1"), #("k2", "v2")])
+  |> should_equal([#("k1", "v1"), #("k2", "v2")])
 
   // Standard Header list syntax
   http.default_req()
   |> http.prepend_req_header("cookie", "k1=v1, k2=v2")
   |> http.get_req_cookies()
-  |> should.equal([#("k1", "v1"), #("k2", "v2")])
+  |> should_equal([#("k1", "v1"), #("k2", "v2")])
 
   // Spread over multiple headers
   http.default_req()
   |> http.prepend_req_header("cookie", "k2=v2")
   |> http.prepend_req_header("cookie", "k1=v1")
   |> http.get_req_cookies()
-  |> should.equal([#("k1", "v1"), #("k2", "v2")])
+  |> should_equal([#("k1", "v1"), #("k2", "v2")])
 
   http.default_req()
   |> http.prepend_req_header("cookie", " k1  =  v1 ; k2=v2 ")
   |> http.get_req_cookies()
-  |> should.equal([#("k1", "v1"), #("k2", "v2")])
+  |> should_equal([#("k1", "v1"), #("k2", "v2")])
 
   http.default_req()
   |> http.prepend_req_header("cookie", "k1; =; =123")
   |> http.get_req_cookies()
-  |> should.equal([])
+  |> should_equal([])
 
   http.default_req()
   |> http.prepend_req_header("cookie", "k\r1=v2; k1=v\r2")
   |> http.get_req_cookies()
-  |> should.equal([])
+  |> should_equal([])
 }
 
 pub fn set_req_cookies_test() {
@@ -1066,12 +1069,12 @@ pub fn set_req_cookies_test() {
 
   request
   |> http.get_req_header("cookie")
-  |> should.equal(Ok("k1=v1"))
+  |> should_equal(Ok("k1=v1"))
 
   request
   |> http.set_req_cookie("k2", "v2")
   |> http.get_req_header("cookie")
-  |> should.equal(Ok("k1=v1; k2=v2"))
+  |> should_equal(Ok("k1=v1; k2=v2"))
 }
 
 pub fn get_resp_cookies_test() {
@@ -1088,7 +1091,7 @@ pub fn get_resp_cookies_test() {
   http.response(200)
   |> http.set_resp_cookie("k1", "v1", empty)
   |> http.get_resp_cookies
-  |> should.equal([#("k1", "v1")])
+  |> should_equal([#("k1", "v1")])
 
   let secure_with_attributes =
     http.CookieAttributes(
@@ -1103,7 +1106,7 @@ pub fn get_resp_cookies_test() {
   http.response(200)
   |> http.set_resp_cookie("k1", "v1", secure_with_attributes)
   |> http.get_resp_cookies
-  |> should.equal([
+  |> should_equal([
     #("k1", "v1"),
     #("Max-Age", "100"),
     #("Domain", "domain.test"),
@@ -1114,7 +1117,7 @@ pub fn get_resp_cookies_test() {
   http.response(200)
   |> http.prepend_resp_header("k1", "v1")
   |> http.get_resp_cookies
-  |> should.equal([])
+  |> should_equal([])
 }
 
 pub fn set_resp_cookie_test() {
@@ -1130,12 +1133,12 @@ pub fn set_resp_cookie_test() {
   http.response(200)
   |> http.set_resp_cookie("k1", "v1", empty)
   |> http.get_resp_header("set-cookie")
-  |> should.equal(Ok("k1=v1"))
+  |> should_equal(Ok("k1=v1"))
 
   http.response(200)
   |> http.set_resp_cookie("k1", "v1", http.cookie_defaults(Http))
   |> http.get_resp_header("set-cookie")
-  |> should.equal(Ok("k1=v1; Path=/; HttpOnly"))
+  |> should_equal(Ok("k1=v1; Path=/; HttpOnly"))
 
   let secure =
     http.CookieAttributes(
@@ -1149,7 +1152,7 @@ pub fn set_resp_cookie_test() {
   http.response(200)
   |> http.set_resp_cookie("k1", "v1", secure)
   |> http.get_resp_header("set-cookie")
-  |> should.equal(Ok(
+  |> should_equal(Ok(
     "k1=v1; Max-Age=100; Domain=domain.test; Path=/foo; Secure; HttpOnly; SameSite=Strict",
   ))
 }
@@ -1158,7 +1161,7 @@ pub fn expire_resp_cookie_test() {
   http.response(200)
   |> http.expire_resp_cookie("k1", http.cookie_defaults(Http))
   |> http.get_resp_header("set-cookie")
-  |> should.equal(Ok(
+  |> should_equal(Ok(
     "k1=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; Path=/; HttpOnly",
   ))
 }
@@ -1172,28 +1175,28 @@ pub fn get_req_origin_test() {
   |> http.prepend_req_header("origin", origin)
   |> http.prepend_req_header("referer", referer)
   |> http.get_req_origin
-  |> should.equal(Ok("http://example.com/"))
+  |> should_equal(Ok("http://example.com/"))
 
   // without 'origin' header
   http.default_req()
   |> http.prepend_req_header("referer", referer)
   |> http.get_req_origin
-  |> should.equal(Ok("http://example.com/"))
+  |> should_equal(Ok("http://example.com/"))
 
   // with neither 'origin' nor 'referer' headers
   http.default_req()
   |> http.get_req_origin
-  |> should.equal(Error(Nil))
+  |> should_equal(Error(Nil))
 
   // with bad 'referer' header - no scheme
   http.default_req()
   |> http.prepend_req_header("referer", "example.com")
   |> http.get_req_origin
-  |> should.equal(Error(Nil))
+  |> should_equal(Error(Nil))
 
   // with bad 'referer' header - no host
   http.default_req()
   |> http.prepend_req_header("referer", "ftp://")
   |> http.get_req_origin
-  |> should.equal(Error(Nil))
+  |> should_equal(Error(Nil))
 }
