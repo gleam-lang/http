@@ -14,7 +14,7 @@ import gleam/bit_string
 import gleam/dynamic.{Dynamic}
 import gleam/int
 import gleam/list
-import gleam/option.{None, Option, Some}
+import gleam/option.{Option}
 import gleam/regex
 import gleam/result
 import gleam/string
@@ -147,9 +147,9 @@ pub type Service(in, out) =
 ///
 pub fn req_to_uri(request: Request(a)) -> Uri {
   Uri(
-    scheme: Some(scheme_to_string(request.scheme)),
+    scheme: option.Some(scheme_to_string(request.scheme)),
     userinfo: option.None,
-    host: Some(request.host),
+    host: option.Some(request.host),
     port: request.port,
     path: request.path,
     query: request.query,
@@ -200,7 +200,7 @@ pub fn path_segments(request: Request(body)) -> List(String) {
 /// Decode the query of a request.
 pub fn get_query(request: Request(body)) -> Result(List(#(String, String)), Nil) {
   case request.query {
-    Some(query_string) -> uri.parse_query(query_string)
+    option.Some(query_string) -> uri.parse_query(query_string)
     option.None -> Ok([])
   }
 }
@@ -221,7 +221,7 @@ pub fn set_query(
     |> list.intersperse(string_builder.from_string("&"))
     |> string_builder.concat
     |> string_builder.to_string
-    |> Some
+    |> option.Some
   Request(..req, query: query)
 }
 
@@ -387,7 +387,7 @@ pub fn set_host(req: Request(body), host: String) -> Request(body) {
 /// Set the port of the request.
 ///
 pub fn set_port(req: Request(body), port: Int) -> Request(body) {
-  Request(..req, port: Some(port))
+  Request(..req, port: option.Some(port))
 }
 
 /// Set the path of the request.
@@ -503,7 +503,7 @@ pub fn cookie_defaults(scheme: Scheme) {
   CookieAttributes(
     max_age: option.None,
     domain: option.None,
-    path: Some("/"),
+    path: option.Some("/"),
     secure: scheme == Https,
     http_only: True,
     same_site: option.None,
@@ -525,18 +525,18 @@ fn cookie_attributes_to_list(attributes) {
     // Only when deleting cookies is the exception made to use the old format,
     // to ensure complete clearup of cookies if required by an application.
     case max_age {
-      Some(0) -> Some([epoch])
+      option.Some(0) -> option.Some([epoch])
       _ -> option.None
     },
     option.map(max_age, fn(max_age) { ["Max-Age=", int.to_string(max_age)] }),
     option.map(domain, fn(domain) { ["Domain=", domain] }),
     option.map(path, fn(path) { ["Path=", path] }),
     case secure {
-      True -> Some(["Secure"])
+      True -> option.Some(["Secure"])
       False -> option.None
     },
     case http_only {
-      True -> Some(["HttpOnly"])
+      True -> option.Some(["HttpOnly"])
       False -> option.None
     },
     option.map(
@@ -584,7 +584,7 @@ pub fn set_resp_cookie(resp, name, value, attributes) {
 ///
 /// Not the attributes value should be the same as when the response cookie was set.
 pub fn expire_resp_cookie(resp, name, attributes) {
-  let attrs = CookieAttributes(..attributes, max_age: Some(0))
+  let attrs = CookieAttributes(..attributes, max_age: option.Some(0))
   set_resp_cookie(resp, name, "", attrs)
 }
 
