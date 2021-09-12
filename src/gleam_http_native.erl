@@ -1,7 +1,7 @@
 -module(gleam_http_native).
--export([method_from_erlang/1]).
+-export([decode_method/1]).
 
-method_from_erlang(Term) ->
+decode_method(Term) ->
   case Term of
     "connect"     -> {ok, connect};
     "delete"      -> {ok, delete};
@@ -84,5 +84,5 @@ method_from_erlang(Term) ->
     <<"Post">>    -> {ok, post};
     <<"Put">>     -> {ok, put};
     <<"Trace">>   -> {ok, trace};
-    _             -> {error, nil}
+    _             -> {error, {decode_error, <<"HTTP method">>, gleam@dynamic:classify(Term)}}
   end.

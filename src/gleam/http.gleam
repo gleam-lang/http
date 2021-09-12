@@ -11,7 +11,7 @@
 // TODO: set_req_header
 // https://github.com/elixir-plug/plug/blob/dfebbebeb716c43c7dee4915a061bede06ec45f1/lib/plug/conn.ex#L776
 import gleam/bit_string
-import gleam/dynamic.{Dynamic}
+import gleam/dynamic.{DecodeError, Dynamic}
 import gleam/int
 import gleam/list
 import gleam/option.{Option}
@@ -112,8 +112,19 @@ pub fn scheme_from_string(scheme: String) -> Result(Scheme, Nil) {
   }
 }
 
-pub external fn method_from_dynamic(Dynamic) -> Result(Method, Nil) =
-  "gleam_http_native" "method_from_erlang"
+pub fn method_from_dynamic(value: Dynamic) -> Result(Method, DecodeError) {
+  do_method_from_dynamic(value)
+}
+
+if erlang {
+  external fn do_method_from_dynamic(Dynamic) -> Result(Method, DecodeError) =
+    "gleam_http_native" "decode_method"
+}
+
+if javascript {
+  external fn do_method_from_dynamic(Dynamic) -> Result(Method, DecodeError) =
+    "../gleam_http_native.js" "decode_method"
+}
 
 /// A HTTP header is a key-value pair. Header keys should be all lowercase
 /// characters.
