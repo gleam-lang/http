@@ -1,4 +1,4 @@
-// Gleam build.js version:2021-09-12
+// Gleam build.js version:2021-09-12.b
 
 import {
   rm,
@@ -104,6 +104,9 @@ async function fileExists(path) {
 
 async function test() {
   let gleamPackage = await build();
+  try {
+    await import("../test/polyfills.js");
+  } catch {}
 
   console.log("Running tests...");
 
@@ -117,14 +120,14 @@ async function test() {
 
     for await (let fnName of Object.keys(module)) {
       if (!fnName.endsWith("_test")) continue;
-      try {
-        await module[fnName]();
-        process.stdout.write(`\u001b[32m.\u001b[0m`);
-        passes++;
-      } catch (error) {
+      let error = await runTest(module[fnName]);
+      if (error) {
         let moduleName = "\n" + relative(dir, path).slice(0, -3);
         process.stdout.write(`\n❌ ${moduleName}.${fnName}: ${error}\n`);
         failures++;
+      } else {
+        process.stdout.write(`\u001b[32m.\u001b[0m`);
+        passes++;
       }
     }
   }
@@ -136,9 +139,24 @@ ${failures} failures`);
   process.exit(failures ? 1 : 0);
 }
 
+async function runTest(test) {
+  let output;
+  try {
+    output = await test();
+  } catch (error) {
+    return `//js(Error("${error.message}"))`;
+  }
+  // if (
+  //   typeof output === "Object" &&
+  //   output.__gleam_prelude_variant__ === "Error"
+  // ) {
+  //   return output.inspect();
+  // }
+}
+
 async function start() {
   let { name } = await build();
-  let { main } = await import(join(outDir(name), "main.js"));
+  let { main } = await import(join(outDir(name), "index.js"));
   return main();
 }
 
