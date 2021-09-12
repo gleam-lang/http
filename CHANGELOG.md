@@ -3,6 +3,7 @@
 ## Unrelease
 
 - Updated for Gleam stdlib v0.17.
+- Updated to work for Gleam JS.
 
 ## v2.0.1 - 2021-08-14
 
