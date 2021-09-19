@@ -607,8 +607,10 @@ pub fn get_req_origin(req: Request(body)) -> Result(String, Nil) {
   get_req_header(req, "origin")
   |> result.lazy_or(fn() {
     try ref = get_req_header(req, "referer")
-    ref
-    |> uri.parse
+    try uri =
+      ref
+      |> uri.parse
+    uri
     |> uri.origin
   })
 }
