@@ -17,6 +17,6 @@ _build
 *.iml
 rebar3.crashdump
 *~
-gen
 doc
 target
+build

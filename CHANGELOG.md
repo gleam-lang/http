@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.1.0 - 2021-11-26
+
+- Converted to use the Gleam build tool.
+
 ## v2.0.2 - 2021-09-19
 
 - Updated for Gleam stdlib v0.17.1.
