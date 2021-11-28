@@ -50,9 +50,12 @@ alphabetically.
 Client adapters are used to send HTTP requests to services over the network.
 Here's a full list of the client adapters available, sorted alphabetically.
 
-| Adapter                      | About                                                |
-| ---                          | ---                                                  |
-| [gleam_httpc][httpc-adapter] | [httpc][httpc] is a HTTP client included with Erlang |
+| Adapter                      | About                                                    |
+| ---                          | ---                                                      |
+| [gleam_fetch][fetch-adapter] | [fetch][fetch] is a HTTP client included with JavaScript |
+| [gleam_httpc][httpc-adapter] | [httpc][httpc] is a HTTP client included with Erlang     |
 
 [httpc]: https://erlang.org/doc/man/httpc.html
 [httpc-adapter]: https://github.com/gleam-lang/httpc
+[fetch]: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
+[fetch-adapter]: https://github.com/gleam-lang/fetch
