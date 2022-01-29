@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.0.0 - Unreleased
+
+- Updated for Gleam v0.19.0. As a result the `method_from_dynamic` function now
+  returns a list of decode errors.
+
 ## v2.1.0 - 2021-11-26
 
 - Converted to use the Gleam build tool.
