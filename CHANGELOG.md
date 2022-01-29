@@ -4,6 +4,7 @@
 
 - Updated for Gleam v0.19.0. As a result the `method_from_dynamic` function now
   returns a list of decode errors.
+- The default cookie attributes now includes `SameSite=Lax`.
 
 ## v2.1.0 - 2021-11-26
 

@@ -1,6 +1,12 @@
-import gleam/http.{Delete, Patch, Post, Put, Request, Service}
+import gleam/http.{Delete, Patch, Post, Put}
+import gleam/http/request.{Request}
+import gleam/http/response.{Response}
 import gleam/list
 import gleam/result
+
+// TODO: document
+pub type Service(in, out) =
+  fn(Request(in)) -> Response(out)
 
 pub type Middleware(before_req, before_resp, after_req, after_resp) =
   fn(Service(before_req, before_resp)) -> Service(after_req, after_resp)
@@ -8,20 +14,20 @@ pub type Middleware(before_req, before_resp, after_req, after_resp) =
 /// A middleware that transform the response body returned by the service using
 /// a given function.
 ///
-pub fn map_resp_body(
+pub fn map_response_body(
   service: Service(req, a),
   with mapper: fn(a) -> b,
 ) -> Service(req, b) {
   fn(req) {
     req
     |> service
-    |> http.map_resp_body(mapper)
+    |> response.map(mapper)
   }
 }
 
 /// A middleware that prepends a header to the request.
 ///
-pub fn prepend_resp_header(
+pub fn prepend_response_header(
   service: Service(req, resp),
   key: String,
   value: String,
@@ -29,7 +35,7 @@ pub fn prepend_resp_header(
   fn(req) {
     req
     |> service
-    |> http.prepend_resp_header(key, value)
+    |> response.prepend_header(key, value)
   }
 }
 
@@ -40,8 +46,8 @@ fn ensure_post(req: Request(a)) {
   }
 }
 
-fn get_override_method(req) {
-  try query_params = http.get_query(req)
+fn get_override_method(request: Request(t)) -> Result(http.Method, Nil) {
+  try query_params = request.get_query(request)
   try method = list.key_find(query_params, "_method")
   try method = http.parse_method(method)
   case method {
@@ -65,12 +71,12 @@ fn get_override_method(req) {
 ///    </form>
 ///
 pub fn method_override(service: Service(req, resp)) -> Service(req, resp) {
-  fn(req) {
-    req
+  fn(request) {
+    request
     |> ensure_post
     |> result.then(get_override_method)
-    |> result.map(http.set_method(req, _))
-    |> result.unwrap(req)
+    |> result.map(request.set_method(request, _))
+    |> result.unwrap(request)
     |> service
   }
 }
