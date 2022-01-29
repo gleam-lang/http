@@ -112,18 +112,21 @@ pub fn scheme_from_string(scheme: String) -> Result(Scheme, Nil) {
   }
 }
 
-pub fn method_from_dynamic(value: Dynamic) -> Result(Method, DecodeError) {
-  do_method_from_dynamic(value)
+pub fn method_from_dynamic(value: Dynamic) -> Result(Method, List(DecodeError)) {
+  case do_method_from_dynamic(value) {
+    Ok(method) -> Ok(method)
+    Error(_) -> Error([DecodeError("HTTP method", dynamic.classify(value), [])])
+  }
 }
 
 if erlang {
-  external fn do_method_from_dynamic(Dynamic) -> Result(Method, DecodeError) =
+  external fn do_method_from_dynamic(Dynamic) -> Result(Method, nil) =
     "gleam_http_native" "decode_method"
 }
 
 if javascript {
-  external fn do_method_from_dynamic(Dynamic) -> Result(Method, DecodeError) =
-    "../gleam_http_native.js" "decode_method"
+  external fn do_method_from_dynamic(Dynamic) -> Result(Method, Nil) =
+    "../gleam_http_native.mjs" "decode_method"
 }
 
 /// A HTTP header is a key-value pair. Header keys should be all lowercase

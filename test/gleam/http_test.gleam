@@ -270,7 +270,7 @@ if erlang {
     "thingy"
     |> make_atom
     |> http.method_from_dynamic
-    |> should_equal(Error(DecodeError("HTTP method", "Atom")))
+    |> should_equal(Error([DecodeError("HTTP method", "Atom", [])]))
   }
 
   pub fn charlist_to_method_test() {
@@ -440,7 +440,7 @@ if erlang {
     |> to_charlist
     |> dynamic.from
     |> http.method_from_dynamic
-    |> should_equal(Error(DecodeError("HTTP method", "List")))
+    |> should_equal(Error([DecodeError("HTTP method", "List", [])]))
   }
 }
 
@@ -583,7 +583,7 @@ pub fn method_from_dynamic_test() {
   "thingy"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should_equal(Error(DecodeError("HTTP method", "String")))
+  |> should_equal(Error([DecodeError("HTTP method", "String", [])]))
 }
 
 pub fn method_to_string_test() {

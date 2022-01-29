@@ -1,8 +1,4 @@
-import { Ok, Error } from "./gleam.js";
-import {
-  DecodeError,
-  classify,
-} from "gleam-packages/gleam_stdlib/gleam/dynamic.js";
+import { Ok, Error } from "./gleam.mjs";
 import {
   Get,
   Post,
@@ -13,7 +9,7 @@ import {
   Connect,
   Options,
   Patch,
-} from "./gleam/http.js";
+} from "./gleam/http.mjs";
 
 export function decode_method(value) {
   try {
@@ -38,5 +34,5 @@ export function decode_method(value) {
         return new Ok(new Patch());
     }
   } catch {}
-  return new Error(new DecodeError("HTTP method", classify(value)));
+  return new Error(undefined);
 }
