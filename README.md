@@ -5,24 +5,28 @@ Types and functions for HTTP clients and servers!
 ## HTTP Service Example
 
 ```rust
+import gleam/http
 import gleam/http/elli
-import gleam/http.{Request, Response}
+import gleam/http/response.{Response}
+import gleam/http/request.{Request}
 import gleam/bit_builder.{BitBuilder}
+import gleam/erlang
 
 // Define a HTTP service
 //
-pub fn my_service(req: Request(BitString)) -> Response(BitBuilder) {
+pub fn my_service(request: Request(t)) -> Response(BitBuilder) {
   let body = bit_builder.from_string("Hello, world!")
 
-  http.response(200)
-  |> http.prepend_resp_header("made-with", "Gleam")
-  |> http.set_resp_body(body)
+  response.new(200)
+  |> response.prepend_header("made-with", "Gleam")
+  |> response.set_body(body)
 }
 
 // Start it on port 3000 using the Elli web server
 //
-pub fn start() {
+pub fn main() {
   elli.start(my_service, on_port: 3000)
+  erlang.sleep_forever()
 }
 ```
 
