@@ -4,13 +4,11 @@ Types and functions for HTTP clients and servers!
 
 ## HTTP Service Example
 
-```rust
-import gleam/http
+```gleam
 import gleam/http/elli
 import gleam/http/response.{Response}
 import gleam/http/request.{Request}
 import gleam/bit_builder.{BitBuilder}
-import gleam/erlang
 
 // Define a HTTP service
 //
@@ -25,8 +23,7 @@ pub fn my_service(request: Request(t)) -> Response(BitBuilder) {
 // Start it on port 3000 using the Elli web server
 //
 pub fn main() {
-  elli.start(my_service, on_port: 3000)
-  erlang.sleep_forever()
+  elli.become(my_service, on_port: 3000)
 }
 ```
 
