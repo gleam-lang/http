@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.0.1 - 2022-05-15
+
+- Fixed some warnings from unused imports.
+
 ## v3.0.0 - 2022-01-29
 
 - Updated for Gleam v0.19.0. As a result the `method_from_dynamic` function now
