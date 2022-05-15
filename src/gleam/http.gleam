@@ -5,16 +5,8 @@
 ////
 //// This module does not implement a HTTP client or HTTP server, but it can be used as a base for them.
 
-import gleam/bit_string
 import gleam/dynamic.{DecodeError, Dynamic}
-import gleam/int
-import gleam/list
-import gleam/option
-import gleam/regex
-import gleam/result
 import gleam/string
-import gleam/string_builder
-import gleam/uri
 
 /// HTTP standard method as defined by [RFC 2616](https://tools.ietf.org/html/rfc2616),
 /// and PATCH which is defined by [RFC 5789](https://tools.ietf.org/html/rfc5789).

@@ -6,9 +6,7 @@ import gleam/http/cookie
 import gleam/option.{None, Option, Some}
 import gleam/uri.{Uri}
 import gleam/list
-import gleam/regex
 import gleam/string
-import gleam/result
 import gleam/string_builder
 
 // TODO: document

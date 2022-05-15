@@ -3,7 +3,6 @@
 import gleam/http.{Header}
 import gleam/http/cookie
 import gleam/list
-import gleam/regex
 import gleam/string
 import gleam/option
 

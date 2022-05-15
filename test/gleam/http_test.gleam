@@ -1,9 +1,5 @@
 import gleam/dynamic.{DecodeError}
-import gleam/string_builder
-import gleam/string
 import gleam/http
-import gleam/option
-import gleam/result
 import gleeunit/should
 
 pub fn parse_method_test() {
