@@ -11,7 +11,7 @@ pub fn redirect_test() {
   should.equal(Ok("/other"), response.get_header(response, "location"))
 }
 
-pub fn map_resp_body_test() {
+pub fn map_body_test() {
   let response = Response(status: 200, headers: [], body: "abcd")
   let expected_updated_body = "dcba"
   let updated_response =
@@ -22,7 +22,7 @@ pub fn map_resp_body_test() {
   |> should.equal(expected_updated_body)
 }
 
-pub fn try_map_resp_body_test() {
+pub fn try_map_body_test() {
   let transform = fn(_old_body) { Ok("new body") }
 
   let response = response.new(200)
@@ -36,7 +36,7 @@ pub fn try_map_resp_body_test() {
   |> should.equal(Error("transform failure"))
 }
 
-pub fn get_resp_header_test() {
+pub fn get_header_test() {
   let response =
     response.new(200)
     |> response.prepend_header("x-foo", "x")
@@ -55,7 +55,18 @@ pub fn get_resp_header_test() {
   |> should.equal([#("x-bar", "y"), #("x-foo", "x")])
 }
 
-pub fn resp_body_test() {
+pub fn set_header_test() {
+  // sets header and replaces existing
+  let response =
+    response.new(200)
+    |> response.set_header("x-foo", "x")
+    |> response.set_header("x-foo", "x")
+
+  response.headers
+  |> should.equal([#("x-foo", "x")])
+}
+
+pub fn set_body_test() {
   let response =
     response.new(200)
     |> response.set_body("Hello, World!")

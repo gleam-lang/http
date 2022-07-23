@@ -275,6 +275,32 @@ pub fn set_path_test() {
   |> should.equal("/gleam-lang")
 }
 
+pub fn set_req_header_test() {
+  let request =
+    Request(
+      method: http.Get,
+      headers: [],
+      body: Nil,
+      scheme: http.Https,
+      host: "example.com",
+      port: None,
+      path: "/",
+      query: None,
+    )
+    |> request.set_header("gleam", "awesome")
+
+  request.headers
+  |> should.equal([#("gleam", "awesome")])
+
+  // Set updates existing
+  let request =
+    request
+    |> request.set_header("gleam", "quite good")
+
+  request.headers
+  |> should.equal([#("gleam", "quite good")])
+}
+
 pub fn prepend_req_header_test() {
   let headers = []
   let request =
@@ -300,6 +326,18 @@ pub fn prepend_req_header_test() {
   // request should have two headers now
   request.headers
   |> should.equal([#("gleam", "awesome"), #("answer", "42")])
+
+  let request =
+    request
+    |> request.prepend_header("gleam", "awesome")
+
+  // request repeats the existing header
+  request.headers
+  |> should.equal([
+    #("gleam", "awesome"),
+    #("gleam", "awesome"),
+    #("answer", "42"),
+  ])
 }
 
 pub fn get_req_cookies_test() {
