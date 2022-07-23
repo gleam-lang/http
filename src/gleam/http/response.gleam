@@ -1,5 +1,3 @@
-// TODO: set_header
-// https://github.com/elixir-plug/plug/blob/dfebbebeb716c43c7dee4915a061bede06ec45f1/lib/plug/conn.ex#L776
 import gleam/http.{Header}
 import gleam/http/cookie
 import gleam/list
@@ -35,14 +33,28 @@ pub fn new(status: Int) -> Response(String) {
 
 /// Get the value for a given header.
 ///
-/// If the request does not have that header then `Error(Nil)` is returned.
+/// If the response does not have that header then `Error(Nil)` is returned.
 ///
 pub fn get_header(response: Response(body), key: String) -> Result(String, Nil) {
   list.key_find(response.headers, string.lowercase(key))
 }
 
-// TODO: document
-// https://github.com/elixir-plug/plug/blob/dfebbebeb716c43c7dee4915a061bede06ec45f1/lib/plug/conn.ex#L809
+/// Set the header with the given value under the given header key.
+///
+/// If the response already has that key, it is replaced.
+pub fn set_header(
+  response: Response(body),
+  key: String,
+  value: String,
+) -> Response(body) {
+  let headers = list.key_set(response.headers, key, string.lowercase(value))
+  Response(..response, headers: headers)
+}
+
+/// Prepend the header with the given value under the given header key.
+///
+/// Similar to `set_header` except if the header already exists it prepends
+/// another header with the same key.
 pub fn prepend_header(
   response: Response(body),
   key: String,

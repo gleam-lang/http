@@ -1,5 +1,3 @@
-// TODO: set_header
-// https://github.com/elixir-plug/plug/blob/dfebbebeb716c43c7dee4915a061bede06ec45f1/lib/plug/conn.ex#L776
 // TODO: validate_req
 import gleam/http.{Get, Header, Method, Scheme}
 import gleam/http/cookie
@@ -69,8 +67,22 @@ pub fn get_header(request: Request(body), key: String) -> Result(String, Nil) {
   list.key_find(request.headers, string.lowercase(key))
 }
 
-// TODO: document
-// https://github.com/elixir-plug/plug/blob/dfebbebeb716c43c7dee4915a061bede06ec45f1/lib/plug/conn.ex#L809
+/// Set the header with the given value under the given header key.
+///
+/// If already present, it is replaced.
+pub fn set_header(
+  request: Request(body),
+  key: String,
+  value: String,
+) -> Request(body) {
+  let headers = list.key_set(request.headers, key, string.lowercase(value))
+  Request(..request, headers: headers)
+}
+
+/// Prepend the header with the given value under the given header key.
+///
+/// Similar to `set_header` except if the header already exists it prepends
+/// another header with the same key.
 pub fn prepend_header(
   request: Request(body),
   key: String,
@@ -80,7 +92,7 @@ pub fn prepend_header(
   Request(..request, headers: headers)
 }
 
-// TODO: record update syntax
+// TODO: record update syntax, which can't be done currently as body type changes
 /// Set the body of the request, overwriting any existing body.
 ///
 pub fn set_body(req: Request(old_body), body: new_body) -> Request(new_body) {
