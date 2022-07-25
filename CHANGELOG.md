@@ -1,5 +1,7 @@
 # Changelog
 
+- Added `set_header` to `request` and `response`.
+
 ## v3.0.1 - 2022-05-15
 
 - Fixed some warnings from unused imports.
