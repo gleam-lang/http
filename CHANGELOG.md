@@ -1,5 +1,7 @@
 # Changelog
 
+## v3.1.0 - 2022-08-05
+
 - Added `set_header` to `request` and `response`.
 
 ## v3.0.1 - 2022-05-15
