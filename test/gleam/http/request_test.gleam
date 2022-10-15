@@ -301,6 +301,42 @@ pub fn set_req_header_test() {
   |> should.equal([#("gleam", "quite good")])
 }
 
+pub fn set_request_header_maintains_value_casing_test() {
+  let request =
+    Request(
+      method: http.Get,
+      headers: [],
+      body: Nil,
+      scheme: http.Https,
+      host: "example.com",
+      port: None,
+      path: "/",
+      query: None,
+    )
+    |> request.set_header("gleam", "UPPERCASE_AWESOME")
+
+  request.headers
+  |> should.equal([#("gleam", "UPPERCASE_AWESOME")])
+}
+
+pub fn set_request_header_lowercases_key_test() {
+  let request =
+    Request(
+      method: http.Get,
+      headers: [],
+      body: Nil,
+      scheme: http.Https,
+      host: "example.com",
+      port: None,
+      path: "/",
+      query: None,
+    )
+    |> request.set_header("UPPERCASE_GLEAM", "awesome")
+
+  request.headers
+  |> should.equal([#("uppercase_gleam", "awesome")])
+}
+
 pub fn prepend_req_header_test() {
   let headers = []
   let request =
