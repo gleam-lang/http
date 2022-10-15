@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.1.1 - 2022-10-15
+
+- Fixed a bug where the `request.set_header` function would lowercase the value
+  rather than the key.
+
 ## v3.1.0 - 2022-08-05
 
 - Added `set_header` to `request` and `response`.
