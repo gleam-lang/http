@@ -47,9 +47,9 @@ fn ensure_post(req: Request(a)) {
 }
 
 fn get_override_method(request: Request(t)) -> Result(http.Method, Nil) {
-  try query_params = request.get_query(request)
-  try method = list.key_find(query_params, "_method")
-  try method = http.parse_method(method)
+  use query_params <- result.then(request.get_query(request))
+  use method <- result.then(list.key_find(query_params, "_method"))
+  use method <- result.then(http.parse_method(method))
   case method {
     Put | Patch | Delete -> Ok(method)
     _ -> Error(Nil)

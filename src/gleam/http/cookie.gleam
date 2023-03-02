@@ -1,3 +1,5 @@
+import gleam/result
+
 import gleam/int
 import gleam/list
 import gleam/regex
@@ -97,7 +99,7 @@ pub fn set_header(name: String, value: String, attributes: Attributes) -> String
 /// discarded.
 ///
 pub fn parse(cookie_string: String) -> List(#(String, String)) {
-  assert Ok(re) = regex.from_string("[,;]")
+  let assert Ok(re) = regex.from_string("[,;]")
   regex.split(re, cookie_string)
   |> list.filter_map(fn(pair) {
     case string.split_once(string.trim(pair), "=") {
@@ -105,8 +107,8 @@ pub fn parse(cookie_string: String) -> List(#(String, String)) {
       Ok(#(key, value)) -> {
         let key = string.trim(key)
         let value = string.trim(value)
-        try _ = check_token(key)
-        try _ = check_token(value)
+        use _ <- result.then(check_token(key))
+        use _ <- result.then(check_token(value))
         Ok(#(key, value))
       }
       Error(Nil) -> Error(Nil)

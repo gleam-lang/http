@@ -1,3 +1,5 @@
+import gleam/result
+
 import gleam/http.{Header}
 import gleam/http/cookie
 import gleam/list
@@ -18,7 +20,7 @@ pub fn try_map(
   response: Response(old_body),
   transform: fn(old_body) -> Result(new_body, error),
 ) -> Result(Response(new_body), error) {
-  try body = transform(response.body)
+  use body <- result.then(transform(response.body))
   Ok(set_body(response, body))
 }
 

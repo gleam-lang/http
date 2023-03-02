@@ -1,3 +1,5 @@
+import gleam/result
+
 // TODO: validate_req
 import gleam/http.{Get, Header, Method, Scheme}
 import gleam/http/cookie
@@ -38,13 +40,15 @@ pub fn to_uri(request: Request(a)) -> Uri {
 /// Construct a request from a URI.
 ///
 pub fn from_uri(uri: Uri) -> Result(Request(String), Nil) {
-  try scheme =
+  use scheme <- result.then(
     uri.scheme
     |> option.unwrap("")
-    |> http.scheme_from_string
-  try host =
+    |> http.scheme_from_string,
+  )
+  use host <- result.then(
     uri.host
-    |> option.to_result(Nil)
+    |> option.to_result(Nil),
+  )
   let req =
     Request(
       method: http.Get,
