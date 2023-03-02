@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.1.2 - 2023-03-02
+
+- Updated for Gleam v0.27.0.
+
 ## v3.1.1 - 2022-10-15
 
 - Fixed a bug where the `request.set_header` function would lowercase the value
