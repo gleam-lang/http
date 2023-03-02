@@ -1,5 +1,4 @@
 import gleam/result
-
 // TODO: validate_req
 import gleam/http.{Get, Header, Method, Scheme}
 import gleam/http/cookie
