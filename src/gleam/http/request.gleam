@@ -1,6 +1,6 @@
 import gleam/result
 // TODO: validate_req
-import gleam/http.{Get, Post, Header, Method, Scheme}
+import gleam/http.{Get, Header, Method, Scheme}
 import gleam/http/cookie
 import gleam/option.{None, Option, Some}
 import gleam/uri.{Uri}
@@ -191,24 +191,15 @@ pub fn new() -> Request(String) {
 
 // Helper method for constructing a Request from a url String.
 fn from_url(url: String) -> Result(Request(String), Nil) {
-    result.map(uri.parse(url), fn(parsed_uri) {
-      from_uri(parsed_uri)
-    }) |> result.flatten
+  result.map(uri.parse(url), fn(parsed_uri) { from_uri(parsed_uri) })
+  |> result.flatten
 }
 
-/// Construct a default get request from a provided url.
-///
-pub fn get(url: String) -> Result(Request(String), Nil) {
-  from_url(url) |> result.map(fn(req) {
-    req |> set_method(Get)
-  })
-}
-
-/// Construct a default post request from a provided url and body.
-///
-pub fn post(url: String, body: body) -> Result(Request(body), Nil) {
-  from_url(url) |> result.map(fn(req) {
-    req |> set_method(Post) |> set_body(body)
+pub fn route(method: Method, url: String) -> Result(Request(String), Nil) {
+  from_url(url)
+  |> result.map(fn(req) {
+    req
+    |> set_method(method)
   })
 }
 

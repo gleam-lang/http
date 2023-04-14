@@ -4,6 +4,7 @@ import gleam/string
 import gleam/http.{Https}
 import gleam/http/request.{Request}
 import gleeunit/should
+import gleam/result
 
 pub fn req_to_uri_test() {
   let make_request = fn(scheme) -> Request(Nil) {
@@ -66,7 +67,8 @@ pub fn req_from_uri_test() {
 pub fn get_req_from_string_test() {
   let url = "https://sky.net/sarah/connor?foo=x%20y"
 
-  request.get(url) |> should.equal(Ok(Request(
+  request.route(http.Get, url)
+  |> should.equal(Ok(Request(
     method: http.Get,
     headers: [],
     body: "",
@@ -81,7 +83,9 @@ pub fn get_req_from_string_test() {
 pub fn post_req_from_string_test() {
   let url = "https://sky.net/sarah/connor?foo=x%20y"
 
-  request.post(url, "test body") |> should.equal(Ok(Request(
+  request.route(http.Post, url)
+  |> result.map(fn(req) { request.set_body(req, "test body") })
+  |> should.equal(Ok(Request(
     method: http.Post,
     headers: [],
     body: "test body",
