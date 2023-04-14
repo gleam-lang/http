@@ -174,10 +174,17 @@ pub fn set_method(req: Request(body), method: Method) -> Request(body) {
 }
 
 /// Create a request from a provided URI string. 
-pub fn new(url: String) -> Request(String) {
-  let assert Ok(parsed_uri) = uri.parse(url)
-  let assert Ok(req) = from_uri(parsed_uri)
-  req
+pub fn new() -> Request(String) {
+  Request(
+    method: http.Get,
+    headers: [],
+    body: "",
+    scheme: http.Https,
+    host: "localhost",
+    port: option.None,
+    path: "",
+    query: option.None,
+  )
 }
 
 // Helper method for constructing a Request from a url String.
@@ -186,7 +193,7 @@ fn from_url(url: String) -> Result(Request(String), Nil) {
   |> result.flatten
 }
 
-pub fn route(method: Method, url: String) -> Result(Request(String), Nil) {
+pub fn for(method: Method, url: String) -> Result(Request(String), Nil) {
   from_url(url)
   |> result.map(fn(req) {
     req
