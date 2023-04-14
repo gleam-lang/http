@@ -13,43 +13,43 @@ pub fn method_override_test() {
 
   // No overriding without the query param
   let assert Response(200, [], Get) =
-    request.new()
+    request.new("http://localhost")
     |> request.set_method(Get)
     |> service
 
   let assert Response(200, [], Post) =
-    request.new()
+    request.new("http://localhost")
     |> request.set_method(Post)
     |> service
 
   // Can override
   let assert Response(200, [], Delete) =
-    request.new()
+    request.new("http://localhost")
     |> request.set_method(Post)
     |> request.set_query([#("_method", "DELETE")])
     |> service
 
   let assert Response(200, [], Patch) =
-    request.new()
+    request.new("http://localhost")
     |> request.set_method(Post)
     |> request.set_query([#("_method", "PATCH")])
     |> service
 
   let assert Response(200, [], Put) =
-    request.new()
+    request.new("http://localhost")
     |> request.set_method(Post)
     |> request.set_query([#("_method", "PUT")])
     |> service
 
   // Cannot override with other methods
   let assert Response(200, [], Post) =
-    request.new()
+    request.new("http://localhost")
     |> request.set_method(Post)
     |> request.set_query([#("_method", "OPTIONS")])
     |> service
 
   let assert Response(200, [], Post) =
-    request.new()
+    request.new("http://localhost")
     |> request.set_method(Post)
     |> request.set_query([#("_method", "SOMETHING")])
     |> service

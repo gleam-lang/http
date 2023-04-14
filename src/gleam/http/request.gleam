@@ -1,6 +1,6 @@
 import gleam/result
 // TODO: validate_req
-import gleam/http.{Get, Post, Header, Method, Scheme}
+import gleam/http.{Get, Header, Method, Post, Scheme}
 import gleam/http/cookie
 import gleam/option.{None, Option, Some}
 import gleam/uri.{Uri}
@@ -173,43 +173,34 @@ pub fn set_method(req: Request(body), method: Method) -> Request(body) {
   Request(..req, method: method)
 }
 
-/// A request with commonly used default values. This request can be used as
-/// an initial value and then update to create the desired request.
-///
-pub fn new() -> Request(String) {
-  Request(
-    method: Get,
-    headers: [],
-    body: "",
-    scheme: http.Https,
-    host: "localhost",
-    port: option.None,
-    path: "",
-    query: option.None,
-  )
+/// Create a request from a provided URI string. 
+pub fn new(url: String) -> Request(String) {
+  let assert Ok(parsed_uri) = uri.parse(url)
+  let assert Ok(req) = from_uri(parsed_uri)
+  req
 }
 
 // Helper method for constructing a Request from a url String.
 fn from_url(url: String) -> Result(Request(String), Nil) {
-    result.map(uri.parse(url), fn(parsed_uri) {
-      from_uri(parsed_uri)
-    }) |> result.flatten
+  use parsed_uri <- result.then(uri.parse(url))
+  from_uri(parsed_uri)
 }
 
 /// Construct a default get request from a provided url.
 ///
 pub fn get(url: String) -> Result(Request(String), Nil) {
-  from_url(url) |> result.map(fn(req) {
-    req |> set_method(Get)
-  })
+  use req <- result.map(from_url(url))
+  req
+  |> set_method(Get)
 }
 
 /// Construct a default post request from a provided url and body.
 ///
 pub fn post(url: String, body: body) -> Result(Request(body), Nil) {
-  from_url(url) |> result.map(fn(req) {
-    req |> set_method(Post) |> set_body(body)
-  })
+  use req <- result.map(from_url(url))
+  req
+  |> set_method(Post)
+  |> set_body(body)
 }
 
 /// Set the scheme (protocol) of the request.
