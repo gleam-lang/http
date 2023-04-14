@@ -239,7 +239,7 @@ pub fn set_method_test() {
 
 pub fn map_req_body_test() {
   let request =
-    request.new()
+    request.new("http://localhost")
     |> request.set_body("abcd")
 
   let expected_updated_body = "dcba"
@@ -250,7 +250,7 @@ pub fn map_req_body_test() {
 }
 
 pub fn set_scheme_test() {
-  let original_request = request.new()
+  let original_request = request.new("https://localhost")
 
   original_request.scheme
   |> should.equal(Https)
@@ -266,7 +266,7 @@ pub fn set_scheme_test() {
 
 pub fn set_host_test() {
   let new_host = "github"
-  let original_request = request.new()
+  let original_request = request.new("http://localhost")
   original_request.host
   |> should.equal("localhost")
 
@@ -280,7 +280,7 @@ pub fn set_host_test() {
 }
 
 pub fn set_port_test() {
-  let original_request = request.new()
+  let original_request = request.new("http://localhost")
 
   original_request.port
   |> should.equal(None)
@@ -296,7 +296,7 @@ pub fn set_port_test() {
 
 pub fn set_path_test() {
   let new_path = "/gleam-lang"
-  let original_request = request.new()
+  let original_request = request.new("http://localhost")
   original_request.path
   |> should.equal("")
 
@@ -411,35 +411,35 @@ pub fn prepend_req_header_test() {
 }
 
 pub fn get_req_cookies_test() {
-  request.new()
+  request.new("http://localhost")
   |> request.prepend_header("cookie", "k1=v1; k2=v2")
   |> request.get_cookies()
   |> should.equal([#("k1", "v1"), #("k2", "v2")])
 
   // Standard Header list syntax
-  request.new()
+  request.new("http://localhost")
   |> request.prepend_header("cookie", "k1=v1, k2=v2")
   |> request.get_cookies()
   |> should.equal([#("k1", "v1"), #("k2", "v2")])
 
   // Spread over multiple headers
-  request.new()
+  request.new("http://localhost")
   |> request.prepend_header("cookie", "k2=v2")
   |> request.prepend_header("cookie", "k1=v1")
   |> request.get_cookies()
   |> should.equal([#("k1", "v1"), #("k2", "v2")])
 
-  request.new()
+  request.new("http://localhost")
   |> request.prepend_header("cookie", " k1  =  v1 ; k2=v2 ")
   |> request.get_cookies()
   |> should.equal([#("k1", "v1"), #("k2", "v2")])
 
-  request.new()
+  request.new("http://localhost")
   |> request.prepend_header("cookie", "k1; =; =123")
   |> request.get_cookies()
   |> should.equal([])
 
-  request.new()
+  request.new("http://localhost")
   |> request.prepend_header("cookie", "k\r1=v2; k1=v\r2")
   |> request.get_cookies()
   |> should.equal([])
@@ -447,7 +447,7 @@ pub fn get_req_cookies_test() {
 
 pub fn set_req_cookies_test() {
   let request =
-    request.new()
+    request.new("http://localhost")
     |> request.set_cookie("k1", "v1")
 
   request

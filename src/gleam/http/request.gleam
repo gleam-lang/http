@@ -1,6 +1,6 @@
 import gleam/result
 // TODO: validate_req
-import gleam/http.{Get, Header, Method, Scheme}
+import gleam/http.{Header, Method, Scheme}
 import gleam/http/cookie
 import gleam/option.{None, Option, Some}
 import gleam/uri.{Uri}
@@ -173,20 +173,11 @@ pub fn set_method(req: Request(body), method: Method) -> Request(body) {
   Request(..req, method: method)
 }
 
-/// A request with commonly used default values. This request can be used as
-/// an initial value and then update to create the desired request.
-///
-pub fn new() -> Request(String) {
-  Request(
-    method: Get,
-    headers: [],
-    body: "",
-    scheme: http.Https,
-    host: "localhost",
-    port: option.None,
-    path: "",
-    query: option.None,
-  )
+/// Create a request from a provided URI string. 
+pub fn new(url: String) -> Request(String) {
+  let assert Ok(parsed_uri) = uri.parse(url)
+  let assert Ok(req) = from_uri(parsed_uri)
+  req
 }
 
 // Helper method for constructing a Request from a url String.
