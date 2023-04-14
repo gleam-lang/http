@@ -63,6 +63,36 @@ pub fn req_from_uri_test() {
   )))
 }
 
+pub fn get_req_from_string_test() {
+  let url = "https://sky.net/sarah/connor?foo=x%20y"
+
+  request.get(url) |> should.equal(Ok(Request(
+    method: http.Get,
+    headers: [],
+    body: "",
+    scheme: http.Https,
+    host: "sky.net",
+    port: None,
+    path: "/sarah/connor",
+    query: Some("foo=x%20y"),
+  )))
+}
+
+pub fn post_req_from_string_test() {
+  let url = "https://sky.net/sarah/connor?foo=x%20y"
+
+  request.post(url, "test body") |> should.equal(Ok(Request(
+    method: http.Post,
+    headers: [],
+    body: "test body",
+    scheme: http.Https,
+    host: "sky.net",
+    port: None,
+    path: "/sarah/connor",
+    query: Some("foo=x%20y"),
+  )))
+}
+
 pub fn path_segments_test() {
   let request =
     Request(
