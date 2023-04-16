@@ -1,6 +1,6 @@
 import gleam/result
 // TODO: validate_req
-import gleam/http.{Header, Method, Scheme}
+import gleam/http.{Get, Header, Method, Scheme}
 import gleam/http/cookie
 import gleam/option.{None, Option, Some}
 import gleam/uri.{Uri}
@@ -50,7 +50,7 @@ pub fn from_uri(uri: Uri) -> Result(Request(String), Nil) {
   )
   let req =
     Request(
-      method: http.Get,
+      method: Get,
       headers: [],
       body: "",
       scheme: scheme,
@@ -178,7 +178,7 @@ pub fn set_method(req: Request(body), method: Method) -> Request(body) {
 ///
 pub fn new() -> Request(String) {
   Request(
-    method: http.Get,
+    method: Get,
     headers: [],
     body: "",
     scheme: http.Https,
