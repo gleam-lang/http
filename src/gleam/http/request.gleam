@@ -173,7 +173,9 @@ pub fn set_method(req: Request(body), method: Method) -> Request(body) {
   Request(..req, method: method)
 }
 
-/// Create a request from a provided URI string. 
+/// A request with commonly used default values. This request can be used as
+/// an initial value and then update to create the desired request.
+///
 pub fn new() -> Request(String) {
   Request(
     method: http.Get,
@@ -188,6 +190,7 @@ pub fn new() -> Request(String) {
 }
 
 /// Construct a request from a URL string
+///
 pub fn to(url: String) -> Result(Request(String), Nil) {
   result.map(uri.parse(url), fn(parsed_uri) { from_uri(parsed_uri) })
   |> result.flatten
