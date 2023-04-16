@@ -187,18 +187,10 @@ pub fn new() -> Request(String) {
   )
 }
 
-// Helper method for constructing a Request from a url String.
-fn from_url(url: String) -> Result(Request(String), Nil) {
+/// Construct a request from a URL string
+pub fn to(url: String) -> Result(Request(String), Nil) {
   result.map(uri.parse(url), fn(parsed_uri) { from_uri(parsed_uri) })
   |> result.flatten
-}
-
-pub fn for(method: Method, url: String) -> Result(Request(String), Nil) {
-  from_url(url)
-  |> result.map(fn(req) {
-    req
-    |> set_method(method)
-  })
 }
 
 /// Set the scheme (protocol) of the request.
