@@ -192,8 +192,9 @@ pub fn new() -> Request(String) {
 /// Construct a request from a URL string
 ///
 pub fn to(url: String) -> Result(Request(String), Nil) {
-  result.map(uri.parse(url), fn(parsed_uri) { from_uri(parsed_uri) })
-  |> result.flatten
+  url
+  |> uri.parse
+  |> result.then(from_uri)
 }
 
 /// Set the scheme (protocol) of the request.
