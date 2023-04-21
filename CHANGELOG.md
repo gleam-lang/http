@@ -1,7 +1,8 @@
 # Changelog
 
-- Added function `request.to` which takes a url string and attempts to create a request by
-  parsing it as a `Uri`. Returns a result.
+## v3.2.0 - 2023-04-21
+
+- The `gleam/http/request` module gains the `to` function for creating requests.
 
 ## v3.1.2 - 2023-03-02
 
