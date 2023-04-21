@@ -50,7 +50,7 @@ pub fn from_uri(uri: Uri) -> Result(Request(String), Nil) {
   )
   let req =
     Request(
-      method: http.Get,
+      method: Get,
       headers: [],
       body: "",
       scheme: scheme,
@@ -187,6 +187,14 @@ pub fn new() -> Request(String) {
     path: "",
     query: option.None,
   )
+}
+
+/// Construct a request from a URL string
+///
+pub fn to(url: String) -> Result(Request(String), Nil) {
+  url
+  |> uri.parse
+  |> result.then(from_uri)
 }
 
 /// Set the scheme (protocol) of the request.

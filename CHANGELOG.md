@@ -1,5 +1,8 @@
 # Changelog
 
+- Added function `request.to` which takes a url string and attempts to create a request by
+  parsing it as a `Uri`. Returns a result.
+
 ## v3.1.2 - 2023-03-02
 
 - Updated for Gleam v0.27.0.
