@@ -191,7 +191,7 @@ pub fn new() -> Request(String) {
 
 /// Construct a request from a URL string
 ///
-pub fn to(url: String) -> Result(Request(String), Nil) {
+pub fn to(url: String) -> Result(Request(body), Nil) {
   url
   |> uri.parse
   |> result.then(from_uri)
