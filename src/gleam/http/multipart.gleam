@@ -7,13 +7,14 @@ import gleam/bit_string
 import gleam/string
 import gleam/result
 import gleam/list
+import gleam/bool
 
 pub type Header =
   #(String, String)
 
 pub type ParsedHeaders {
   ParsedHeaders(headers: List(Header), remaining_input: BitString)
-  MoreInputNeededForHeaders(fn(BitString) -> ParsedHeaders)
+  MoreForHeaders(fn(BitString) -> Result(ParsedHeaders, Nil))
 }
 
 /// Parse the headers for the next multipart part.
@@ -29,24 +30,51 @@ pub fn parse_headers(
   boundary: String,
 ) -> Result(ParsedHeaders, Nil) {
   let boundary = bit_string.from_string(boundary)
-  let data = skip_preamble(data, boundary)
+  skip_preamble(data, boundary)
+}
+
+fn parse_headers_after_prelude(
+  data: BitString,
+  boundary: BitString,
+) -> Result(ParsedHeaders, Nil) {
+  let dsize = bit_string.byte_size(data)
   let bsize = bit_string.byte_size(boundary)
+  let required_size = bsize + 4
   case data {
+    _ if dsize < required_size ->
+      parse_headers_after_prelude(_, boundary)
+      |> more_please(data)
+      |> MoreForHeaders
+      |> Ok
+
     // The last boundary. Return the epilogue.
     <<"--":utf8, b:binary-size(bsize), "--":utf8, data:binary>> if b == boundary ->
       Ok(ParsedHeaders(headers: [], remaining_input: data))
 
     <<"--":utf8, b:binary-size(bsize), data:binary>> if b == boundary ->
       do_parse_headers(data)
+
+    _ -> Error(Nil)
   }
   // TODO: more required
   // TODO: other
 }
 
 // TODO: implement
-fn skip_preamble(data: BitString, boundary: BitString) -> BitString {
+fn skip_preamble(
+  data: BitString,
+  boundary: BitString,
+) -> Result(ParsedHeaders, Nil) {
+  let dsize = bit_string.byte_size(data)
   case data {
-    <<"--":utf8, _:binary>> -> data
+    _ if dsize < 2 ->
+      skip_preamble(_, boundary)
+      |> more_please(data)
+      |> MoreForHeaders
+      |> Ok
+
+    <<"--":utf8, _:binary>> -> parse_headers_after_prelude(data, boundary)
+
     _ -> todo as "skip preamble"
   }
 }
@@ -82,10 +110,16 @@ fn parse_header_name(
       data
       |> skip_whitespace
       |> parse_header_value(headers, name, <<>>)
+
     <<char:utf8_codepoint, data:binary>> ->
       parse_header_name(data, headers, <<name:bit_string, char:utf8_codepoint>>)
+
+    <<>> ->
+      parse_header_name(_, headers, name)
+      |> more_please(data)
+      |> MoreForHeaders
+      |> Ok
   }
-  // TODO: more required
 }
 
 fn parse_header_value(
@@ -94,7 +128,19 @@ fn parse_header_value(
   name: BitString,
   value: BitString,
 ) -> Result(ParsedHeaders, Nil) {
+  let size = bit_string.byte_size(data)
   case data {
+    // We need at least 4 bytes to check for the end of the headers.
+    _ if size < 4 ->
+      fn(data) {
+        data
+        |> skip_whitespace
+        |> parse_header_value(headers, name, value)
+      }
+      |> more_please(data)
+      |> MoreForHeaders
+      |> Ok
+
     <<"\r\n\r\n":utf8, data:binary>> -> {
       use name <- result.try(bit_string.to_string(name))
       use value <- result.map(bit_string.to_string(value))
@@ -112,10 +158,21 @@ fn parse_header_value(
       parse_header_name(data, headers, <<>>)
     }
 
-    <<char:utf8_codepoint, data:binary>> -> {
+    <<char:utf8_codepoint, rest:binary>> -> {
       let value = <<value:bit_string, char:utf8_codepoint>>
-      parse_header_value(data, headers, name, value)
+      parse_header_value(rest, headers, name, value)
     }
+
+    _ -> Error(Nil)
   }
-  // TODO: more required
+}
+
+fn more_please(
+  continuation: fn(BitString) -> Result(t, Nil),
+  existing: BitString,
+) -> fn(BitString) -> Result(t, Nil) {
+  fn(more) {
+    use <- bool.guard(more == <<>>, return: Error(Nil))
+    continuation(<<existing:bit_string, more:bit_string>>)
+  }
 }
