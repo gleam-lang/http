@@ -106,15 +106,13 @@ pub fn method_from_dynamic(value: Dynamic) -> Result(Method, List(DecodeError)) 
   }
 }
 
-if erlang {
-  external fn do_method_from_dynamic(Dynamic) -> Result(Method, nil) =
-    "gleam_http_native" "decode_method"
-}
+@target(erlang)
+@external(erlang, "gleam_http_native", "decode_method")
+fn do_method_from_dynamic(a: Dynamic) -> Result(Method, nil)
 
-if javascript {
-  external fn do_method_from_dynamic(Dynamic) -> Result(Method, Nil) =
-    "../gleam_http_native.mjs" "decode_method"
-}
+@target(javascript)
+@external(javascript, "../gleam_http_native.mjs", "decode_method")
+fn do_method_from_dynamic(a: Dynamic) -> Result(Method, Nil)
 
 /// A HTTP header is a key-value pair. Header keys should be all lowercase
 /// characters.
