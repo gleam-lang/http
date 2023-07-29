@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.3.0 - 2023-07-29
+
+- Updated for Gleam v0.30.0.
+
 ## v3.2.0 - 2023-04-21
 
 - The `gleam/http/request` module gains the `to` function for creating requests.
