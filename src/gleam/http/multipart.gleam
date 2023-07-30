@@ -15,9 +15,10 @@ import gleam/bool
 pub type Header =
   #(String, String)
 
-pub type ParsedHeaders {
-  ParsedHeaders(headers: List(Header), remaining_input: BitString)
-  MoreForHeaders(fn(BitString) -> Result(ParsedHeaders, Nil))
+pub type Parsed(t) {
+  Part(t, remaining: BitString)
+  Done(t, remaining: BitString)
+  MoreRequired(fn(BitString) -> Result(Parsed(t), Nil))
 }
 
 /// Parse the headers for the next multipart part.
@@ -31,7 +32,7 @@ pub type ParsedHeaders {
 pub fn parse_headers(
   data: BitString,
   boundary: String,
-) -> Result(ParsedHeaders, Nil) {
+) -> Result(Parsed(List(Header)), Nil) {
   let boundary = bit_string.from_string(boundary)
   // TODO: rewrite this to use a bit pattern once JavaScript supports
   // the `b:binary-size(bsize)` pattern.
@@ -44,10 +45,81 @@ pub fn parse_headers(
   }
 }
 
+/// Parse the body of the current multipart part, which is everything until the
+/// next boundary.
+/// 
+/// This function will accept input of any size, it is up to the caller to limit
+/// it if needed.
+/// 
+pub fn parse_body(
+  data: BitString,
+  boundary: String,
+) -> Result(Parsed(String), Nil) {
+  let boundary = bit_string.from_string(boundary)
+  parse_body_with_bit_string(data, boundary)
+}
+
+fn parse_body_with_bit_string(
+  data: BitString,
+  boundary: BitString,
+) -> Result(Parsed(String), Nil) {
+  let bsize = bit_string.byte_size(boundary)
+  let prefix = bit_string.slice(data, 0, 2 + bsize)
+  case prefix == Ok(<<45, 45, boundary:bit_string>>) {
+    True -> Ok(Part("", remaining: data))
+    False -> parse_body_loop(data, boundary, <<>>)
+  }
+}
+
+fn parse_body_loop(
+  data: BitString,
+  boundary: BitString,
+  body: BitString,
+) -> Result(Parsed(String), Nil) {
+  let dsize = bit_string.byte_size(data)
+  let bsize = bit_string.byte_size(boundary)
+  let required = 4 + bsize
+  case data {
+    _ if dsize < required -> {
+      more_please(parse_body_loop(_, boundary, body), data)
+    }
+
+    // TODO: flatten this into a single case expression once JavaScript supports
+    // the `b:binary-size(bsize)` pattern.
+    //
+    // \r\n
+    <<13, 10, data:binary>> -> {
+      let desired = <<45, 45, boundary:bit_string>>
+      let size = bit_string.byte_size(desired)
+      let dsize = bit_string.byte_size(data)
+      let prefix = bit_string.slice(data, 0, size)
+      let rest = bit_string.slice(data, size, dsize - size)
+      case prefix == Ok(desired), rest {
+        // --boundary\r\n
+        True, Ok(<<13, 10, _:binary>>) -> {
+          use body <- result.map(bit_string.to_string(body))
+          Part(body, remaining: data)
+        }
+
+        // --boundary--
+        True, Ok(<<45, 45, data:binary>>) -> {
+          use body <- result.map(bit_string.to_string(body))
+          Done(body, remaining: data)
+        }
+        False, _ -> parse_body_loop(data, boundary, <<body:bit_string, 13, 10>>)
+      }
+    }
+
+    <<char, data:binary>> -> {
+      parse_body_loop(data, boundary, <<body:bit_string, char>>)
+    }
+  }
+}
+
 fn parse_headers_after_prelude(
   data: BitString,
   boundary: BitString,
-) -> Result(ParsedHeaders, Nil) {
+) -> Result(Parsed(List(Header)), Nil) {
   let dsize = bit_string.byte_size(data)
   let bsize = bit_string.byte_size(boundary)
   let required_size = bsize + 4
@@ -58,10 +130,7 @@ fn parse_headers_after_prelude(
 
   use <- bool.guard(
     when: dsize < required_size,
-    return: parse_headers_after_prelude(_, boundary)
-    |> more_please(data)
-    |> MoreForHeaders
-    |> Ok,
+    return: more_please(parse_headers_after_prelude(_, boundary), data),
   )
 
   use prefix <- result.try(bit_string.slice(data, 0, required_size - 2))
@@ -76,7 +145,7 @@ fn parse_headers_after_prelude(
     True -> {
       let rest_size = dsize - required_size
       use data <- result.map(bit_string.slice(data, required_size, rest_size))
-      ParsedHeaders(headers: [], remaining_input: data)
+      Part([], remaining: data)
     }
 
     // --boundary
@@ -93,16 +162,12 @@ fn parse_headers_after_prelude(
 fn skip_preamble(
   data: BitString,
   boundary: BitString,
-) -> Result(ParsedHeaders, Nil) {
+) -> Result(Parsed(List(Header)), Nil) {
   let data_size = bit_string.byte_size(data)
   let boundary_size = bit_string.byte_size(boundary)
   let required = boundary_size + 4
   case data {
-    _ if data_size < required ->
-      skip_preamble(_, boundary)
-      |> more_please(data)
-      |> MoreForHeaders
-      |> Ok
+    _ if data_size < required -> more_please(skip_preamble(_, boundary), data)
 
     // TODO: change this to use one non-nested case expression once the compiler
     // supports the `b:binary-size(bsize)` pattern on JS.
@@ -133,22 +198,17 @@ fn skip_whitespace(data: BitString) -> BitString {
   }
 }
 
-fn do_parse_headers(data: BitString) -> Result(ParsedHeaders, Nil) {
+fn do_parse_headers(data: BitString) -> Result(Parsed(List(Header)), Nil) {
   case data {
     // \r\n\r\n
     // We've reached the end, there are no headers.
-    <<13, 10, 13, 10, data:binary>> ->
-      Ok(ParsedHeaders(headers: [], remaining_input: data))
+    <<13, 10, 13, 10, data:binary>> -> Ok(Part([], remaining: data))
 
     // \r\n
     // Skip the line break after the boundary.
     <<13, 10, data:binary>> -> parse_header_name(data, [], <<>>)
 
-    <<13>> | <<>> ->
-      do_parse_headers
-      |> more_please(data)
-      |> MoreForHeaders
-      |> Ok
+    <<13>> | <<>> -> more_please(do_parse_headers, data)
 
     _ -> Error(Nil)
   }
@@ -158,7 +218,7 @@ fn parse_header_name(
   data: BitString,
   headers: List(Header),
   name: BitString,
-) -> Result(ParsedHeaders, Nil) {
+) -> Result(Parsed(List(Header)), Nil) {
   case skip_whitespace(data) {
     // :
     <<58, data:binary>> ->
@@ -169,11 +229,7 @@ fn parse_header_name(
     <<char, data:binary>> ->
       parse_header_name(data, headers, <<name:bit_string, char>>)
 
-    <<>> ->
-      parse_header_name(_, headers, name)
-      |> more_please(data)
-      |> MoreForHeaders
-      |> Ok
+    <<>> -> more_please(parse_header_name(_, headers, name), data)
   }
 }
 
@@ -182,7 +238,7 @@ fn parse_header_value(
   headers: List(Header),
   name: BitString,
   value: BitString,
-) -> Result(ParsedHeaders, Nil) {
+) -> Result(Parsed(List(Header)), Nil) {
   let size = bit_string.byte_size(data)
   case data {
     // We need at least 4 bytes to check for the end of the headers.
@@ -193,15 +249,13 @@ fn parse_header_value(
         |> parse_header_value(headers, name, value)
       }
       |> more_please(data)
-      |> MoreForHeaders
-      |> Ok
 
     // \r\n\r\n
     <<13, 10, 13, 10, data:binary>> -> {
       use name <- result.try(bit_string.to_string(name))
       use value <- result.map(bit_string.to_string(value))
       let headers = list.reverse([#(string.lowercase(name), value), ..headers])
-      ParsedHeaders(headers, data)
+      Part(headers, data)
     }
 
     // \r\n\s
@@ -227,11 +281,11 @@ fn parse_header_value(
 }
 
 fn more_please(
-  continuation: fn(BitString) -> Result(t, Nil),
+  continuation: fn(BitString) -> Result(Parsed(t), Nil),
   existing: BitString,
-) -> fn(BitString) -> Result(t, Nil) {
-  fn(more) {
+) -> Result(Parsed(t), Nil) {
+  Ok(MoreRequired(fn(more) {
     use <- bool.guard(more == <<>>, return: Error(Nil))
     continuation(<<existing:bit_string, more:bit_string>>)
-  }
+  }))
 }
