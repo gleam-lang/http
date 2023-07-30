@@ -110,11 +110,6 @@ pub fn method_from_dynamic(value: Dynamic) -> Result(Method, List(DecodeError)) 
   }
 }
 
-/// A HTTP header is a key-value pair. Header keys should be all lowercase
-/// characters.
-pub type Header =
-  #(String, String)
-
 pub type Multipart(t) {
   Part(t, remaining: BitString)
   Done(t, remaining: BitString)
@@ -404,3 +399,8 @@ fn do_method_from_dynamic(a: Dynamic) -> Result(Method, nil)
 @target(javascript)
 @external(javascript, "../gleam_http_native.mjs", "decode_method")
 fn do_method_from_dynamic(a: Dynamic) -> Result(Method, Nil)
+
+/// A HTTP header is a key-value pair. Header keys should be all lowercase
+/// characters.
+pub type Header =
+  #(String, String)
