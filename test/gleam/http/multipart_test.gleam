@@ -77,7 +77,7 @@ This is the body of the message.\r
     MoreRequired(continue) -> continue(after)
     Part(headers, remaining) ->
       Ok(Part(headers, bit_string.append(remaining, after)))
-    Done(..) -> panic as "should not be done"
+    Done(..) -> panic
   }
 
   headers
@@ -110,7 +110,7 @@ This is the body of the next part\r
   let assert Ok(Part(body, rest)) = case return {
     MoreRequired(continue) -> continue(after)
     Part(body, remaining) -> Ok(Part(body, bit_string.append(remaining, after)))
-    Done(..) -> panic as "should not be done"
+    Done(..) -> panic
   }
 
   body
