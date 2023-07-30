@@ -195,3 +195,200 @@ Ym9keSBvZiB0aGUgbWVzc2FnZS48L3A+CiAgPC9ib2R5Pgo8L2h0bWw+Cg==",
   rest
   |> should.equal(<<>>)
 }
+
+pub fn parse_2_test() {
+  let input = <<
+    "--AaB03x\r
+Content-Disposition: form-data; name=\"submit-name\"\r
+\r
+Larry\r
+--AaB03x\r
+Content-Disposition: form-data; name=\"files\"\r
+Content-Type: multipart/mixed; boundary=BbC04y\r
+\r
+--BbC04y\r
+Content-Disposition: file; filename=\"file1.txt\"\r
+Content-Type: text/plain\r
+\r
+... contents of file1.txt ...\r
+--BbC04y\r
+Content-Disposition: file; filename=\"file2.gif\"\r
+Content-Type: image/gif\r
+Content-Transfer-Encoding: binary\r
+\r
+...contents of file2.gif...\r
+--BbC04y--\r
+--AaB03x--":utf8,
+  >>
+
+  let assert Ok(Part(headers, input)) = multipart.parse_headers(input, "AaB03x")
+  headers
+  |> should.equal([#("content-disposition", "form-data; name=\"submit-name\"")])
+
+  let assert Ok(Part(body, input)) = multipart.parse_body(input, "AaB03x")
+  body
+  |> should.equal("Larry")
+
+  let assert Ok(Part(headers, input)) = multipart.parse_headers(input, "AaB03x")
+  headers
+  |> should.equal([
+    #("content-disposition", "form-data; name=\"files\""),
+    // The boundary is changed here!
+    #("content-type", "multipart/mixed; boundary=BbC04y"),
+  ])
+
+  let assert Ok(Part(body, input)) = multipart.parse_body(input, "BbC04y")
+  body
+  |> should.equal("")
+
+  let assert Ok(Part(headers, input)) = multipart.parse_headers(input, "BbC04y")
+  headers
+  |> should.equal([
+    #("content-disposition", "file; filename=\"file1.txt\""),
+    #("content-type", "text/plain"),
+  ])
+
+  let assert Ok(Part(body, input)) = multipart.parse_body(input, "BbC04y")
+  body
+  |> should.equal("... contents of file1.txt ...")
+
+  let assert Ok(Part(headers, input)) = multipart.parse_headers(input, "BbC04y")
+  headers
+  |> should.equal([
+    #("content-disposition", "file; filename=\"file2.gif\""),
+    #("content-type", "image/gif"),
+    #("content-transfer-encoding", "binary"),
+  ])
+
+  let assert Ok(Done(body, input)) = multipart.parse_body(input, "BbC04y")
+  body
+  |> should.equal("...contents of file2.gif...")
+
+  let assert Ok(Done(body, input)) = multipart.parse_body(input, "AaB03x")
+  body
+  |> should.equal("")
+  input
+  |> should.equal(<<>>)
+}
+
+pub fn parse_3_test() {
+  let input = <<
+    "This is the preamble.\r
+--boundary\r
+Content-Type: text/plain\r
+\r
+This is the body of the message.\r
+--boundary--\r
+This is the epilogue. Here it includes leading CRLF":utf8,
+  >>
+
+  let assert Ok(Part(body, input)) = multipart.parse_body(input, "boundary")
+  body
+  |> should.equal("This is the preamble.")
+
+  let assert Ok(Part(headers, input)) =
+    multipart.parse_headers(input, "boundary")
+  headers
+  |> should.equal([#("content-type", "text/plain")])
+
+  let assert Ok(Done(body, input)) = multipart.parse_body(input, "boundary")
+  body
+  |> should.equal("This is the body of the message.")
+
+  input
+  |> should.equal(<<
+    "\r\nThis is the epilogue. Here it includes leading CRLF":utf8,
+  >>)
+}
+
+pub fn parse_4_test() {
+  let input = <<
+    "This is the preamble.\r
+--boundary\r
+Content-Type: text/plain\r
+\r
+This is the body of the message.\r
+--boundary--\r
+":utf8,
+  >>
+
+  let assert Ok(Part(body, input)) = multipart.parse_body(input, "boundary")
+  body
+  |> should.equal("This is the preamble.")
+
+  let assert Ok(Part(headers, input)) =
+    multipart.parse_headers(input, "boundary")
+  headers
+  |> should.equal([#("content-type", "text/plain")])
+
+  let assert Ok(Done(body, input)) = multipart.parse_body(input, "boundary")
+  body
+  |> should.equal("This is the body of the message.")
+
+  input
+  |> should.equal(<<"\r\n":utf8>>)
+}
+
+pub fn parse_5_test() {
+  let input = <<
+    "This is the preamble.  It is to be ignored, though it\r
+is a handy place for composition agents to include an\r
+explanatory note to non-MIME conformant readers.\r
+\r
+--simple boundary\r
+\r
+This is implicitly typed plain US-ASCII text.\r
+It does NOT end with a linebreak.\r
+--simple boundary\r
+Content-type: text/plain; charset=us-ascii\r
+\r
+This is explicitly typed plain US-ASCII text.\r
+It DOES end with a linebreak.\r
+\r
+--simple boundary--\r
+\r
+This is the epilogue.  It is also to be ignored.":utf8,
+  >>
+
+  let assert Ok(Part(body, input)) =
+    multipart.parse_body(input, "simple boundary")
+  body
+  |> should.equal(
+    "This is the preamble.  It is to be ignored, though it\r
+is a handy place for composition agents to include an\r
+explanatory note to non-MIME conformant readers.\r
+",
+  )
+
+  let assert Ok(Part(headers, input)) =
+    multipart.parse_headers(input, "simple boundary")
+  headers
+  |> should.equal([])
+
+  let assert Ok(Part(body, input)) =
+    multipart.parse_body(input, "simple boundary")
+  body
+  |> should.equal(
+    "This is implicitly typed plain US-ASCII text.\r
+It does NOT end with a linebreak.",
+  )
+
+  let assert Ok(Part(headers, input)) =
+    multipart.parse_headers(input, "simple boundary")
+  headers
+  |> should.equal([#("content-type", "text/plain; charset=us-ascii")])
+
+  let assert Ok(Done(body, input)) =
+    multipart.parse_body(input, "simple boundary")
+  body
+  |> should.equal(
+    "This is explicitly typed plain US-ASCII text.\r
+It DOES end with a linebreak.\r
+",
+  )
+
+  input
+  |> should.equal(<<
+    "\r\n\r\nThis is the epilogue.  It is also to be ignored.":utf8,
+  >>)
+}
