@@ -110,23 +110,15 @@ pub fn method_from_dynamic(value: Dynamic) -> Result(Method, List(DecodeError)) 
   }
 }
 
-@target(erlang)
-@external(erlang, "gleam_http_native", "decode_method")
-fn do_method_from_dynamic(a: Dynamic) -> Result(Method, nil)
-
-@target(javascript)
-@external(javascript, "../gleam_http_native.mjs", "decode_method")
-fn do_method_from_dynamic(a: Dynamic) -> Result(Method, Nil)
-
 /// A HTTP header is a key-value pair. Header keys should be all lowercase
 /// characters.
 pub type Header =
   #(String, String)
 
-pub type Parsed(t) {
+pub type Multipart(t) {
   Part(t, remaining: BitString)
   Done(t, remaining: BitString)
-  MoreRequired(fn(BitString) -> Result(Parsed(t), Nil))
+  MoreRequired(fn(BitString) -> Result(Multipart(t), Nil))
 }
 
 /// Parse the headers for the next multipart part.
@@ -143,7 +135,7 @@ pub type Parsed(t) {
 pub fn parse_multipart_headers(
   data: BitString,
   boundary: String,
-) -> Result(Parsed(List(Header)), Nil) {
+) -> Result(Multipart(List(Header)), Nil) {
   let boundary = bit_string.from_string(boundary)
   // TODO: rewrite this to use a bit pattern once JavaScript supports
   // the `b:binary-size(bsize)` pattern.
@@ -168,7 +160,7 @@ pub fn parse_multipart_headers(
 pub fn parse_multipart_body(
   data: BitString,
   boundary: String,
-) -> Result(Parsed(String), Nil) {
+) -> Result(Multipart(String), Nil) {
   let boundary = bit_string.from_string(boundary)
   parse_body_with_bit_string(data, boundary)
 }
@@ -176,7 +168,7 @@ pub fn parse_multipart_body(
 fn parse_body_with_bit_string(
   data: BitString,
   boundary: BitString,
-) -> Result(Parsed(String), Nil) {
+) -> Result(Multipart(String), Nil) {
   let bsize = bit_string.byte_size(boundary)
   let prefix = bit_string.slice(data, 0, 2 + bsize)
   case prefix == Ok(<<45, 45, boundary:bit_string>>) {
@@ -189,7 +181,7 @@ fn parse_body_loop(
   data: BitString,
   boundary: BitString,
   body: BitString,
-) -> Result(Parsed(String), Nil) {
+) -> Result(Multipart(String), Nil) {
   let dsize = bit_string.byte_size(data)
   let bsize = bit_string.byte_size(boundary)
   let required = 6 + bsize
@@ -234,7 +226,7 @@ fn parse_body_loop(
 fn parse_headers_after_prelude(
   data: BitString,
   boundary: BitString,
-) -> Result(Parsed(List(Header)), Nil) {
+) -> Result(Multipart(List(Header)), Nil) {
   let dsize = bit_string.byte_size(data)
   let bsize = bit_string.byte_size(boundary)
   let required_size = bsize + 4
@@ -277,7 +269,7 @@ fn parse_headers_after_prelude(
 fn skip_preamble(
   data: BitString,
   boundary: BitString,
-) -> Result(Parsed(List(Header)), Nil) {
+) -> Result(Multipart(List(Header)), Nil) {
   let data_size = bit_string.byte_size(data)
   let boundary_size = bit_string.byte_size(boundary)
   let required = boundary_size + 4
@@ -313,7 +305,7 @@ fn skip_whitespace(data: BitString) -> BitString {
   }
 }
 
-fn do_parse_headers(data: BitString) -> Result(Parsed(List(Header)), Nil) {
+fn do_parse_headers(data: BitString) -> Result(Multipart(List(Header)), Nil) {
   case data {
     // \r\n\r\n
     // We've reached the end, there are no headers.
@@ -333,7 +325,7 @@ fn parse_header_name(
   data: BitString,
   headers: List(Header),
   name: BitString,
-) -> Result(Parsed(List(Header)), Nil) {
+) -> Result(Multipart(List(Header)), Nil) {
   case skip_whitespace(data) {
     // :
     <<58, data:binary>> ->
@@ -353,7 +345,7 @@ fn parse_header_value(
   headers: List(Header),
   name: BitString,
   value: BitString,
-) -> Result(Parsed(List(Header)), Nil) {
+) -> Result(Multipart(List(Header)), Nil) {
   let size = bit_string.byte_size(data)
   case data {
     // We need at least 4 bytes to check for the end of the headers.
@@ -396,11 +388,19 @@ fn parse_header_value(
 }
 
 fn more_please(
-  continuation: fn(BitString) -> Result(Parsed(t), Nil),
+  continuation: fn(BitString) -> Result(Multipart(t), Nil),
   existing: BitString,
-) -> Result(Parsed(t), Nil) {
+) -> Result(Multipart(t), Nil) {
   Ok(MoreRequired(fn(more) {
     use <- bool.guard(more == <<>>, return: Error(Nil))
     continuation(<<existing:bit_string, more:bit_string>>)
   }))
 }
+
+@target(erlang)
+@external(erlang, "gleam_http_native", "decode_method")
+fn do_method_from_dynamic(a: Dynamic) -> Result(Method, nil)
+
+@target(javascript)
+@external(javascript, "../gleam_http_native.mjs", "decode_method")
+fn do_method_from_dynamic(a: Dynamic) -> Result(Method, Nil)
