@@ -33,7 +33,15 @@ pub fn parse_headers(
   boundary: String,
 ) -> Result(ParsedHeaders, Nil) {
   let boundary = bit_string.from_string(boundary)
-  skip_preamble(data, boundary)
+  // TODO: rewrite this to use a bit pattern once JavaScript supports
+  // the `b:binary-size(bsize)` pattern.
+  let prefix = <<45, 45, boundary:bit_string>>
+  case bit_string.slice(data, 0, bit_string.byte_size(prefix)) == Ok(prefix) {
+    // There is no preamble, parse the headers.
+    True -> parse_headers_after_prelude(data, boundary)
+    // There is a preamble, skip it before parsing.
+    False -> skip_preamble(data, boundary)
+  }
 }
 
 fn parse_headers_after_prelude(
@@ -86,18 +94,34 @@ fn skip_preamble(
   data: BitString,
   boundary: BitString,
 ) -> Result(ParsedHeaders, Nil) {
-  let dsize = bit_string.byte_size(data)
+  let data_size = bit_string.byte_size(data)
+  let boundary_size = bit_string.byte_size(boundary)
+  let required = boundary_size + 4
   case data {
-    _ if dsize < 2 ->
+    _ if data_size < required ->
       skip_preamble(_, boundary)
       |> more_please(data)
       |> MoreForHeaders
       |> Ok
 
-    // --
-    <<45, 45, _:binary>> -> parse_headers_after_prelude(data, boundary)
+    // TODO: change this to use one non-nested case expression once the compiler
+    // supports the `b:binary-size(bsize)` pattern on JS.
+    // \r\n--
+    <<13, 10, 45, 45, data:binary>> -> {
+      case bit_string.slice(data, 0, boundary_size) {
+        // --boundary
+        Ok(prefix) if prefix == boundary -> {
+          let start = boundary_size
+          let length = bit_string.byte_size(data) - boundary_size
+          use rest <- result.try(bit_string.slice(data, start, length))
+          do_parse_headers(rest)
+        }
+        Ok(_) -> skip_preamble(data, boundary)
+        Error(_) -> Error(Nil)
+      }
+    }
 
-    _ -> todo as "skip preamble"
+    <<_, data:binary>> -> skip_preamble(data, boundary)
   }
 }
 
@@ -109,7 +133,7 @@ fn skip_whitespace(data: BitString) -> BitString {
   }
 }
 
-fn do_parse_headers(data) -> Result(ParsedHeaders, Nil) {
+fn do_parse_headers(data: BitString) -> Result(ParsedHeaders, Nil) {
   case data {
     // \r\n\r\n
     // We've reached the end, there are no headers.
@@ -119,6 +143,12 @@ fn do_parse_headers(data) -> Result(ParsedHeaders, Nil) {
     // \r\n
     // Skip the line break after the boundary.
     <<13, 10, data:binary>> -> parse_header_name(data, [], <<>>)
+
+    <<13>> | <<>> ->
+      do_parse_headers
+      |> more_please(data)
+      |> MoreForHeaders
+      |> Ok
 
     _ -> Error(Nil)
   }
