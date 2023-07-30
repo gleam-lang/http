@@ -107,6 +107,7 @@ fn parse_body_loop(
           Done(body, remaining: data)
         }
         False, _ -> parse_body_loop(data, boundary, <<body:bit_string, 13, 10>>)
+        _, _ -> Error(Nil)
       }
     }
 
