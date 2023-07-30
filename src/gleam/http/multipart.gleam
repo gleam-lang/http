@@ -78,7 +78,7 @@ fn parse_body_loop(
 ) -> Result(Parsed(String), Nil) {
   let dsize = bit_string.byte_size(data)
   let bsize = bit_string.byte_size(boundary)
-  let required = 4 + bsize
+  let required = 6 + bsize
   case data {
     _ if dsize < required -> {
       more_please(parse_body_loop(_, boundary, body), data)

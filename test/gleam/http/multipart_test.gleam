@@ -90,6 +90,41 @@ This is the body of the message.\r
   >>)
 }
 
+/// This test uses the `slices` function to split the input into every possible
+/// pair of bit-strings and then parses the headers from each pair.
+/// This ensures that no matter where the input gets chunked the parser will
+/// return the same result.
+pub fn parse_body_chunked_test() {
+  let input = <<
+    "This is the body of the message.\r
+--frontier\r
+Content-Type: text/plain\r
+This is the body of the next part\r
+--frontier\r
+":utf8,
+  >>
+  use #(before, after) <- list.each(slices(<<>>, input, []))
+
+  let assert Ok(return) = multipart.parse_body(before, "frontier")
+
+  let assert Ok(Part(body, rest)) = case return {
+    MoreRequired(continue) -> continue(after)
+    Part(body, remaining) -> Ok(Part(body, bit_string.append(remaining, after)))
+    Done(..) -> panic as "should not be done"
+  }
+
+  body
+  |> should.equal("This is the body of the message.")
+  rest
+  |> should.equal(<<
+    "--frontier\r
+Content-Type: text/plain\r
+This is the body of the next part\r
+--frontier\r
+":utf8,
+  >>)
+}
+
 fn slices(
   before: BitString,
   after: BitString,
