@@ -110,10 +110,19 @@ pub fn method_from_dynamic(value: Dynamic) -> Result(Method, List(DecodeError)) 
   }
 }
 
-pub type Multipart(t) {
-  Part(t, remaining: BitString)
-  Done(t, remaining: BitString)
-  MoreRequired(fn(BitString) -> Result(Multipart(t), Nil))
+pub type MultipartHeaders {
+  MultipartHeaders(headers: List(Header), remaining: BitString)
+  MoreRequiredForHeaders(
+    continuation: fn(BitString) -> Result(MultipartHeaders, Nil),
+  )
+}
+
+pub type MultipartBody {
+  MultipartBody(chunk: String, done: Bool, remaining: BitString)
+  MoreRequiredForBody(
+    chunk: String,
+    continuation: fn(BitString) -> Result(MultipartBody, Nil),
+  )
 }
 
 /// Parse the headers for the next multipart part.
@@ -130,7 +139,7 @@ pub type Multipart(t) {
 pub fn parse_multipart_headers(
   data: BitString,
   boundary: String,
-) -> Result(Multipart(List(Header)), Nil) {
+) -> Result(MultipartHeaders, Nil) {
   let boundary = bit_string.from_string(boundary)
   // TODO: rewrite this to use a bit pattern once JavaScript supports
   // the `b:binary-size(bsize)` pattern.
@@ -155,7 +164,7 @@ pub fn parse_multipart_headers(
 pub fn parse_multipart_body(
   data: BitString,
   boundary: String,
-) -> Result(Multipart(String), Nil) {
+) -> Result(MultipartBody, Nil) {
   let boundary = bit_string.from_string(boundary)
   parse_body_with_bit_string(data, boundary)
 }
@@ -163,11 +172,11 @@ pub fn parse_multipart_body(
 fn parse_body_with_bit_string(
   data: BitString,
   boundary: BitString,
-) -> Result(Multipart(String), Nil) {
+) -> Result(MultipartBody, Nil) {
   let bsize = bit_string.byte_size(boundary)
   let prefix = bit_string.slice(data, 0, 2 + bsize)
   case prefix == Ok(<<45, 45, boundary:bit_string>>) {
-    True -> Ok(Part("", remaining: data))
+    True -> Ok(MultipartBody("", done: False, remaining: data))
     False -> parse_body_loop(data, boundary, <<>>)
   }
 }
@@ -176,13 +185,14 @@ fn parse_body_loop(
   data: BitString,
   boundary: BitString,
   body: BitString,
-) -> Result(Multipart(String), Nil) {
+) -> Result(MultipartBody, Nil) {
   let dsize = bit_string.byte_size(data)
   let bsize = bit_string.byte_size(boundary)
   let required = 6 + bsize
   case data {
     _ if dsize < required -> {
-      more_please(parse_body_loop(_, boundary, body), data)
+      use chunk <- result.try(bit_string.to_string(body))
+      more_please_body(parse_body_loop(_, boundary, <<>>), chunk, data)
     }
 
     // TODO: flatten this into a single case expression once JavaScript supports
@@ -199,13 +209,13 @@ fn parse_body_loop(
         // --boundary\r\n
         True, Ok(<<13, 10, _:binary>>) -> {
           use body <- result.map(bit_string.to_string(body))
-          Part(body, remaining: data)
+          MultipartBody(body, done: False, remaining: data)
         }
 
         // --boundary--
         True, Ok(<<45, 45, data:binary>>) -> {
           use body <- result.map(bit_string.to_string(body))
-          Done(body, remaining: data)
+          MultipartBody(body, done: True, remaining: data)
         }
         False, _ -> parse_body_loop(data, boundary, <<body:bit_string, 13, 10>>)
         _, _ -> Error(Nil)
@@ -221,7 +231,7 @@ fn parse_body_loop(
 fn parse_headers_after_prelude(
   data: BitString,
   boundary: BitString,
-) -> Result(Multipart(List(Header)), Nil) {
+) -> Result(MultipartHeaders, Nil) {
   let dsize = bit_string.byte_size(data)
   let bsize = bit_string.byte_size(boundary)
   let required_size = bsize + 4
@@ -232,7 +242,7 @@ fn parse_headers_after_prelude(
 
   use <- bool.guard(
     when: dsize < required_size,
-    return: more_please(parse_headers_after_prelude(_, boundary), data),
+    return: more_please_headers(parse_headers_after_prelude(_, boundary), data),
   )
 
   use prefix <- result.try(bit_string.slice(data, 0, required_size - 2))
@@ -247,7 +257,7 @@ fn parse_headers_after_prelude(
     True -> {
       let rest_size = dsize - required_size
       use data <- result.map(bit_string.slice(data, required_size, rest_size))
-      Part([], remaining: data)
+      MultipartHeaders([], remaining: data)
     }
 
     // --boundary
@@ -264,12 +274,13 @@ fn parse_headers_after_prelude(
 fn skip_preamble(
   data: BitString,
   boundary: BitString,
-) -> Result(Multipart(List(Header)), Nil) {
+) -> Result(MultipartHeaders, Nil) {
   let data_size = bit_string.byte_size(data)
   let boundary_size = bit_string.byte_size(boundary)
   let required = boundary_size + 4
   case data {
-    _ if data_size < required -> more_please(skip_preamble(_, boundary), data)
+    _ if data_size < required ->
+      more_please_headers(skip_preamble(_, boundary), data)
 
     // TODO: change this to use one non-nested case expression once the compiler
     // supports the `b:binary-size(bsize)` pattern on JS.
@@ -300,17 +311,17 @@ fn skip_whitespace(data: BitString) -> BitString {
   }
 }
 
-fn do_parse_headers(data: BitString) -> Result(Multipart(List(Header)), Nil) {
+fn do_parse_headers(data: BitString) -> Result(MultipartHeaders, Nil) {
   case data {
     // \r\n\r\n
     // We've reached the end, there are no headers.
-    <<13, 10, 13, 10, data:binary>> -> Ok(Part([], remaining: data))
+    <<13, 10, 13, 10, data:binary>> -> Ok(MultipartHeaders([], remaining: data))
 
     // \r\n
     // Skip the line break after the boundary.
     <<13, 10, data:binary>> -> parse_header_name(data, [], <<>>)
 
-    <<13>> | <<>> -> more_please(do_parse_headers, data)
+    <<13>> | <<>> -> more_please_headers(do_parse_headers, data)
 
     _ -> Error(Nil)
   }
@@ -320,7 +331,7 @@ fn parse_header_name(
   data: BitString,
   headers: List(Header),
   name: BitString,
-) -> Result(Multipart(List(Header)), Nil) {
+) -> Result(MultipartHeaders, Nil) {
   case skip_whitespace(data) {
     // :
     <<58, data:binary>> ->
@@ -331,7 +342,7 @@ fn parse_header_name(
     <<char, data:binary>> ->
       parse_header_name(data, headers, <<name:bit_string, char>>)
 
-    <<>> -> more_please(parse_header_name(_, headers, name), data)
+    <<>> -> more_please_headers(parse_header_name(_, headers, name), data)
   }
 }
 
@@ -340,7 +351,7 @@ fn parse_header_value(
   headers: List(Header),
   name: BitString,
   value: BitString,
-) -> Result(Multipart(List(Header)), Nil) {
+) -> Result(MultipartHeaders, Nil) {
   let size = bit_string.byte_size(data)
   case data {
     // We need at least 4 bytes to check for the end of the headers.
@@ -350,14 +361,14 @@ fn parse_header_value(
         |> skip_whitespace
         |> parse_header_value(headers, name, value)
       }
-      |> more_please(data)
+      |> more_please_headers(data)
 
     // \r\n\r\n
     <<13, 10, 13, 10, data:binary>> -> {
       use name <- result.try(bit_string.to_string(name))
       use value <- result.map(bit_string.to_string(value))
       let headers = list.reverse([#(string.lowercase(name), value), ..headers])
-      Part(headers, data)
+      MultipartHeaders(headers, data)
     }
 
     // \r\n\s
@@ -382,14 +393,27 @@ fn parse_header_value(
   }
 }
 
-fn more_please(
-  continuation: fn(BitString) -> Result(Multipart(t), Nil),
+fn more_please_headers(
+  continuation: fn(BitString) -> Result(MultipartHeaders, Nil),
   existing: BitString,
-) -> Result(Multipart(t), Nil) {
-  Ok(MoreRequired(fn(more) {
+) -> Result(MultipartHeaders, Nil) {
+  Ok(MoreRequiredForHeaders(fn(more) {
     use <- bool.guard(more == <<>>, return: Error(Nil))
     continuation(<<existing:bit_string, more:bit_string>>)
   }))
+}
+
+fn more_please_body(
+  continuation: fn(BitString) -> Result(MultipartBody, Nil),
+  chunk: String,
+  existing: BitString,
+) -> Result(MultipartBody, Nil) {
+  fn(more) {
+    use <- bool.guard(more == <<>>, return: Error(Nil))
+    continuation(<<existing:bit_string, more:bit_string>>)
+  }
+  |> MoreRequiredForBody(chunk, _)
+  |> Ok
 }
 
 @target(erlang)
