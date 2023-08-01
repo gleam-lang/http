@@ -1,7 +1,9 @@
 import gleeunit/should
 import gleam/bit_string
 import gleam/list
-import gleam/http.{Done, MoreRequired, Part}
+import gleam/http.{
+  MoreRequiredForBody, MoreRequiredForHeaders, MultipartBody, MultipartHeaders,
+}
 
 pub fn parse_multipart_headers_1_test() {
   let input = <<
@@ -17,7 +19,7 @@ This is the body of the message.\r
 ":utf8,
   >>
 
-  let assert Ok(Part(headers, rest)) =
+  let assert Ok(MultipartHeaders(headers, rest)) =
     http.parse_multipart_headers(input, "frontier")
 
   headers
@@ -37,7 +39,7 @@ Ym9keSBvZiB0aGUgbWVzc2FnZS48L3A+CiAgPC9ib2R5Pgo8L2h0bWw+Cg==\r
 --wibblewobble--":utf8,
   >>
 
-  let assert Ok(Part(headers, rest)) =
+  let assert Ok(MultipartHeaders(headers, rest)) =
     http.parse_multipart_headers(input, "wibblewobble")
 
   headers
@@ -73,11 +75,10 @@ This is the body of the message.\r
 
   let assert Ok(return) = http.parse_multipart_headers(before, "frontier")
 
-  let assert Ok(Part(headers, rest)) = case return {
-    MoreRequired(continue) -> continue(after)
-    Part(headers, remaining) ->
-      Ok(Part(headers, bit_string.append(remaining, after)))
-    Done(..) -> panic
+  let assert Ok(MultipartHeaders(headers, rest)) = case return {
+    MoreRequiredForHeaders(continue) -> continue(after)
+    MultipartHeaders(headers, remaining) ->
+      Ok(MultipartHeaders(headers, bit_string.append(remaining, after)))
   }
 
   headers
@@ -107,10 +108,13 @@ This is the body of the next part\r
 
   let assert Ok(return) = http.parse_multipart_body(before, "frontier")
 
-  let assert Ok(Part(body, rest)) = case return {
-    MoreRequired(continue) -> continue(after)
-    Part(body, remaining) -> Ok(Part(body, bit_string.append(remaining, after)))
-    Done(..) -> panic
+  let assert Ok(MultipartBody(body, False, rest)) = case return {
+    MoreRequiredForBody(chunk, continue) -> {
+      let assert Ok(MultipartBody(body, done, remaining)) = continue(after)
+      Ok(MultipartBody(chunk <> body, done, remaining))
+    }
+    MultipartBody(body, done, remaining) ->
+      Ok(MultipartBody(body, done, bit_string.append(remaining, after)))
   }
 
   body
@@ -165,22 +169,22 @@ Ym9keSBvZiB0aGUgbWVzc2FnZS48L3A+CiAgPC9ib2R5Pgo8L2h0bWw+Cg==\r
 --frontier--":utf8,
   >>
 
-  let assert Ok(Part(body, input)) =
+  let assert Ok(MultipartBody(body, False, input)) =
     http.parse_multipart_body(input, "frontier")
   body
   |> should.equal("This is a message with multiple parts in MIME format.")
 
-  let assert Ok(Part(headers, input)) =
+  let assert Ok(MultipartHeaders(headers, input)) =
     http.parse_multipart_headers(input, "frontier")
   headers
   |> should.equal([#("content-type", "text/plain")])
 
-  let assert Ok(Part(body, input)) =
+  let assert Ok(MultipartBody(body, False, input)) =
     http.parse_multipart_body(input, "frontier")
   body
   |> should.equal("This is the body of the message.")
 
-  let assert Ok(Part(headers, input)) =
+  let assert Ok(MultipartHeaders(headers, input)) =
     http.parse_multipart_headers(input, "frontier")
   headers
   |> should.equal([
@@ -188,7 +192,8 @@ Ym9keSBvZiB0aGUgbWVzc2FnZS48L3A+CiAgPC9ib2R5Pgo8L2h0bWw+Cg==\r
     #("content-transfer-encoding", "base64"),
   ])
 
-  let assert Ok(Done(body, rest)) = http.parse_multipart_body(input, "frontier")
+  let assert Ok(MultipartBody(body, True, rest)) =
+    http.parse_multipart_body(input, "frontier")
   body
   |> should.equal(
     "PGh0bWw+CiAgPGhlYWQ+CiAgPC9oZWFkPgogIDxib2R5PgogICAgPHA+VGhpcyBpcyB0aGUg\r
@@ -223,16 +228,17 @@ Content-Transfer-Encoding: binary\r
 --AaB03x--":utf8,
   >>
 
-  let assert Ok(Part(headers, input)) =
+  let assert Ok(MultipartHeaders(headers, input)) =
     http.parse_multipart_headers(input, "AaB03x")
   headers
   |> should.equal([#("content-disposition", "form-data; name=\"submit-name\"")])
 
-  let assert Ok(Part(body, input)) = http.parse_multipart_body(input, "AaB03x")
+  let assert Ok(MultipartBody(body, False, input)) =
+    http.parse_multipart_body(input, "AaB03x")
   body
   |> should.equal("Larry")
 
-  let assert Ok(Part(headers, input)) =
+  let assert Ok(MultipartHeaders(headers, input)) =
     http.parse_multipart_headers(input, "AaB03x")
   headers
   |> should.equal([
@@ -241,11 +247,12 @@ Content-Transfer-Encoding: binary\r
     #("content-type", "multipart/mixed; boundary=BbC04y"),
   ])
 
-  let assert Ok(Part(body, input)) = http.parse_multipart_body(input, "BbC04y")
+  let assert Ok(MultipartBody(body, False, input)) =
+    http.parse_multipart_body(input, "BbC04y")
   body
   |> should.equal("")
 
-  let assert Ok(Part(headers, input)) =
+  let assert Ok(MultipartHeaders(headers, input)) =
     http.parse_multipart_headers(input, "BbC04y")
   headers
   |> should.equal([
@@ -253,11 +260,12 @@ Content-Transfer-Encoding: binary\r
     #("content-type", "text/plain"),
   ])
 
-  let assert Ok(Part(body, input)) = http.parse_multipart_body(input, "BbC04y")
+  let assert Ok(MultipartBody(body, False, input)) =
+    http.parse_multipart_body(input, "BbC04y")
   body
   |> should.equal("... contents of file1.txt ...")
 
-  let assert Ok(Part(headers, input)) =
+  let assert Ok(MultipartHeaders(headers, input)) =
     http.parse_multipart_headers(input, "BbC04y")
   headers
   |> should.equal([
@@ -266,11 +274,13 @@ Content-Transfer-Encoding: binary\r
     #("content-transfer-encoding", "binary"),
   ])
 
-  let assert Ok(Done(body, input)) = http.parse_multipart_body(input, "BbC04y")
+  let assert Ok(MultipartBody(body, True, input)) =
+    http.parse_multipart_body(input, "BbC04y")
   body
   |> should.equal("...contents of file2.gif...")
 
-  let assert Ok(Done(body, input)) = http.parse_multipart_body(input, "AaB03x")
+  let assert Ok(MultipartBody(body, True, input)) =
+    http.parse_multipart_body(input, "AaB03x")
   body
   |> should.equal("")
   input
@@ -288,17 +298,17 @@ This is the body of the message.\r
 This is the epilogue. Here it includes leading CRLF":utf8,
   >>
 
-  let assert Ok(Part(body, input)) =
+  let assert Ok(MultipartBody(body, False, input)) =
     http.parse_multipart_body(input, "boundary")
   body
   |> should.equal("This is the preamble.")
 
-  let assert Ok(Part(headers, input)) =
+  let assert Ok(MultipartHeaders(headers, input)) =
     http.parse_multipart_headers(input, "boundary")
   headers
   |> should.equal([#("content-type", "text/plain")])
 
-  let assert Ok(Done(body, input)) =
+  let assert Ok(MultipartBody(body, True, input)) =
     http.parse_multipart_body(input, "boundary")
   body
   |> should.equal("This is the body of the message.")
@@ -320,17 +330,17 @@ This is the body of the message.\r
 ":utf8,
   >>
 
-  let assert Ok(Part(body, input)) =
+  let assert Ok(MultipartBody(body, False, input)) =
     http.parse_multipart_body(input, "boundary")
   body
   |> should.equal("This is the preamble.")
 
-  let assert Ok(Part(headers, input)) =
+  let assert Ok(MultipartHeaders(headers, input)) =
     http.parse_multipart_headers(input, "boundary")
   headers
   |> should.equal([#("content-type", "text/plain")])
 
-  let assert Ok(Done(body, input)) =
+  let assert Ok(MultipartBody(body, True, input)) =
     http.parse_multipart_body(input, "boundary")
   body
   |> should.equal("This is the body of the message.")
@@ -360,7 +370,7 @@ It DOES end with a linebreak.\r
 This is the epilogue.  It is also to be ignored.":utf8,
   >>
 
-  let assert Ok(Part(body, input)) =
+  let assert Ok(MultipartBody(body, False, input)) =
     http.parse_multipart_body(input, "simple boundary")
   body
   |> should.equal(
@@ -370,12 +380,12 @@ explanatory note to non-MIME conformant readers.\r
 ",
   )
 
-  let assert Ok(Part(headers, input)) =
+  let assert Ok(MultipartHeaders(headers, input)) =
     http.parse_multipart_headers(input, "simple boundary")
   headers
   |> should.equal([])
 
-  let assert Ok(Part(body, input)) =
+  let assert Ok(MultipartBody(body, False, input)) =
     http.parse_multipart_body(input, "simple boundary")
   body
   |> should.equal(
@@ -383,12 +393,12 @@ explanatory note to non-MIME conformant readers.\r
 It does NOT end with a linebreak.",
   )
 
-  let assert Ok(Part(headers, input)) =
+  let assert Ok(MultipartHeaders(headers, input)) =
     http.parse_multipart_headers(input, "simple boundary")
   headers
   |> should.equal([#("content-type", "text/plain; charset=us-ascii")])
 
-  let assert Ok(Done(body, input)) =
+  let assert Ok(MultipartBody(body, True, input)) =
     http.parse_multipart_body(input, "simple boundary")
   body
   |> should.equal(
