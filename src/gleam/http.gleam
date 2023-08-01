@@ -111,30 +111,57 @@ pub fn method_from_dynamic(value: Dynamic) -> Result(Method, List(DecodeError)) 
 }
 
 pub type MultipartHeaders {
-  MultipartHeaders(headers: List(Header), remaining: BitString)
+  /// The headers for the part have been fully parsed.
+  MultipartHeaders(
+    headers: List(Header),
+    /// The remaining content that has not yet been parsed. This will contain
+    /// the body for this part, if any, and can be parsed with the
+    /// `parse_multipart_body` function.
+    remaining: BitString,
+  )
+  /// More input is required to parse the headers for this part.
   MoreRequiredForHeaders(
+    /// Call this function to continue parsing the headers for this part.
     continuation: fn(BitString) -> Result(MultipartHeaders, Nil),
   )
 }
 
 pub type MultipartBody {
-  MultipartBody(chunk: String, done: Bool, remaining: BitString)
-  MoreRequiredForBody(
+  /// The body for the part has been fully parsed.
+  MultipartBody(
+    // The rest of the body for this part. The full body of the part is this
+    // concatenated onto the end of each chunk returned by any previous
+    // `MoreRequiredForBody` returns.
     chunk: String,
+    /// This is `True` if this was the last part in the multipart message,
+    /// otherwise there are more parts to parse.
+    done: Bool,
+    /// The remaining content that has not yet been parsed. This will contain
+    /// the next part if `done` is `False`, otherwise it will contain the
+    /// epilogue, if any.
+    remaining: BitString,
+  )
+  MoreRequiredForBody(
+    // The body that has been parsed so far. The full body of the part is this
+    // concatenated with the chunk returned by each `MoreRequiredForBody` return
+    // value, and the final `MultipartBody` return value.
+    chunk: String,
+    /// Call this function to continue parsing the body for this part.
     continuation: fn(BitString) -> Result(MultipartBody, Nil),
   )
 }
 
-/// Parse the headers for the next multipart part.
-///
-/// This function is used for parsing the multipart format is defined in
-/// RFC 2045, along with `parse_multipart_body`.
+/// Parse the headers for part of a multipart message, as defined in RFC 2045.
 ///
 /// This function skips any preamble before the boundary. The preamble may be
-/// retrieved using `parse_body`.
+/// retrieved using `parse_multipart_body`.
 ///
 /// This function will accept input of any size, it is up to the caller to limit
 /// it if needed.
+/// 
+/// To enable streaming parsing of multipart messages, this function will return
+/// a continuation if there is not enough data to fully parse the headers.
+/// Further information is available in the documentation for `MultipartBody`.
 /// 
 pub fn parse_multipart_headers(
   data: BitString,
@@ -152,14 +179,17 @@ pub fn parse_multipart_headers(
   }
 }
 
-/// Parse the body of the current multipart part, which is everything until the
-/// next boundary.
+/// Parse the body for part of a multipart message, as defined in RFC 2045. The
+/// body is everything until the next boundary. This function is generally to be
+/// called after calling `parse_multipart_headers` for a given part.
 /// 
-/// This function is used for parsing the multipart format is defined in
-/// RFC 2045, along with `parse_multipart_headers`.
-///
 /// This function will accept input of any size, it is up to the caller to limit
 /// it if needed.
+/// 
+/// To enable streaming parsing of multipart messages, this function will return
+/// a continuation if there is not enough data to fully parse the body, along
+/// with the data that has been parsed so far. Further information is available
+/// in the documentation for `MultipartBody`.
 /// 
 pub fn parse_multipart_body(
   data: BitString,
