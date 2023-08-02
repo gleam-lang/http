@@ -1,6 +1,6 @@
 # Changelog
 
-## v3.4.0 - Unreleased
+## v3.4.0 - 2023-08-02
 
 - The `gleam/http` module gains the `parse_multipart_headers`,
   `parse_multipart_body`, and `parse_content_disposition` functions.
