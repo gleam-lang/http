@@ -433,6 +433,110 @@ fn more_please_headers(
   }))
 }
 
+pub type ContentDisposition {
+  ContentDisposition(String, parameters: List(#(String, String)))
+}
+
+pub fn parse_content_disposition(
+  header: String,
+) -> Result(ContentDisposition, Nil) {
+  parse_content_disposition_type(header, "")
+}
+
+fn parse_content_disposition_type(
+  header: String,
+  name: String,
+) -> Result(ContentDisposition, Nil) {
+  case string.pop_grapheme(header) {
+    Error(Nil) -> Ok(ContentDisposition(name, []))
+
+    Ok(#(" ", rest)) | Ok(#("\t", rest)) | Ok(#(";", rest)) -> {
+      let result = parse_rfc_2045_parameters(rest, [])
+      use parameters <- result.map(result)
+      ContentDisposition(name, parameters)
+    }
+
+    Ok(#(grapheme, rest)) ->
+      parse_content_disposition_type(rest, name <> string.lowercase(grapheme))
+  }
+}
+
+fn parse_rfc_2045_parameters(
+  header: String,
+  parameters: List(#(String, String)),
+) -> Result(List(#(String, String)), Nil) {
+  case string.pop_grapheme(header) {
+    Error(Nil) -> Ok(list.reverse(parameters))
+
+    Ok(#(";", rest)) | Ok(#(" ", rest)) | Ok(#("\t", rest)) ->
+      parse_rfc_2045_parameters(rest, parameters)
+
+    Ok(#(grapheme, rest)) -> {
+      let acc = string.lowercase(grapheme)
+      use #(parameter, rest) <- result.try(parse_rfc_2045_parameter(rest, acc))
+      parse_rfc_2045_parameters(rest, [parameter, ..parameters])
+    }
+  }
+}
+
+fn parse_rfc_2045_parameter(
+  header: String,
+  name: String,
+) -> Result(#(#(String, String), String), Nil) {
+  use #(grapheme, rest) <- result.try(string.pop_grapheme(header))
+  case grapheme {
+    "=" -> parse_rfc_2045_parameter_value(rest, name)
+    _ -> parse_rfc_2045_parameter(rest, name <> string.lowercase(grapheme))
+  }
+}
+
+fn parse_rfc_2045_parameter_value(
+  header: String,
+  name: String,
+) -> Result(#(#(String, String), String), Nil) {
+  case string.pop_grapheme(header) {
+    Error(Nil) -> Error(Nil)
+    Ok(#("\"", rest)) -> parse_rfc_2045_parameter_quoted_value(rest, name, "")
+    Ok(#(grapheme, rest)) ->
+      Ok(parse_rfc_2045_parameter_unquoted_value(rest, name, grapheme))
+  }
+}
+
+fn parse_rfc_2045_parameter_quoted_value(
+  header: String,
+  name: String,
+  value: String,
+) -> Result(#(#(String, String), String), Nil) {
+  case string.pop_grapheme(header) {
+    Error(Nil) -> Error(Nil)
+    Ok(#("\"", rest)) -> Ok(#(#(name, value), rest))
+    Ok(#("\\", rest)) -> {
+      use #(grapheme, rest) <- result.try(string.pop_grapheme(rest))
+      parse_rfc_2045_parameter_quoted_value(rest, name, value <> grapheme)
+    }
+    Ok(#(grapheme, rest)) ->
+      parse_rfc_2045_parameter_quoted_value(rest, name, value <> grapheme)
+  }
+}
+
+fn parse_rfc_2045_parameter_unquoted_value(
+  header: String,
+  name: String,
+  value: String,
+) -> #(#(String, String), String) {
+  case string.pop_grapheme(header) {
+    Error(Nil) -> #(#(name, value), header)
+
+    Ok(#(";", rest)) | Ok(#(" ", rest)) | Ok(#("\t", rest)) -> #(
+      #(name, value),
+      rest,
+    )
+
+    Ok(#(grapheme, rest)) ->
+      parse_rfc_2045_parameter_unquoted_value(rest, name, value <> grapheme)
+  }
+}
+
 fn more_please_body(
   continuation: fn(BitString) -> Result(MultipartBody, Nil),
   chunk: String,
