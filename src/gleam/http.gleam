@@ -195,8 +195,9 @@ pub fn parse_multipart_body(
   data: BitString,
   boundary: String,
 ) -> Result(MultipartBody, Nil) {
-  let boundary = bit_string.from_string(boundary)
-  parse_body_with_bit_string(data, boundary)
+  boundary
+  |> bit_string.from_string
+  |> parse_body_with_bit_string(data, _)
 }
 
 fn parse_body_with_bit_string(
@@ -300,7 +301,6 @@ fn parse_headers_after_prelude(
   }
 }
 
-// TODO: implement
 fn skip_preamble(
   data: BitString,
   boundary: BitString,
