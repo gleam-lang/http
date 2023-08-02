@@ -35,6 +35,7 @@ alphabetically.
 
 | Adapter                        | About                                                    |
 | ---                            | ---                                                      |
+| [Mist][mist]                   | [Mist][mist] is a high performance pure Gleam web server |
 | [gleam_cowboy][cowboy-adapter] | [Cowboy][cowboy] is an Erlang HTTP2 & HTTP1.1 web server |
 | [gleam_elli][elli-adapter]     | [Elli][elli] is an Erlang HTTP1.1 web server             |
 | [gleam_plug][plug-adapter]     | [Plug][plug] is an Elixir web application interface      |
@@ -45,6 +46,7 @@ alphabetically.
 [elli-adapter]: https://github.com/gleam-lang/elli
 [plug]:https://github.com/elixir-plug/plug
 [plug-adapter]: https://github.com/gleam-lang/plug
+[mist]: https://github.com/rawhat/mist
 
 ## Client adapters
 
