@@ -2,8 +2,8 @@
 
 ## v3.4.0 - Unreleased
 
-- The `gleam/http` module gains the `parse_multipart_headers` and
-  `parse_multipart_body` functions.
+- The `gleam/http` module gains the `parse_multipart_headers`,
+  `parse_multipart_body`, and `parse_content_disposition` functions.
 
 ## v3.3.0 - 2023-07-29
 
