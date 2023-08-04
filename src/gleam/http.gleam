@@ -132,7 +132,7 @@ pub type MultipartBody {
     // The rest of the body for this part. The full body of the part is this
     // concatenated onto the end of each chunk returned by any previous
     // `MoreRequiredForBody` returns.
-    chunk: String,
+    chunk: BitString,
     /// This is `True` if this was the last part in the multipart message,
     /// otherwise there are more parts to parse.
     done: Bool,
@@ -145,7 +145,7 @@ pub type MultipartBody {
     // The body that has been parsed so far. The full body of the part is this
     // concatenated with the chunk returned by each `MoreRequiredForBody` return
     // value, and the final `MultipartBody` return value.
-    chunk: String,
+    chunk: BitString,
     /// Call this function to continue parsing the body for this part.
     continuation: fn(BitString) -> Result(MultipartBody, Nil),
   )
@@ -207,7 +207,7 @@ fn parse_body_with_bit_string(
   let bsize = bit_string.byte_size(boundary)
   let prefix = bit_string.slice(data, 0, 2 + bsize)
   case prefix == Ok(<<45, 45, boundary:bit_string>>) {
-    True -> Ok(MultipartBody("", done: False, remaining: data))
+    True -> Ok(MultipartBody(<<>>, done: False, remaining: data))
     False -> parse_body_loop(data, boundary, <<>>)
   }
 }
@@ -222,8 +222,7 @@ fn parse_body_loop(
   let required = 6 + bsize
   case data {
     _ if dsize < required -> {
-      use chunk <- result.try(bit_string.to_string(body))
-      more_please_body(parse_body_loop(_, boundary, <<>>), chunk, data)
+      more_please_body(parse_body_loop(_, boundary, <<>>), body, data)
     }
 
     // TODO: flatten this into a single case expression once JavaScript supports
@@ -238,16 +237,13 @@ fn parse_body_loop(
       let rest = bit_string.slice(data, size, dsize - size)
       case prefix == Ok(desired), rest {
         // --boundary\r\n
-        True, Ok(<<13, 10, _:binary>>) -> {
-          use body <- result.map(bit_string.to_string(body))
-          MultipartBody(body, done: False, remaining: data)
-        }
+        True, Ok(<<13, 10, _:binary>>) ->
+          Ok(MultipartBody(body, done: False, remaining: data))
 
         // --boundary--
-        True, Ok(<<45, 45, data:binary>>) -> {
-          use body <- result.map(bit_string.to_string(body))
-          MultipartBody(body, done: True, remaining: data)
-        }
+        True, Ok(<<45, 45, data:binary>>) ->
+          Ok(MultipartBody(body, done: True, remaining: data))
+
         False, _ -> parse_body_loop(data, boundary, <<body:bit_string, 13, 10>>)
         _, _ -> Error(Nil)
       }
@@ -539,7 +535,7 @@ fn parse_rfc_2045_parameter_unquoted_value(
 
 fn more_please_body(
   continuation: fn(BitString) -> Result(MultipartBody, Nil),
-  chunk: String,
+  chunk: BitString,
   existing: BitString,
 ) -> Result(MultipartBody, Nil) {
   fn(more) {

@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.5.0 - 2023-08-04
+
+- The `parse_multipart_body` function now return a bit string rather than a string.
+
 ## v3.4.0 - 2023-08-02
 
 - The `gleam/http` module gains the `parse_multipart_headers`,
