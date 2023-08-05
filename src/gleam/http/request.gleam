@@ -134,6 +134,15 @@ pub fn map(
 
 /// Return the non-empty segments of a request path.
 ///
+/// # Examples
+///
+/// ```gleam
+/// > new()
+/// > |> set_path("/one/two/three")
+/// > |> path_segments
+/// ["one", "two", "three"]
+/// ```
+///
 pub fn path_segments(request: Request(body)) -> List(String) {
   request.path
   |> uri.path_segments
