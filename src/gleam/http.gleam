@@ -89,10 +89,10 @@ pub fn scheme_to_string(scheme: Scheme) -> String {
 ///
 /// # Examples
 ///
-///    > scheme_to_string("http")
+///    > scheme_from_string("http")
 ///    Ok(Http)
 ///
-///    > scheme_to_string("ftp")
+///    > scheme_from_string("ftp")
 ///    Error(Nil)
 ///
 pub fn scheme_from_string(scheme: String) -> Result(Scheme, Nil) {
