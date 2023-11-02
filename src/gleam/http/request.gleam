@@ -1,9 +1,9 @@
 import gleam/result
 // TODO: validate_req
-import gleam/http.{Get, Header, Method, Scheme}
+import gleam/http.{type Header, type Method, type Scheme, Get}
 import gleam/http/cookie
-import gleam/option.{None, Option, Some}
-import gleam/uri.{Uri}
+import gleam/option.{type Option}
+import gleam/uri.{type Uri, Uri}
 import gleam/list
 import gleam/string
 import gleam/string_builder

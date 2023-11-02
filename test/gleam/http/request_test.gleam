@@ -2,7 +2,7 @@ import gleam/option.{None, Some}
 import gleam/uri.{Uri}
 import gleam/string
 import gleam/http.{Https}
-import gleam/http/request.{Request}
+import gleam/http/request.{type Request, Request}
 import gleeunit/should
 
 pub fn req_to_uri_test() {

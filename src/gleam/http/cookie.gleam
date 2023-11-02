@@ -3,8 +3,8 @@ import gleam/int
 import gleam/list
 import gleam/regex
 import gleam/string
-import gleam/option.{Option, Some}
-import gleam/http.{Scheme}
+import gleam/option.{type Option, Some}
+import gleam/http.{type Scheme}
 
 /// Policy options for the SameSite cookie attribute
 ///

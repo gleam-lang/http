@@ -1,5 +1,5 @@
 import gleeunit/should
-import gleam/bit_string
+import gleam/bit_array
 import gleam/list
 import gleam/http.{
   MoreRequiredForBody, MoreRequiredForHeaders, MultipartBody, MultipartHeaders,
@@ -78,7 +78,7 @@ This is the body of the message.\r
   let assert Ok(MultipartHeaders(headers, rest)) = case return {
     MoreRequiredForHeaders(continue) -> continue(after)
     MultipartHeaders(headers, remaining) ->
-      Ok(MultipartHeaders(headers, bit_string.append(remaining, after)))
+      Ok(MultipartHeaders(headers, bit_array.append(remaining, after)))
   }
 
   headers
@@ -111,10 +111,10 @@ This is the body of the next part\r
   let assert Ok(MultipartBody(body, False, rest)) = case return {
     MoreRequiredForBody(chunk, continue) -> {
       let assert Ok(MultipartBody(body, done, remaining)) = continue(after)
-      Ok(MultipartBody(bit_string.append(chunk, body), done, remaining))
+      Ok(MultipartBody(bit_array.append(chunk, body), done, remaining))
     }
     MultipartBody(body, done, remaining) ->
-      Ok(MultipartBody(body, done, bit_string.append(remaining, after)))
+      Ok(MultipartBody(body, done, bit_array.append(remaining, after)))
   }
 
   body
@@ -130,13 +130,13 @@ This is the body of the next part\r
 }
 
 fn slices(
-  before: BitString,
-  after: BitString,
-  acc: List(#(BitString, BitString)),
-) -> List(#(BitString, BitString)) {
+  before: BitArray,
+  after: BitArray,
+  acc: List(#(BitArray, BitArray)),
+) -> List(#(BitArray, BitArray)) {
   case after {
-    <<first, rest:binary>> ->
-      slices(<<before:bit_string, first>>, rest, [#(before, after), ..acc])
+    <<first, rest:bytes>> ->
+      slices(<<before:bits, first>>, rest, [#(before, after), ..acc])
     <<>> -> [#(before, after), ..acc]
   }
 }

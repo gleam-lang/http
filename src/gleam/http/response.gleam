@@ -1,5 +1,5 @@
 import gleam/result
-import gleam/http.{Header}
+import gleam/http.{type Header}
 import gleam/http/cookie
 import gleam/list
 import gleam/string
