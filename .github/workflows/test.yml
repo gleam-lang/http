@@ -15,7 +15,7 @@ jobs:
       - uses: erlef/setup-beam@v1
         with:
           otp-version: "25.1"
-          gleam-version: "0.32.0"
+          gleam-version: "0.32.1"
           rebar3-version: "3"
       - run: gleam test --target=erlang
       - run: gleam test --target=javascript
