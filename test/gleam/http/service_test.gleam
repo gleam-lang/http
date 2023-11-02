@@ -1,6 +1,6 @@
 import gleam/http.{Delete, Get, Patch, Post, Put}
 import gleam/http/response.{Response}
-import gleam/http/request.{Request}
+import gleam/http/request.{type Request}
 import gleam/http/service
 
 pub fn method_override_test() {

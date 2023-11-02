@@ -1,6 +1,6 @@
 import gleam/http.{Delete, Patch, Post, Put}
-import gleam/http/request.{Request}
-import gleam/http/response.{Response}
+import gleam/http/request.{type Request}
+import gleam/http/response.{type Response}
 import gleam/list
 import gleam/result
 

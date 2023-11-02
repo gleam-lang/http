@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.5.1 - Unreleased
+
+- Updated for Gleam v0.32.0.
+
 ## v3.5.0 - 2023-08-04
 
 - The `parse_multipart_body` function now return a bit string rather than a string.
