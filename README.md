@@ -33,12 +33,12 @@ In the example above the Elli Erlang web server is used to run the Gleam HTTP
 service. Here's a full list of the server adapters available, sorted
 alphabetically.
 
-| Adapter                        | About                                                    |
-| ---                            | ---                                                      |
-| [Mist][mist]                   | [Mist][mist] is a high performance pure Gleam web server |
-| [gleam_cowboy][cowboy-adapter] | [Cowboy][cowboy] is an Erlang HTTP2 & HTTP1.1 web server |
-| [gleam_elli][elli-adapter]     | [Elli][elli] is an Erlang HTTP1.1 web server             |
-| [gleam_plug][plug-adapter]     | [Plug][plug] is an Elixir web application interface      |
+| Adapter                        | About                                                         |
+| ---                            | ---                                                           |
+| [Mist][mist]                   | [Mist][mist] is a high performance pure Gleam HTTP 1.1 server |
+| [gleam_cowboy][cowboy-adapter] | [Cowboy][cowboy] is an Erlang HTTP2 & HTTP1.1 web server      |
+| [gleam_elli][elli-adapter]     | [Elli][elli] is an Erlang HTTP1.1 web server                  |
+| [gleam_plug][plug-adapter]     | [Plug][plug] is an Elixir web application interface           |
 
 [cowboy]:https://github.com/ninenines/cowboy
 [cowboy-adapter]: https://github.com/gleam-lang/cowboy
