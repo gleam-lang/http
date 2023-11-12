@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.5.2 - 2023-11-12
+
+- Fixed a bug where `response.set_header` would lowercase the value rather than
+  the key.
+
 ## v3.5.1 - 2023-11-02
 
 - Updated for Gleam v0.32.0.
