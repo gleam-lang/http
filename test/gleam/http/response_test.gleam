@@ -59,11 +59,12 @@ pub fn set_header_test() {
   // sets header and replaces existing
   let response =
     response.new(200)
-    |> response.set_header("x-foo", "x")
-    |> response.set_header("x-foo", "x")
+    |> response.set_header("x-one", "y")
+    |> response.set_header("x-one", "x")
+    |> response.set_header("x-two", "UPPERCASE")
 
   response.headers
-  |> should.equal([#("x-foo", "x")])
+  |> should.equal([#("x-one", "x"), #("x-two", "UPPERCASE")])
 }
 
 pub fn set_body_test() {

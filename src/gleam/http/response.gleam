@@ -48,7 +48,7 @@ pub fn set_header(
   key: String,
   value: String,
 ) -> Response(body) {
-  let headers = list.key_set(response.headers, key, string.lowercase(value))
+  let headers = list.key_set(response.headers, string.lowercase(key), value)
   Response(..response, headers: headers)
 }
 
