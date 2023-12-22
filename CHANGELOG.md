@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.5.3 - 2023-12-22
+
+- Fixed warnings on Gleam v0.33.0.
+
 ## v3.5.2 - 2023-11-12
 
 - Fixed a bug where `response.set_header` would lowercase the value rather than
