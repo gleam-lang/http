@@ -137,7 +137,7 @@ fn slices(
   case after {
     <<first, rest:bytes>> ->
       slices(<<before:bits, first>>, rest, [#(before, after), ..acc])
-    <<>> -> [#(before, after), ..acc]
+    _ -> [#(before, after), ..acc]
   }
 }
 

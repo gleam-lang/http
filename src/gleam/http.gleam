@@ -252,6 +252,8 @@ fn parse_body_loop(
     <<char, data:bytes>> -> {
       parse_body_loop(data, boundary, <<body:bits, char>>)
     }
+
+    _ -> panic as "unreachable"
   }
 }
 
@@ -268,7 +270,8 @@ fn parse_headers_after_prelude(
   // compiler support this.
 
   use <- bool.guard(
-    when: dsize < required_size,
+    when: dsize
+    < required_size,
     return: more_please_headers(parse_headers_after_prelude(_, boundary), data),
   )
 
@@ -326,6 +329,8 @@ fn skip_preamble(
     }
 
     <<_, data:bytes>> -> skip_preamble(data, boundary)
+
+    _ -> panic as "unreachable"
   }
 }
 
@@ -368,7 +373,7 @@ fn parse_header_name(
     <<char, data:bytes>> ->
       parse_header_name(data, headers, <<name:bits, char>>)
 
-    <<>> -> more_please_headers(parse_header_name(_, headers, name), data)
+    _ -> more_please_headers(parse_header_name(_, headers, name), data)
   }
 }
 
@@ -423,10 +428,12 @@ fn more_please_headers(
   continuation: fn(BitArray) -> Result(MultipartHeaders, Nil),
   existing: BitArray,
 ) -> Result(MultipartHeaders, Nil) {
-  Ok(MoreRequiredForHeaders(fn(more) {
-    use <- bool.guard(more == <<>>, return: Error(Nil))
-    continuation(<<existing:bits, more:bits>>)
-  }))
+  Ok(
+    MoreRequiredForHeaders(fn(more) {
+      use <- bool.guard(more == <<>>, return: Error(Nil))
+      continuation(<<existing:bits, more:bits>>)
+    }),
+  )
 }
 
 pub type ContentDisposition {
