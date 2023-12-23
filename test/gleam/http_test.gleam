@@ -660,48 +660,49 @@ pub fn parse_content_disposition_1_test() {
   http.parse_content_disposition(
     "attachment; filename=genome.jpeg; modification-date=\"Wed, 12 Feb 1997 16:29:51 -0500\";",
   )
-  |> should.equal(Ok(http.ContentDisposition(
-    "attachment",
-    [
-      #("filename", "genome.jpeg"),
-      #("modification-date", "Wed, 12 Feb 1997 16:29:51 -0500"),
-    ],
-  )))
+  |> should.equal(
+    Ok(
+      http.ContentDisposition("attachment", [
+        #("filename", "genome.jpeg"),
+        #("modification-date", "Wed, 12 Feb 1997 16:29:51 -0500"),
+      ]),
+    ),
+  )
 
   http.parse_content_disposition("form-data; name=\"user\"")
   |> should.equal(Ok(http.ContentDisposition("form-data", [#("name", "user")])))
 
   http.parse_content_disposition("form-data; NAME=\"submit-name\"")
-  |> should.equal(Ok(http.ContentDisposition(
-    "form-data",
-    [#("name", "submit-name")],
-  )))
+  |> should.equal(
+    Ok(http.ContentDisposition("form-data", [#("name", "submit-name")])),
+  )
 
   http.parse_content_disposition(
     "form-data; name=\"files\"; filename=\"file1.txt\"",
   )
-  |> should.equal(Ok(http.ContentDisposition(
-    "form-data",
-    [#("name", "files"), #("filename", "file1.txt")],
-  )))
+  |> should.equal(
+    Ok(
+      http.ContentDisposition("form-data", [
+        #("name", "files"),
+        #("filename", "file1.txt"),
+      ]),
+    ),
+  )
 
   http.parse_content_disposition("file; filename=\"file1.txt\"")
-  |> should.equal(Ok(http.ContentDisposition(
-    "file",
-    [#("filename", "file1.txt")],
-  )))
+  |> should.equal(
+    Ok(http.ContentDisposition("file", [#("filename", "file1.txt")])),
+  )
 
   http.parse_content_disposition("file; filename=\"file2.gif\"")
-  |> should.equal(Ok(http.ContentDisposition(
-    "file",
-    [#("filename", "file2.gif")],
-  )))
+  |> should.equal(
+    Ok(http.ContentDisposition("file", [#("filename", "file2.gif")])),
+  )
 
   http.parse_content_disposition("file; filename=\"file2\\\".gif\"")
-  |> should.equal(Ok(http.ContentDisposition(
-    "file",
-    [#("filename", "file2\".gif")],
-  )))
+  |> should.equal(
+    Ok(http.ContentDisposition("file", [#("filename", "file2\".gif")])),
+  )
 
   http.parse_content_disposition("file; filename=\"file2")
   |> should.equal(Error(Nil))

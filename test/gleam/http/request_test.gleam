@@ -51,32 +51,36 @@ pub fn req_from_uri_test() {
     Uri(Some("https"), None, Some("sky.net"), None, "/sarah/connor", None, None)
   uri
   |> request.from_uri
-  |> should.equal(Ok(Request(
-    method: http.Get,
-    headers: [],
-    body: "",
-    scheme: http.Https,
-    host: "sky.net",
-    port: None,
-    path: "/sarah/connor",
-    query: None,
-  )))
+  |> should.equal(
+    Ok(Request(
+      method: http.Get,
+      headers: [],
+      body: "",
+      scheme: http.Https,
+      host: "sky.net",
+      port: None,
+      path: "/sarah/connor",
+      query: None,
+    )),
+  )
 }
 
 pub fn req_from_url_test() {
   let url = "https://sky.net/sarah/connor?foo=x%20y"
 
   request.to(url)
-  |> should.equal(Ok(Request(
-    method: http.Get,
-    headers: [],
-    body: "",
-    scheme: http.Https,
-    host: "sky.net",
-    port: None,
-    path: "/sarah/connor",
-    query: Some("foo=x%20y"),
-  )))
+  |> should.equal(
+    Ok(Request(
+      method: http.Get,
+      headers: [],
+      body: "",
+      scheme: http.Https,
+      host: "sky.net",
+      port: None,
+      path: "/sarah/connor",
+      query: Some("foo=x%20y"),
+    )),
+  )
 }
 
 pub fn path_segments_test() {

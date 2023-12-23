@@ -43,7 +43,8 @@ pub fn defaults(scheme: Scheme) {
     max_age: option.None,
     domain: option.None,
     path: option.Some("/"),
-    secure: scheme == http.Https,
+    secure: scheme
+    == http.Https,
     http_only: True,
     same_site: Some(Lax),
   )
@@ -80,10 +81,9 @@ fn cookie_attributes_to_list(attributes) {
       True -> option.Some(["HttpOnly"])
       False -> option.None
     },
-    option.map(
-      same_site,
-      fn(same_site) { ["SameSite=", same_site_to_string(same_site)] },
-    ),
+    option.map(same_site, fn(same_site) {
+      ["SameSite=", same_site_to_string(same_site)]
+    }),
   ]
   |> list.filter_map(option.to_result(_, Nil))
 }
