@@ -36,17 +36,19 @@ alphabetically.
 | Adapter                        | About                                                         |
 | ---                            | ---                                                           |
 | [Mist][mist]                   | [Mist][mist] is a high performance pure Gleam HTTP 1.1 server |
+| [cgi][cgi]                     | [cgi][cgi] is a adapter for the Common Gateway Interface. |
 | [gleam_cowboy][cowboy-adapter] | [Cowboy][cowboy] is an Erlang HTTP2 & HTTP1.1 web server      |
 | [gleam_elli][elli-adapter]     | [Elli][elli] is an Erlang HTTP1.1 web server                  |
 | [gleam_plug][plug-adapter]     | [Plug][plug] is an Elixir web application interface           |
 
-[cowboy]:https://github.com/ninenines/cowboy
+[cgi]: https://github.com/lpil/cgi
 [cowboy-adapter]: https://github.com/gleam-lang/cowboy
-[elli]:https://github.com/elli-lib/elli
+[cowboy]:https://github.com/ninenines/cowboy
 [elli-adapter]: https://github.com/gleam-lang/elli
-[plug]:https://github.com/elixir-plug/plug
-[plug-adapter]: https://github.com/gleam-lang/plug
+[elli]:https://github.com/elli-lib/elli
 [mist]: https://github.com/rawhat/mist
+[plug-adapter]: https://github.com/gleam-lang/plug
+[plug]:https://github.com/elixir-plug/plug
 
 ## Client adapters
 
