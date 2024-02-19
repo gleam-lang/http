@@ -4,20 +4,17 @@ import gleam/http/response.{type Response}
 import gleam/list
 import gleam/result
 
-// TODO: document
+@deprecated("Use middleware packages such as Wisp or Glen instead")
 pub type Service(in, out) =
   fn(Request(in)) -> Response(out)
 
+@deprecated("Use middleware packages such as Wisp or Glen instead")
 pub type Middleware(before_req, before_resp, after_req, after_resp) =
-  fn(Service(before_req, before_resp)) -> Service(after_req, after_resp)
+  fn(fn(Request(before_req)) -> Response(before_resp)) ->
+    fn(Request(after_req)) -> Response(after_resp)
 
-/// A middleware that transform the response body returned by the service using
-/// a given function.
-///
-pub fn map_response_body(
-  service: Service(req, a),
-  with mapper: fn(a) -> b,
-) -> Service(req, b) {
+@deprecated("Use middleware packages such as Wisp or Glen instead")
+pub fn map_response_body(service, with mapper: fn(a) -> b) {
   fn(req) {
     req
     |> service
@@ -25,13 +22,8 @@ pub fn map_response_body(
   }
 }
 
-/// A middleware that prepends a header to the request.
-///
-pub fn prepend_response_header(
-  service: Service(req, resp),
-  key: String,
-  value: String,
-) -> Service(req, resp) {
+@deprecated("Use middleware packages such as Wisp or Glen instead")
+pub fn prepend_response_header(service, key: String, value: String) {
   fn(req) {
     req
     |> service
@@ -56,21 +48,8 @@ fn get_override_method(request: Request(t)) -> Result(http.Method, Nil) {
   }
 }
 
-/// A middleware that overrides an incoming POST request with a method given in
-/// the request's `_method` query paramerter. This is useful as web browsers
-/// typically only support GET and POST requests, but our application may
-/// expect other HTTP methods that are more semantically correct.
-///
-/// The methods PUT, PATCH, and DELETE are accepted for overriding, all others
-/// are ignored.
-///
-/// The `_method` query paramerter can be specified in a HTML form like so:
-///
-///    <form method="POST" action="/item/1?_method=DELETE">
-///      <button type="submit">Delete item</button>
-///    </form>
-///
-pub fn method_override(service: Service(req, resp)) -> Service(req, resp) {
+@deprecated("Use middleware packages such as Wisp or Glen instead")
+pub fn method_override(service) {
   fn(request) {
     request
     |> ensure_post

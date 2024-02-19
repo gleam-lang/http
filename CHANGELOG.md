@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- The `gleam/http/service` module has been deprecated in favour of other
+  packages such as Wisp and Glen.
+
 ## v3.5.3 - 2023-12-22
 
 - Fixed warnings on Gleam v0.33.0.
