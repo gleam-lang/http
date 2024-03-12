@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v3.6.2 - 2024-03-12
 
 - The `gleam/http/service` module has been deprecated in favour of other
   packages such as Wisp and Glen.
