@@ -362,8 +362,6 @@ pub fn set_request_header_lowercases_key_test() {
   |> should.equal([#("uppercase_gleam", "awesome")])
 }
 
-// dillon start
-
 pub fn set_req_headers_test() {
   let request =
     Request(
