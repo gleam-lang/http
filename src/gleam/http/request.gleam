@@ -95,6 +95,34 @@ pub fn prepend_header(
   Request(..request, headers: headers)
 }
 
+/// Set a requests headers using a list.
+///
+/// Similar to `set_header` but for setting more than a single header at once.
+/// Existing headers on the request will be replaced.
+pub fn set_headers(
+  request: Request(body),
+  headers: List(#(String, String)),
+) -> Request(body) {
+  let new_headers =
+    list.fold(headers, [], fn(acc, header) {
+      list.key_set(acc, string.lowercase(header.0), header.1)
+    })
+  Request(..request, headers: new_headers)
+}
+
+/// Prepend the request header with the given key/values.
+///
+/// Similar to `prepend_header` but for prepending multiple key/values at once.
+/// If a header already exists it prepends another header with the same key.
+pub fn prepend_headers(
+  request: Request(body),
+  headers: List(#(String, String)),
+) -> Request(body) {
+  list.fold(headers, request, fn(acc, header) {
+    prepend_header(acc, header.0, header.1)
+  })
+}
+
 // TODO: record update syntax, which can't be done currently as body type changes
 /// Set the body of the request, overwriting any existing body.
 ///

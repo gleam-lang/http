@@ -362,6 +362,73 @@ pub fn set_request_header_lowercases_key_test() {
   |> should.equal([#("uppercase_gleam", "awesome")])
 }
 
+// dillon start
+
+pub fn set_req_headers_test() {
+  let request =
+    Request(
+      method: http.Get,
+      headers: [],
+      body: Nil,
+      scheme: http.Https,
+      host: "example.com",
+      port: None,
+      path: "/",
+      query: None,
+    )
+    |> request.set_headers([
+      #("gleam", "awesome"),
+      #("ocaml", "also pretty cool"),
+    ])
+
+  request.headers
+  |> should.equal([#("gleam", "awesome"), #("ocaml", "also pretty cool")])
+
+  // Set updates existing
+  let request =
+    request
+    |> request.set_headers([#("gleam", "the best")])
+
+  request.headers
+  |> should.equal([#("gleam", "the best")])
+}
+
+pub fn set_request_headers_maintains_value_casing_test() {
+  let request =
+    Request(
+      method: http.Get,
+      headers: [],
+      body: Nil,
+      scheme: http.Https,
+      host: "example.com",
+      port: None,
+      path: "/",
+      query: None,
+    )
+    |> request.set_headers([#("gleam", "UPPERCASE_AWESOME")])
+
+  request.headers
+  |> should.equal([#("gleam", "UPPERCASE_AWESOME")])
+}
+
+pub fn set_request_headers_lowercases_key_test() {
+  let request =
+    Request(
+      method: http.Get,
+      headers: [],
+      body: Nil,
+      scheme: http.Https,
+      host: "example.com",
+      port: None,
+      path: "/",
+      query: None,
+    )
+    |> request.set_headers([#("UPPERCASE_GLEAM", "awesome")])
+
+  request.headers
+  |> should.equal([#("uppercase_gleam", "awesome")])
+}
+
 pub fn prepend_req_header_test() {
   let headers = []
   let request =
@@ -391,6 +458,45 @@ pub fn prepend_req_header_test() {
   let request =
     request
     |> request.prepend_header("gleam", "awesome")
+
+  // request repeats the existing header
+  request.headers
+  |> should.equal([
+    #("gleam", "awesome"),
+    #("gleam", "awesome"),
+    #("answer", "42"),
+  ])
+}
+
+pub fn prepend_req_headers_test() {
+  let headers = []
+  let request =
+    Request(
+      method: http.Get,
+      headers: headers,
+      body: Nil,
+      scheme: http.Https,
+      host: "example.com",
+      port: None,
+      path: "/",
+      query: None,
+    )
+    |> request.prepend_headers([#("answer", "42")])
+
+  request.headers
+  |> should.equal([#("answer", "42")])
+
+  let request =
+    request
+    |> request.prepend_headers([#("gleam", "awesome")])
+
+  // request should have two headers now
+  request.headers
+  |> should.equal([#("gleam", "awesome"), #("answer", "42")])
+
+  let request =
+    request
+    |> request.prepend_headers([#("gleam", "awesome")])
 
   // request repeats the existing header
   request.headers
