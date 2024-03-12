@@ -95,7 +95,7 @@ pub fn prepend_header(
   Request(..request, headers: headers)
 }
 
-/// Set a requests headers using a list.
+/// Set a request's headers using a list.
 ///
 /// Similar to `set_header` but for setting more than a single header at once.
 /// Existing headers on the request will be replaced.
