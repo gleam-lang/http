@@ -145,6 +145,11 @@ pub fn set_query_test() {
   let updated_request = request.set_query(request, empty_query)
   updated_request.query
   |> should.equal(Some(""))
+
+  let query = [#("foo bar", "x y")]
+  let updated_request = request.set_query(request, query)
+  updated_request.query
+  |> should.equal(Some("foo%20bar=x%20y"))
 }
 
 pub fn get_req_header_test() {

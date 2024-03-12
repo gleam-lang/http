@@ -156,15 +156,19 @@ pub fn get_query(request: Request(body)) -> Result(List(#(String, String)), Nil)
   }
 }
 
-// TODO: escape
 /// Set the query of the request.
+/// Query params will be percent encoded before being added to the Request.
 ///
 pub fn set_query(
   req: Request(body),
   query: List(#(String, String)),
 ) -> Request(body) {
   let pair = fn(t: #(String, String)) {
-    string_builder.from_strings([t.0, "=", t.1])
+    string_builder.from_strings([
+      uri.percent_encode(t.0),
+      "=",
+      uri.percent_encode(t.1),
+    ])
   }
   let query =
     query
