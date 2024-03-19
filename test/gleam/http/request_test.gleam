@@ -178,6 +178,32 @@ pub fn get_req_header_test() {
   |> should.equal(Error(Nil))
 }
 
+pub fn get_req_case_insensitive_header_test() {
+  let make_request = fn(headers) {
+    Request(
+      method: http.Get,
+      headers: headers,
+      body: Nil,
+      scheme: http.Https,
+      host: "example.com",
+      port: None,
+      path: "/",
+      query: None,
+    )
+  }
+
+  let header_key = "GLEAM"
+  let request = make_request([#("ANSWER", "42"), #("GLEAM", "awesome")])
+  request
+  |> request.get_header(header_key)
+  |> should.equal(Ok("awesome"))
+
+  let request = make_request([#("answer", "42")])
+  request
+  |> request.get_header(header_key)
+  |> should.equal(Error(Nil))
+}
+
 pub fn set_req_body_test() {
   let body =
     "<html>
