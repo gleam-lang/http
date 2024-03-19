@@ -270,8 +270,7 @@ fn parse_headers_after_prelude(
   // compiler support this.
 
   use <- bool.guard(
-    when: dsize
-    < required_size,
+    when: dsize < required_size,
     return: more_please_headers(parse_headers_after_prelude(_, boundary), data),
   )
 

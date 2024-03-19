@@ -43,8 +43,7 @@ pub fn defaults(scheme: Scheme) {
     max_age: option.None,
     domain: option.None,
     path: option.Some("/"),
-    secure: scheme
-    == http.Https,
+    secure: scheme == http.Https,
     http_only: True,
     same_site: Some(Lax),
   )
