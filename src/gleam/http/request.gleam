@@ -1,17 +1,21 @@
-import gleam/result
-// TODO: validate_req
 import gleam/http.{type Header, type Method, type Scheme, Get}
 import gleam/http/cookie
-import gleam/option.{type Option}
-import gleam/uri.{type Uri, Uri}
 import gleam/list
+import gleam/option.{type Option}
+import gleam/result
 import gleam/string
 import gleam/string_builder
+import gleam/uri.{type Uri, Uri}
 
-// TODO: document
+/// A HTTP request.
+///
+/// The body of the request is parameterised. The HTTP server or client you are
+/// using will have a particular set of types it supports for the body.
+/// 
 pub type Request(body) {
   Request(
     method: Method,
+    /// The request headers. The keys must always be lowercase.
     headers: List(Header),
     body: body,
     scheme: Scheme,
@@ -66,6 +70,9 @@ pub fn from_uri(uri: Uri) -> Result(Request(String), Nil) {
 ///
 /// If the request does not have that header then `Error(Nil)` is returned.
 ///
+/// Header keys are always lowercase in `gleam_http`. To use any uppercase
+/// letter is invalid.
+///
 pub fn get_header(request: Request(body), key: String) -> Result(String, Nil) {
   list.key_find(request.headers, string.lowercase(key))
 }
@@ -73,6 +80,10 @@ pub fn get_header(request: Request(body), key: String) -> Result(String, Nil) {
 /// Set the header with the given value under the given header key.
 ///
 /// If already present, it is replaced.
+///
+/// Header keys are always lowercase in `gleam_http`. To use any uppercase
+/// letter is invalid.
+///
 pub fn set_header(
   request: Request(body),
   key: String,
@@ -86,6 +97,10 @@ pub fn set_header(
 ///
 /// Similar to `set_header` except if the header already exists it prepends
 /// another header with the same key.
+///
+/// Header keys are always lowercase in `gleam_http`. To use any uppercase
+/// letter is invalid.
+///
 pub fn prepend_header(
   request: Request(body),
   key: String,

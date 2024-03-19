@@ -5,12 +5,12 @@
 ////
 //// This module does not implement a HTTP client or HTTP server, but it can be used as a base for them.
 
-import gleam/dynamic.{type DecodeError, type Dynamic, DecodeError}
-import gleam/string
 import gleam/bit_array
-import gleam/result
-import gleam/list
 import gleam/bool
+import gleam/dynamic.{type DecodeError, type Dynamic, DecodeError}
+import gleam/list
+import gleam/result
+import gleam/string
 
 /// HTTP standard method as defined by [RFC 2616](https://tools.ietf.org/html/rfc2616),
 /// and PATCH which is defined by [RFC 5789](https://tools.ietf.org/html/rfc5789).
@@ -112,6 +112,7 @@ pub fn method_from_dynamic(value: Dynamic) -> Result(Method, List(DecodeError)) 
 
 pub type MultipartHeaders {
   /// The headers for the part have been fully parsed.
+  /// Header keys are all lowercase.
   MultipartHeaders(
     headers: List(Header),
     /// The remaining content that has not yet been parsed. This will contain
@@ -270,8 +271,7 @@ fn parse_headers_after_prelude(
   // compiler support this.
 
   use <- bool.guard(
-    when: dsize
-    < required_size,
+    when: dsize < required_size,
     return: more_please_headers(parse_headers_after_prelude(_, boundary), data),
   )
 
@@ -561,7 +561,7 @@ fn do_method_from_dynamic(a: Dynamic) -> Result(Method, nil)
 @external(javascript, "../gleam_http_native.mjs", "decode_method")
 fn do_method_from_dynamic(a: Dynamic) -> Result(Method, Nil)
 
-/// A HTTP header is a key-value pair. Header keys should be all lowercase
+/// A HTTP header is a key-value pair. Header keys must be all lowercase
 /// characters.
 pub type Header =
   #(String, String)

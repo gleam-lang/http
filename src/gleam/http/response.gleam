@@ -1,13 +1,22 @@
-import gleam/result
 import gleam/http.{type Header}
 import gleam/http/cookie
 import gleam/list
-import gleam/string
 import gleam/option
+import gleam/result
+import gleam/string
 
-// TODO: document
+/// A HTTP response.
+///
+/// The body of the request is parameterised. The HTTP server or client you are
+/// using will have a particular set of types it supports for the body.
+/// 
 pub type Response(body) {
-  Response(status: Int, headers: List(Header), body: body)
+  Response(
+    status: Int,
+    /// The request headers. The keys must always be lowercase.
+    headers: List(Header),
+    body: body,
+  )
 }
 
 /// Update the body of a response using a given result returning function.
@@ -43,6 +52,10 @@ pub fn get_header(response: Response(body), key: String) -> Result(String, Nil) 
 /// Set the header with the given value under the given header key.
 ///
 /// If the response already has that key, it is replaced.
+///
+/// Header keys are always lowercase in `gleam_http`. To use any uppercase
+/// letter is invalid.
+///
 pub fn set_header(
   response: Response(body),
   key: String,
@@ -56,6 +69,10 @@ pub fn set_header(
 ///
 /// Similar to `set_header` except if the header already exists it prepends
 /// another header with the same key.
+///
+/// Header keys are always lowercase in `gleam_http`. To use any uppercase
+/// letter is invalid.
+///
 pub fn prepend_header(
   response: Response(body),
   key: String,
