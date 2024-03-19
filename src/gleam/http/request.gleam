@@ -67,9 +67,10 @@ pub fn from_uri(uri: Uri) -> Result(Request(String), Nil) {
 /// If the request does not have that header then `Error(Nil)` is returned.
 ///
 pub fn get_header(request: Request(body), key: String) -> Result(String, Nil) {
+  let lowercased_key = string.lowercase(key)
   use #(_, value) <- result.try(
     list.find(request.headers, fn(header) {
-      string.lowercase(header.0) == string.lowercase(key)
+      string.lowercase(header.0) == lowercased_key
     }),
   )
   Ok(value)

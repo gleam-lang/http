@@ -192,7 +192,7 @@ pub fn get_req_case_insensitive_header_test() {
     )
   }
 
-  let header_key = "GLEAM"
+  let header_key = "gleam"
   let request = make_request([#("ANSWER", "42"), #("GLEAM", "awesome")])
   request
   |> request.get_header(header_key)
