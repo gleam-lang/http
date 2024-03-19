@@ -192,16 +192,53 @@ pub fn get_req_case_insensitive_header_test() {
     )
   }
 
+  // Test lowercase key -> uppercase header
   let header_key = "gleam"
-  let request = make_request([#("ANSWER", "42"), #("GLEAM", "awesome")])
+  let request = make_request([#("GLEAM", "awesome")])
+
   request
   |> request.get_header(header_key)
   |> should.equal(Ok("awesome"))
 
-  let request = make_request([#("answer", "42")])
+  // Test uppercase key -> uppercase header
+  let header_key = "GLEAM"
+  let request = make_request([#("GLEAM", "awesome")])
+
   request
   |> request.get_header(header_key)
-  |> should.equal(Error(Nil))
+  |> should.equal(Ok("awesome"))
+
+  // Test uppercase key -> lowercase header
+  let header_key = "GLEAM"
+  let request = make_request([#("gleam", "awesome")])
+
+  request
+  |> request.get_header(header_key)
+  |> should.equal(Ok("awesome"))
+
+  // Test random cased key -> lowercase header
+  let header_key = "GlEaM"
+  let request = make_request([#("gleam", "awesome")])
+
+  request
+  |> request.get_header(header_key)
+  |> should.equal(Ok("awesome"))
+
+  // Test uppercase key -> random cased header
+  let header_key = "GLEAM"
+  let request = make_request([#("gLeAm", "awesome")])
+
+  request
+  |> request.get_header(header_key)
+  |> should.equal(Ok("awesome"))
+
+  // Test random cased key -> random cased header
+  let header_key = "GlEaM"
+  let request = make_request([#("gLeAm", "awesome")])
+
+  request
+  |> request.get_header(header_key)
+  |> should.equal(Ok("awesome"))
 }
 
 pub fn set_req_body_test() {
