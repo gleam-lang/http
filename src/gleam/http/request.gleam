@@ -5,7 +5,6 @@ import gleam/http/cookie
 import gleam/option.{type Option}
 import gleam/uri.{type Uri, Uri}
 import gleam/list
-import gleam/pair
 import gleam/string
 import gleam/string_builder
 
@@ -68,10 +67,12 @@ pub fn from_uri(uri: Uri) -> Result(Request(String), Nil) {
 /// If the request does not have that header then `Error(Nil)` is returned.
 ///
 pub fn get_header(request: Request(body), key: String) -> Result(String, Nil) {
-  list.find(request.headers, fn(header) {
-    string.lowercase(header.0) == string.lowercase(key)
-  })
-  |> result.map(pair.second)
+  use #(_, value) <- result.try(
+    list.find(request.headers, fn(header) {
+      string.lowercase(header.0) == string.lowercase(key)
+    }),
+  )
+  Ok(value)
 }
 
 /// Set the header with the given value under the given header key.
