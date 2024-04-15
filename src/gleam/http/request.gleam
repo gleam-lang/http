@@ -231,7 +231,7 @@ pub fn set_scheme(req: Request(body), scheme: Scheme) -> Request(body) {
   Request(..req, scheme: scheme)
 }
 
-/// Set the method of the request.
+/// Set the host of the request.
 ///
 pub fn set_host(req: Request(body), host: String) -> Request(body) {
   Request(..req, host: host)
