@@ -1,8 +1,8 @@
 import gleam/http.{Http}
-import gleam/http/response.{Response}
 import gleam/http/cookie
-import gleam/string
+import gleam/http/response.{Response}
 import gleam/option.{None, Some}
+import gleam/string
 import gleeunit/should
 
 pub fn redirect_test() {

@@ -1,9 +1,9 @@
-import gleeunit/should
 import gleam/bit_array
-import gleam/list
 import gleam/http.{
   MoreRequiredForBody, MoreRequiredForHeaders, MultipartBody, MultipartHeaders,
 }
+import gleam/list
+import gleeunit/should
 
 pub fn parse_multipart_headers_1_test() {
   let input = <<
