@@ -159,11 +159,11 @@ pub type MultipartBody {
 ///
 /// This function will accept input of any size, it is up to the caller to limit
 /// it if needed.
-/// 
+///
 /// To enable streaming parsing of multipart messages, this function will return
 /// a continuation if there is not enough data to fully parse the headers.
 /// Further information is available in the documentation for `MultipartBody`.
-/// 
+///
 pub fn parse_multipart_headers(
   data: BitArray,
   boundary: String,
@@ -183,15 +183,15 @@ pub fn parse_multipart_headers(
 /// Parse the body for part of a multipart message, as defined in RFC 2045. The
 /// body is everything until the next boundary. This function is generally to be
 /// called after calling `parse_multipart_headers` for a given part.
-/// 
+///
 /// This function will accept input of any size, it is up to the caller to limit
 /// it if needed.
-/// 
+///
 /// To enable streaming parsing of multipart messages, this function will return
 /// a continuation if there is not enough data to fully parse the body, along
 /// with the data that has been parsed so far. Further information is available
 /// in the documentation for `MultipartBody`.
-/// 
+///
 pub fn parse_multipart_body(
   data: BitArray,
   boundary: String,
@@ -553,11 +553,7 @@ fn more_please_body(
   |> Ok
 }
 
-@target(erlang)
 @external(erlang, "gleam_http_native", "decode_method")
-fn do_method_from_dynamic(a: Dynamic) -> Result(Method, nil)
-
-@target(javascript)
 @external(javascript, "../gleam_http_native.mjs", "decode_method")
 fn do_method_from_dynamic(a: Dynamic) -> Result(Method, Nil)
 
