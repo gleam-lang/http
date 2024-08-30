@@ -1,3 +1,4 @@
+import gleam/bool
 import gleam/http.{type Header, type Method, type Scheme, Get}
 import gleam/http/cookie
 import gleam/list
@@ -283,4 +284,22 @@ pub fn get_cookies(req) -> List(#(String, String)) {
     }
   })
   |> list.flatten()
+}
+
+/// Remove a cookie from a request
+///
+/// Remove a cookie from the request. If no cookie is found return the request unchanged.
+pub fn remove_cookie(req: Request(body), name: String) {
+  case list.key_pop(req.headers, "cookie") {
+    Ok(#(cookies_string, headers)) -> {
+      let new_cookies_string =
+        string.split(cookies_string, ";")
+        |> list.map(string.trim)
+        |> list.filter(fn(str) { string.starts_with(str, name) |> bool.negate })
+        |> string.join("; ")
+
+      Request(..req, headers: [#("cookie", new_cookies_string), ..headers])
+    }
+    Error(_) -> req
+  }
 }

@@ -450,3 +450,27 @@ pub fn set_req_cookies_test() {
   |> request.get_header("cookie")
   |> should.equal(Ok("k1=v1; k2=v2"))
 }
+
+pub fn remove_cookie_from_request_test() {
+  let req =
+    request.new()
+    |> request.set_cookie("FIRST_COOKIE", "first")
+    |> request.set_cookie("SECOND_COOKIE", "second")
+    |> request.set_cookie("THIRD_COOKIE", "third")
+
+  req
+  |> request.get_header("cookie")
+  |> should.be_ok
+  |> should.equal(
+    "FIRST_COOKIE=first; SECOND_COOKIE=second; THIRD_COOKIE=third",
+  )
+
+  let modified_req =
+    req
+    |> request.remove_cookie("SECOND_COOKIE")
+
+  modified_req
+  |> request.get_header("cookie")
+  |> should.be_ok
+  |> should.equal("FIRST_COOKIE=first; THIRD_COOKIE=third")
+}
