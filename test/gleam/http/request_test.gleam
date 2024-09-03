@@ -474,3 +474,16 @@ pub fn remove_cookie_from_request_test() {
   |> should.be_ok
   |> should.equal("FIRST_COOKIE=first; THIRD_COOKIE=third")
 }
+
+pub fn only_remove_matching_cookies_test() {
+  request.new()
+  |> request.set_cookie("FIRST_COOKIE", "first")
+  |> request.set_cookie("SECOND_COOKIE", "second")
+  |> request.set_cookie("THIRD_COOKIE", "third")
+  |> request.remove_cookie("SECOND")
+  |> request.get_header("cookie")
+  |> should.be_ok
+  |> should.equal(
+    "FIRST_COOKIE=first; SECOND_COOKIE=second; THIRD_COOKIE=third",
+  )
+}

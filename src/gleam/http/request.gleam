@@ -1,5 +1,6 @@
 import gleam/http.{type Header, type Method, type Scheme, Get}
 import gleam/http/cookie
+import gleam/io
 import gleam/list
 import gleam/option.{type Option}
 import gleam/result
@@ -294,9 +295,15 @@ pub fn remove_cookie(req: Request(body), name: String) {
     Ok(#(cookies_string, headers)) -> {
       let new_cookies_string =
         string.split(cookies_string, ";")
-        |> list.map(string.trim)
-        |> list.filter(fn(str) { !string.starts_with(str, name) })
-        |> string.join("; ")
+        |> list.filter(fn(str) {
+          string.trim(str)
+          |> string.split_once("=")
+          // Keep cookie if name does not match
+          |> result.map(fn(tup) { tup.0 != name })
+          // Don't do anything with malformed cookies
+          |> result.unwrap(True)
+        })
+        |> string.join(";")
 
       Request(..req, headers: [#("cookie", new_cookies_string), ..headers])
     }
