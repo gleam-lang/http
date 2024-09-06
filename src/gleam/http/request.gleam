@@ -1,6 +1,5 @@
 import gleam/http.{type Header, type Method, type Scheme, Get}
 import gleam/http/cookie
-import gleam/io
 import gleam/list
 import gleam/option.{type Option}
 import gleam/result
