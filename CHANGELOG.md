@@ -1,6 +1,7 @@
 # Changelog
 
-## v.3.7.0 - 2024-09-10
+## v3.7.0 - 2024-09-12
+
 - The `gleam/http/request` module gains the `remove_cookie` function.
 
 ## v3.6.2 - 2024-03-12
