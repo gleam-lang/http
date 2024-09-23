@@ -58,11 +58,8 @@ Here's a full list of the client adapters available, sorted alphabetically.
 | Adapter                          | About                                                    |
 | ---                              | ---                                                      |
 | [gleam_fetch][fetch-adapter]     | [fetch][fetch] is a HTTP client included with JavaScript |
-| [gleam_hackney][hackney-adapter] | [Hackney][hackney] is a simple HTTP client for Erlang    |
 | [gleam_httpc][httpc-adapter]     | [httpc][httpc] is a HTTP client included with Erlang     |
 
-[hackney]: https://github.com/benoitc/hackney
-[hackney-adapter]: https://github.com/gleam-lang/hackney
 [httpc]: https://erlang.org/doc/man/httpc.html
 [httpc-adapter]: https://github.com/gleam-lang/httpc
 [fetch]: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
