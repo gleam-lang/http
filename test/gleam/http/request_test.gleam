@@ -123,6 +123,66 @@ pub fn get_query_test() {
   should.equal(Error(Nil), request.get_query(request))
 }
 
+pub fn get_query_arg_test() {
+  let make_request = fn(query) {
+    Request(
+      method: http.Get,
+      headers: [],
+      body: Nil,
+      scheme: http.Https,
+      host: "example.com",
+      port: None,
+      path: "/",
+      query: query,
+    )
+  }
+
+  let request = make_request(Some("foo=bar"))
+  should.equal(Ok(#("foo", ["bar"])), request.get_query_arg(request, "foo"))
+  should.equal(Ok(#("baz", [])), request.get_query_arg(request, "baz"))
+
+  let request = make_request(Some("foo=bar&foo=bif"))
+  should.equal(
+    Ok(#("foo", ["bar", "bif"])),
+    request.get_query_arg(request, "foo"),
+  )
+
+  // ensure empty parameters are maintained as an empty string
+  let request = make_request(Some("foo=&bar=bif"))
+  should.equal(Ok(#("foo", [""])), request.get_query_arg(request, "foo"))
+
+  // ensure invalid query arguments pass through the Error result.
+  let request = make_request(Some("foo=%!2"))
+  should.equal(Error(Nil), request.get_query_arg(request, "foo"))
+}
+
+pub fn has_query_arg_test() {
+  let make_request = fn(query) {
+    Request(
+      method: http.Get,
+      headers: [],
+      body: Nil,
+      scheme: http.Https,
+      host: "example.com",
+      port: None,
+      path: "/",
+      query: query,
+    )
+  }
+
+  let request = make_request(Some("foo=bar"))
+  should.equal(True, request.has_query_arg(request, "foo"))
+  should.equal(False, request.has_query_arg(request, "baz"))
+
+  // ensure empty parameters return True for their presence
+  let request = make_request(Some("foo=&bar=bif"))
+  should.equal(True, request.has_query_arg(request, "foo"))
+
+  // ensure invalid query parameters return False
+  let request = make_request(Some("foo=%!2"))
+  should.equal(False, request.has_query_arg(request, "foo"))
+}
+
 pub fn set_query_test() {
   let request =
     Request(

@@ -2,6 +2,7 @@ import gleam/http.{type Header, type Method, type Scheme, Get}
 import gleam/http/cookie
 import gleam/list
 import gleam/option.{type Option}
+import gleam/pair
 import gleam/result
 import gleam/string
 import gleam/string_builder
@@ -11,7 +12,7 @@ import gleam/uri.{type Uri, Uri}
 ///
 /// The body of the request is parameterised. The HTTP server or client you are
 /// using will have a particular set of types it supports for the body.
-/// 
+///
 pub type Request(body) {
   Request(
     method: Method,
@@ -169,6 +170,34 @@ pub fn get_query(request: Request(body)) -> Result(List(#(String, String)), Nil)
     option.Some(query_string) -> uri.parse_query(query_string)
     option.None -> Ok([])
   }
+}
+
+/// Gets the value of a specific argument in the query string. Will return the
+/// argument with a list (which may be empty if the argument is not in the query string).
+/// Will return an error if parsing the query string failed.
+///
+/// Empty query arguments, e.g., "foo=&" are preserved and retained as an empty string.
+pub fn get_query_arg(
+  req: Request(body),
+  any arg: String,
+) -> Result(#(String, List(String)), Nil) {
+  get_query(req)
+  |> result.map(fn(qlist) {
+    list.filter(qlist, fn(d) { pair.first(d) == arg })
+    |> list.fold_right(#(arg, []), fn(e, a) {
+      #(arg, [pair.second(a), ..pair.second(e)])
+    })
+  })
+}
+
+/// Checks for the presence of a given query argument.
+///
+/// An empty query parameter will still return True to indicate its presence in the
+/// query parameters.
+pub fn has_query_arg(req: Request(body), any arg: String) -> Bool {
+  get_query(req)
+  |> result.map(fn(qlist) { list.any(qlist, fn(pr) { pair.first(pr) == arg }) })
+  |> result.unwrap(False)
 }
 
 /// Set the query of the request.
