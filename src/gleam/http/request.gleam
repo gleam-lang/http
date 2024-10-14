@@ -1,8 +1,8 @@
+import gleam/bool
 import gleam/http.{type Header, type Method, type Scheme, Get}
 import gleam/http/cookie
 import gleam/list
 import gleam/option.{type Option}
-import gleam/pair
 import gleam/result
 import gleam/string
 import gleam/string_builder
@@ -183,10 +183,8 @@ pub fn get_query_arg(
 ) -> Result(#(String, List(String)), Nil) {
   get_query(req)
   |> result.map(fn(qlist) {
-    list.filter(qlist, fn(d) { pair.first(d) == arg })
-    |> list.fold_right(#(arg, []), fn(e, a) {
-      #(arg, [pair.second(a), ..pair.second(e)])
-    })
+    let matching_args = list.key_filter(qlist, arg)
+    #(arg, matching_args)
   })
 }
 
@@ -196,7 +194,9 @@ pub fn get_query_arg(
 /// query parameters.
 pub fn has_query_arg(req: Request(body), any arg: String) -> Bool {
   get_query(req)
-  |> result.map(fn(qlist) { list.any(qlist, fn(pr) { pair.first(pr) == arg }) })
+  |> result.map(fn(qlist) {
+    list.key_filter(qlist, arg) |> list.is_empty |> bool.negate
+  })
   |> result.unwrap(False)
 }
 
