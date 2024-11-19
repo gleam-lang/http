@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.7.1 - 2024-11-19
+
+- Fixed warnings on `gleam_stdlib` v0.42.0.
+
 ## v3.7.0 - 2024-09-12
 
 - The `gleam/http/request` module gains the `remove_cookie` function.

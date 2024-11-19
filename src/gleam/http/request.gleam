@@ -4,7 +4,6 @@ import gleam/list
 import gleam/option.{type Option}
 import gleam/result
 import gleam/string
-import gleam/string_builder
 import gleam/uri.{type Uri, Uri}
 
 /// A HTTP request.
@@ -179,18 +178,13 @@ pub fn set_query(
   query: List(#(String, String)),
 ) -> Request(body) {
   let pair = fn(t: #(String, String)) {
-    string_builder.from_strings([
-      uri.percent_encode(t.0),
-      "=",
-      uri.percent_encode(t.1),
-    ])
+    uri.percent_encode(t.0) <> "=" <> uri.percent_encode(t.1)
   }
   let query =
     query
     |> list.map(pair)
-    |> list.intersperse(string_builder.from_string("&"))
-    |> string_builder.concat
-    |> string_builder.to_string
+    |> list.intersperse("&")
+    |> string.concat
     |> option.Some
   Request(..req, query: query)
 }
