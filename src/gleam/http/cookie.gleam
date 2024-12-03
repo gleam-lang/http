@@ -2,7 +2,7 @@ import gleam/http.{type Scheme}
 import gleam/int
 import gleam/list
 import gleam/option.{type Option, Some}
-import gleam/regex
+import gleam/regexp
 import gleam/result
 import gleam/string
 
@@ -97,8 +97,8 @@ pub fn set_header(name: String, value: String, attributes: Attributes) -> String
 /// discarded.
 ///
 pub fn parse(cookie_string: String) -> List(#(String, String)) {
-  let assert Ok(re) = regex.from_string("[,;]")
-  regex.split(re, cookie_string)
+  let assert Ok(re) = regexp.from_string("[,;]")
+  regexp.split(re, cookie_string)
   |> list.filter_map(fn(pair) {
     case string.split_once(string.trim(pair), "=") {
       Ok(#("", _)) -> Error(Nil)
