@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.7.2 - 2024-12-08
+
+- Fixed warnings on `gleam_stdlib` v0.45.0.
+
 ## v3.7.1 - 2024-11-19
 
 - Fixed warnings on `gleam_stdlib` v0.42.0.
