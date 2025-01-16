@@ -32,31 +32,31 @@ pub type Method {
 // TODO: check if the a is a valid HTTP method (i.e. it is a token, as per the
 // spec) and return Ok(Other(s)) if so.
 pub fn parse_method(s) -> Result(Method, Nil) {
-  case string.lowercase(s) {
-    "connect" -> Ok(Connect)
-    "delete" -> Ok(Delete)
-    "get" -> Ok(Get)
-    "head" -> Ok(Head)
-    "options" -> Ok(Options)
-    "patch" -> Ok(Patch)
-    "post" -> Ok(Post)
-    "put" -> Ok(Put)
-    "trace" -> Ok(Trace)
+  case s {
+    "CONNECT" -> Ok(Connect)
+    "DELETE" -> Ok(Delete)
+    "GET" -> Ok(Get)
+    "HEAD" -> Ok(Head)
+    "OPTIONS" -> Ok(Options)
+    "PATCH" -> Ok(Patch)
+    "POST" -> Ok(Post)
+    "PUT" -> Ok(Put)
+    "TRACE" -> Ok(Trace)
     _ -> Error(Nil)
   }
 }
 
 pub fn method_to_string(method: Method) -> String {
   case method {
-    Connect -> "connect"
-    Delete -> "delete"
-    Get -> "get"
-    Head -> "head"
-    Options -> "options"
-    Patch -> "patch"
-    Post -> "post"
-    Put -> "put"
-    Trace -> "trace"
+    Connect -> "CONNECT"
+    Delete -> "DELETE"
+    Get -> "GET"
+    Head -> "HEAD"
+    Options -> "OPTIONS"
+    Patch -> "PATCH"
+    Post -> "POST"
+    Put -> "PUT"
+    Trace -> "TRACE"
     Other(s) -> s
   }
 }
