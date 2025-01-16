@@ -29,6 +29,51 @@ pub type Method {
   Other(String)
 }
 
+// A token is defined as:
+//
+//   token         = 1*tchar
+//
+//   tchar         = "!" / "#" / "$" / "%" / "&" / "'" / "*"
+//                 / "+" / "-" / "." / "^" / "_" / "`" / "|" / "~"
+//                 / DIGIT / ALPHA
+//                 ; any VCHAR, except delimiters
+//
+// (From https://www.rfc-editor.org/rfc/rfc9110.html#name-tokens)
+//
+// Where DIGIT = %x30-39
+//       ALPHA = %x41-5A / %x61-7A
+// (%xXX is a hexadecimal ASCII value)
+//
+// (From https://www.rfc-editor.org/rfc/rfc5234#appendix-B.1)
+//
+fn is_valid_token(s: String) -> Bool {
+  bit_array.from_string(s)
+  |> do_is_valid_token(True)
+}
+
+fn do_is_valid_token(bytes: BitArray, acc: Bool) {
+  case bytes, acc {
+    <<char, rest:bits>>, True -> do_is_valid_token(rest, is_valid_tchar(char))
+    _, _ -> acc
+  }
+}
+
+//   tchar         = "33" / "35" / "36" / "37" / "38" / "39" / "42"
+//                 / "43" / "45" / "46" / "94" / "95" / "96" / "124" / "126"
+fn is_valid_tchar(ch: Int) -> Bool {
+  case ch {
+    // "!" | "#" | "$" | "%" | "&" | "'" | "*" | "+" | "-"
+    // | "." | "^" | "_" | "`" | "|" | "~"
+    33 | 35 | 36 | 37 | 38 | 39 | 42 | 43 | 45 | 46 | 94 | 95 | 96 | 124 | 126 ->
+      True
+    // DIGIT
+    ch if ch >= 0x30 && ch <= 0x39 -> True
+    // ALPHA
+    ch if ch >= 0x41 && ch <= 0x5A || ch >= 0x61 && ch <= 0x7A -> True
+    _ -> False
+  }
+}
+
 // TODO: check if the a is a valid HTTP method (i.e. it is a token, as per the
 // spec) and return Ok(Other(s)) if so.
 pub fn parse_method(s) -> Result(Method, Nil) {
@@ -42,7 +87,11 @@ pub fn parse_method(s) -> Result(Method, Nil) {
     "POST" -> Ok(Post)
     "PUT" -> Ok(Put)
     "TRACE" -> Ok(Trace)
-    _ -> Error(Nil)
+    s ->
+      case is_valid_token(s) {
+        True -> Ok(Other(s))
+        False -> Error(Nil)
+      }
   }
 }
 
