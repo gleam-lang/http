@@ -18,21 +18,21 @@ import {
 export function is_valid_tchar(ch) {
   try {
     switch (ch) {
-      case  '33': return true;
-      case  '35': return true;
-      case  '36': return true;
-      case  '37': return true;
-      case  '38': return true;
-      case  '39': return true;
-      case  '42': return true;
-      case  '43': return true;
-      case  '45': return true;
-      case  '46': return true;
-      case  '94': return true;
-      case  '95': return true;
-      case  '96': return true;
-      case '124': return true;
-      case '126': return true;
+      case  33: return true;
+      case  35: return true;
+      case  36: return true;
+      case  37: return true;
+      case  38: return true;
+      case  39: return true;
+      case  42: return true;
+      case  43: return true;
+      case  45: return true;
+      case  46: return true;
+      case  94: return true;
+      case  95: return true;
+      case  96: return true;
+      case 124: return true;
+      case 126: return true;
     }
     // DIGIT
     if (ch >= 0x30 && ch <= 0x39) return true;
@@ -66,7 +66,7 @@ export function decode_method(value) {
     }
     if (typeof value === 'string') {
       for (const v of value)
-        if (!is_valid_tchar(v)) return new Error(undefined);
+        if (!is_valid_tchar(v.charCodeAt(0))) return new Error(undefined);
       return new Ok(new Other(value));
     }
   } catch {}
