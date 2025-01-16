@@ -5,7 +5,7 @@ import gleeunit/should
 pub fn parse_method_test() {
   "Connect"
   |> http.parse_method
-  |> should.equal(Ok(http.Connect))
+  |> should.equal(Ok(http.Other("Connect")))
 
   "CONNECT"
   |> http.parse_method
@@ -13,11 +13,11 @@ pub fn parse_method_test() {
 
   "connect"
   |> http.parse_method
-  |> should.equal(Ok(http.Connect))
+  |> should.equal(Ok(http.Other("connect")))
 
   "Delete"
   |> http.parse_method
-  |> should.equal(Ok(http.Delete))
+  |> should.equal(Ok(http.Other("Delete")))
 
   "DELETE"
   |> http.parse_method
@@ -25,11 +25,11 @@ pub fn parse_method_test() {
 
   "delete"
   |> http.parse_method
-  |> should.equal(Ok(http.Delete))
+  |> should.equal(Ok(http.Other("delete")))
 
   "Get"
   |> http.parse_method
-  |> should.equal(Ok(http.Get))
+  |> should.equal(Ok(http.Other("Get")))
 
   "GET"
   |> http.parse_method
@@ -37,11 +37,11 @@ pub fn parse_method_test() {
 
   "get"
   |> http.parse_method
-  |> should.equal(Ok(http.Get))
+  |> should.equal(Ok(http.Other("get")))
 
   "Head"
   |> http.parse_method
-  |> should.equal(Ok(http.Head))
+  |> should.equal(Ok(http.Other("Head")))
 
   "HEAD"
   |> http.parse_method
@@ -49,11 +49,11 @@ pub fn parse_method_test() {
 
   "head"
   |> http.parse_method
-  |> should.equal(Ok(http.Head))
+  |> should.equal(Ok(http.Other("head")))
 
   "Options"
   |> http.parse_method
-  |> should.equal(Ok(http.Options))
+  |> should.equal(Ok(http.Other("Options")))
 
   "OPTIONS"
   |> http.parse_method
@@ -61,11 +61,11 @@ pub fn parse_method_test() {
 
   "options"
   |> http.parse_method
-  |> should.equal(Ok(http.Options))
+  |> should.equal(Ok(http.Other("options")))
 
   "Patch"
   |> http.parse_method
-  |> should.equal(Ok(http.Patch))
+  |> should.equal(Ok(http.Other("Patch")))
 
   "PATCH"
   |> http.parse_method
@@ -73,11 +73,11 @@ pub fn parse_method_test() {
 
   "patch"
   |> http.parse_method
-  |> should.equal(Ok(http.Patch))
+  |> should.equal(Ok(http.Other("patch")))
 
   "Post"
   |> http.parse_method
-  |> should.equal(Ok(http.Post))
+  |> should.equal(Ok(http.Other("Post")))
 
   "POST"
   |> http.parse_method
@@ -85,11 +85,11 @@ pub fn parse_method_test() {
 
   "post"
   |> http.parse_method
-  |> should.equal(Ok(http.Post))
+  |> should.equal(Ok(http.Other("post")))
 
   "Put"
   |> http.parse_method
-  |> should.equal(Ok(http.Put))
+  |> should.equal(Ok(http.Other("Put")))
 
   "PUT"
   |> http.parse_method
@@ -97,11 +97,11 @@ pub fn parse_method_test() {
 
   "put"
   |> http.parse_method
-  |> should.equal(Ok(http.Put))
+  |> should.equal(Ok(http.Other("put")))
 
   "Trace"
   |> http.parse_method
-  |> should.equal(Ok(http.Trace))
+  |> should.equal(Ok(http.Other("Trace")))
 
   "TRACE"
   |> http.parse_method
@@ -109,9 +109,17 @@ pub fn parse_method_test() {
 
   "trace"
   |> http.parse_method
-  |> should.equal(Ok(http.Trace))
+  |> should.equal(Ok(http.Other("trace")))
 
   "thingy"
+  |> http.parse_method
+  |> should.equal(Ok(http.Other("thingy")))
+
+  "!#$%&'*+-.^_`|~abcABC123"
+  |> http.parse_method
+  |> should.equal(Ok(http.Other("!#$%&'*+-.^_`|~abcABC123")))
+
+  "In-valid method"
   |> http.parse_method
   |> should.equal(Error(Nil))
 }
@@ -129,7 +137,7 @@ pub fn method_from_dynamic_atom_test() {
   "Connect"
   |> make_atom
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Connect))
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
 
   "CONNECT"
   |> make_atom
@@ -139,12 +147,12 @@ pub fn method_from_dynamic_atom_test() {
   "connect"
   |> make_atom
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Connect))
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
 
   "Delete"
   |> make_atom
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Delete))
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
 
   "DELETE"
   |> make_atom
@@ -154,12 +162,12 @@ pub fn method_from_dynamic_atom_test() {
   "delete"
   |> make_atom
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Delete))
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
 
   "Get"
   |> make_atom
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Get))
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
 
   "GET"
   |> make_atom
@@ -169,12 +177,12 @@ pub fn method_from_dynamic_atom_test() {
   "get"
   |> make_atom
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Get))
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
 
   "Head"
   |> make_atom
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Head))
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
 
   "HEAD"
   |> make_atom
@@ -184,12 +192,12 @@ pub fn method_from_dynamic_atom_test() {
   "head"
   |> make_atom
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Head))
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
 
   "Options"
   |> make_atom
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Options))
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
 
   "OPTIONS"
   |> make_atom
@@ -199,12 +207,12 @@ pub fn method_from_dynamic_atom_test() {
   "options"
   |> make_atom
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Options))
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
 
   "Patch"
   |> make_atom
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Patch))
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
 
   "PATCH"
   |> make_atom
@@ -214,12 +222,12 @@ pub fn method_from_dynamic_atom_test() {
   "patch"
   |> make_atom
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Patch))
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
 
   "Post"
   |> make_atom
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Post))
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
 
   "POST"
   |> make_atom
@@ -229,12 +237,12 @@ pub fn method_from_dynamic_atom_test() {
   "post"
   |> make_atom
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Post))
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
 
   "Put"
   |> make_atom
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Put))
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
 
   "PUT"
   |> make_atom
@@ -244,12 +252,12 @@ pub fn method_from_dynamic_atom_test() {
   "put"
   |> make_atom
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Put))
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
 
   "Trace"
   |> make_atom
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Trace))
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
 
   "TRACE"
   |> make_atom
@@ -259,9 +267,19 @@ pub fn method_from_dynamic_atom_test() {
   "trace"
   |> make_atom
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Trace))
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
 
   "thingy"
+  |> make_atom
+  |> http.method_from_dynamic
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
+
+  "!#$%&'*+-.^_`|~abcABC123"
+  |> make_atom
+  |> http.method_from_dynamic
+  |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
+
+  "In-valid method"
   |> make_atom
   |> http.method_from_dynamic
   |> should.equal(Error([DecodeError("HTTP method", "Atom", [])]))
@@ -273,7 +291,7 @@ pub fn charlist_to_method_test() {
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Connect))
+  |> should.equal(Ok(http.Other("Connect")))
 
   "CONNECT"
   |> to_charlist
@@ -285,13 +303,13 @@ pub fn charlist_to_method_test() {
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Connect))
+  |> should.equal(Ok(http.Other("connect")))
 
   "Delete"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Delete))
+  |> should.equal(Ok(http.Other("Delete")))
 
   "DELETE"
   |> to_charlist
@@ -303,13 +321,13 @@ pub fn charlist_to_method_test() {
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Delete))
+  |> should.equal(Ok(http.Other("delete")))
 
   "Get"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Get))
+  |> should.equal(Ok(http.Other("Get")))
 
   "GET"
   |> to_charlist
@@ -321,13 +339,13 @@ pub fn charlist_to_method_test() {
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Get))
+  |> should.equal(Ok(http.Other("get")))
 
   "Head"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Head))
+  |> should.equal(Ok(http.Other("Head")))
 
   "HEAD"
   |> to_charlist
@@ -339,13 +357,13 @@ pub fn charlist_to_method_test() {
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Head))
+  |> should.equal(Ok(http.Other("head")))
 
   "Options"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Options))
+  |> should.equal(Ok(http.Other("Options")))
 
   "OPTIONS"
   |> to_charlist
@@ -357,13 +375,13 @@ pub fn charlist_to_method_test() {
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Options))
+  |> should.equal(Ok(http.Other("options")))
 
   "Patch"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Patch))
+  |> should.equal(Ok(http.Other("Patch")))
 
   "PATCH"
   |> to_charlist
@@ -375,13 +393,13 @@ pub fn charlist_to_method_test() {
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Patch))
+  |> should.equal(Ok(http.Other("patch")))
 
   "Post"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Post))
+  |> should.equal(Ok(http.Other("Post")))
 
   "POST"
   |> to_charlist
@@ -393,13 +411,13 @@ pub fn charlist_to_method_test() {
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Post))
+  |> should.equal(Ok(http.Other("post")))
 
   "Put"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Put))
+  |> should.equal(Ok(http.Other("Put")))
 
   "PUT"
   |> to_charlist
@@ -411,13 +429,13 @@ pub fn charlist_to_method_test() {
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Put))
+  |> should.equal(Ok(http.Other("put")))
 
   "Trace"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Trace))
+  |> should.equal(Ok(http.Other("Trace")))
 
   "TRACE"
   |> to_charlist
@@ -429,9 +447,21 @@ pub fn charlist_to_method_test() {
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Trace))
+  |> should.equal(Ok(http.Other("trace")))
 
   "thingy"
+  |> to_charlist
+  |> dynamic.from
+  |> http.method_from_dynamic
+  |> should.equal(Ok(http.Other("thingy")))
+
+  "!#$%&'*+-.^_`|~abcABC123"
+  |> to_charlist
+  |> dynamic.from
+  |> http.method_from_dynamic
+  |> should.equal(Ok(http.Other("!#$%&'*+-.^_`|~abcABC123")))
+
+  "In-valid method"
   |> to_charlist
   |> dynamic.from
   |> http.method_from_dynamic
@@ -442,7 +472,7 @@ pub fn method_from_dynamic_test() {
   "Connect"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Connect))
+  |> should.equal(Ok(http.Other("Connect")))
 
   "CONNECT"
   |> dynamic.from
@@ -452,12 +482,12 @@ pub fn method_from_dynamic_test() {
   "connect"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Connect))
+  |> should.equal(Ok(http.Other("connect")))
 
   "Delete"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Delete))
+  |> should.equal(Ok(http.Other("Delete")))
 
   "DELETE"
   |> dynamic.from
@@ -467,12 +497,12 @@ pub fn method_from_dynamic_test() {
   "delete"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Delete))
+  |> should.equal(Ok(http.Other("delete")))
 
   "Get"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Get))
+  |> should.equal(Ok(http.Other("Get")))
 
   "GET"
   |> dynamic.from
@@ -482,12 +512,12 @@ pub fn method_from_dynamic_test() {
   "get"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Get))
+  |> should.equal(Ok(http.Other("get")))
 
   "Head"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Head))
+  |> should.equal(Ok(http.Other("Head")))
 
   "HEAD"
   |> dynamic.from
@@ -497,12 +527,12 @@ pub fn method_from_dynamic_test() {
   "head"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Head))
+  |> should.equal(Ok(http.Other("head")))
 
   "Options"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Options))
+  |> should.equal(Ok(http.Other("Options")))
 
   "OPTIONS"
   |> dynamic.from
@@ -512,12 +542,12 @@ pub fn method_from_dynamic_test() {
   "options"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Options))
+  |> should.equal(Ok(http.Other("options")))
 
   "Patch"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Patch))
+  |> should.equal(Ok(http.Other("Patch")))
 
   "PATCH"
   |> dynamic.from
@@ -527,12 +557,12 @@ pub fn method_from_dynamic_test() {
   "patch"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Patch))
+  |> should.equal(Ok(http.Other("patch")))
 
   "Post"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Post))
+  |> should.equal(Ok(http.Other("Post")))
 
   "POST"
   |> dynamic.from
@@ -542,12 +572,12 @@ pub fn method_from_dynamic_test() {
   "post"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Post))
+  |> should.equal(Ok(http.Other("post")))
 
   "Put"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Put))
+  |> should.equal(Ok(http.Other("Put")))
 
   "PUT"
   |> dynamic.from
@@ -557,12 +587,12 @@ pub fn method_from_dynamic_test() {
   "put"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Put))
+  |> should.equal(Ok(http.Other("put")))
 
   "Trace"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Trace))
+  |> should.equal(Ok(http.Other("Trace")))
 
   "TRACE"
   |> dynamic.from
@@ -572,9 +602,19 @@ pub fn method_from_dynamic_test() {
   "trace"
   |> dynamic.from
   |> http.method_from_dynamic
-  |> should.equal(Ok(http.Trace))
+  |> should.equal(Ok(http.Other("trace")))
 
   "thingy"
+  |> dynamic.from
+  |> http.method_from_dynamic
+  |> should.equal(Ok(http.Other("thingy")))
+
+  "!#$%&'*+-.^_`|~abcABC123"
+  |> dynamic.from
+  |> http.method_from_dynamic
+  |> should.equal(Ok(http.Other("!#$%&'*+-.^_`|~abcABC123")))
+
+  "In-valid method"
   |> dynamic.from
   |> http.method_from_dynamic
   |> should.equal(Error([DecodeError("HTTP method", "String", [])]))
@@ -583,39 +623,39 @@ pub fn method_from_dynamic_test() {
 pub fn method_to_string_test() {
   http.Connect
   |> http.method_to_string
-  |> should.equal("connect")
+  |> should.equal("CONNECT")
 
   http.Delete
   |> http.method_to_string
-  |> should.equal("delete")
+  |> should.equal("DELETE")
 
   http.Get
   |> http.method_to_string
-  |> should.equal("get")
+  |> should.equal("GET")
 
   http.Head
   |> http.method_to_string
-  |> should.equal("head")
+  |> should.equal("HEAD")
 
   http.Options
   |> http.method_to_string
-  |> should.equal("options")
+  |> should.equal("OPTIONS")
 
   http.Patch
   |> http.method_to_string
-  |> should.equal("patch")
+  |> should.equal("PATCH")
 
   http.Post
   |> http.method_to_string
-  |> should.equal("post")
+  |> should.equal("POST")
 
   http.Put
   |> http.method_to_string
-  |> should.equal("put")
+  |> should.equal("PUT")
 
   http.Trace
   |> http.method_to_string
-  |> should.equal("trace")
+  |> should.equal("TRACE")
 
   http.Other("ok")
   |> http.method_to_string
