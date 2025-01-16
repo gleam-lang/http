@@ -53,7 +53,7 @@ fn is_valid_token(s: String) -> Bool {
 
 fn do_is_valid_token(bytes: BitArray, acc: Bool) {
   case bytes, acc {
-    <<char, rest:bits>>, True -> do_is_valid_token(rest, is_valid_tchar(char))
+    <<char, rest:bytes>>, True -> do_is_valid_token(rest, is_valid_tchar(char))
     _, _ -> acc
   }
 }
@@ -143,7 +143,8 @@ pub fn scheme_from_string(scheme: String) -> Result(Scheme, Nil) {
 pub fn method_from_dynamic(value: Dynamic) -> Result(Method, List(DecodeError)) {
   case do_method_from_dynamic(value) {
     Ok(method) -> Ok(method)
-    Error(_) -> Error([DecodeError("HTTP method", dynamic.classify(value), [])])
+    Error(Nil) ->
+      Error([DecodeError("HTTP method", dynamic.classify(value), [])])
   }
 }
 
