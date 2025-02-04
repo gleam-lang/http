@@ -7,7 +7,6 @@
 
 import gleam/bit_array
 import gleam/bool
-import gleam/dynamic.{type DecodeError, type Dynamic, DecodeError}
 import gleam/list
 import gleam/result
 import gleam/string
@@ -137,14 +136,6 @@ pub fn scheme_from_string(scheme: String) -> Result(Scheme, Nil) {
     "http" -> Ok(Http)
     "https" -> Ok(Https)
     _ -> Error(Nil)
-  }
-}
-
-pub fn method_from_dynamic(value: Dynamic) -> Result(Method, List(DecodeError)) {
-  case do_method_from_dynamic(value) {
-    Ok(method) -> Ok(method)
-    Error(Nil) ->
-      Error([DecodeError("HTTP method", dynamic.classify(value), [])])
   }
 }
 
@@ -590,10 +581,6 @@ fn more_please_body(
   |> MoreRequiredForBody(chunk, _)
   |> Ok
 }
-
-@external(erlang, "gleam_http_native", "decode_method")
-@external(javascript, "../gleam_http_native.mjs", "decode_method")
-fn do_method_from_dynamic(a: Dynamic) -> Result(Method, Nil)
 
 /// A HTTP header is a key-value pair. Header keys must be all lowercase
 /// characters.
