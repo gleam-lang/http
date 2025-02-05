@@ -57,9 +57,19 @@ fn do_is_valid_token(bytes: BitArray, acc: Bool) {
   }
 }
 
-@external(erlang, "gleam_http_native", "is_valid_tchar")
-@external(javascript, "../gleam_http_native.mjs", "is_valid_tchar")
-fn is_valid_tchar(ch: Int) -> Bool
+fn is_valid_tchar(ch: Int) -> Bool {
+  case ch {
+    // "!" | "#" | "$" | "%" | "&" | "'" | "*" | "+" | "-"
+    // | "." | "^" | "_" | "`" | "|" | "~"
+    33 | 35 | 36 | 37 | 38 | 39 | 42 | 43 | 45 | 46 | 94 | 95 | 96 | 124 | 126 ->
+      True
+    // DIGIT
+    ch if ch >= 0x30 && ch <= 0x39 -> True
+    // ALPHA
+    ch if ch >= 0x41 && ch <= 0x5A || ch >= 0x61 && ch <= 0x7A -> True
+    _ -> False
+  }
+}
 
 // TODO: check if the a is a valid HTTP method (i.e. it is a token, as per the
 // spec) and return Ok(Other(s)) if so.
