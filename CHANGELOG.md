@@ -4,7 +4,7 @@
 
 - Removed `method_from_dynamic`.
 - Fixed a bug where `parse_method` could parse invalid HTTP methods.
-- Fixed a bug where `method_to_string` would use incorreect syntax.
+- Fixed a bug where `method_to_string` would use incorrect syntax.
 
 ## v3.7.2 - 2024-12-08
 
