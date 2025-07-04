@@ -10,7 +10,7 @@ import gleam/uri.{type Uri, Uri}
 ///
 /// The body of the request is parameterised. The HTTP server or client you are
 /// using will have a particular set of types it supports for the body.
-/// 
+///
 pub type Request(body) {
   Request(
     method: Method,
@@ -42,12 +42,12 @@ pub fn to_uri(request: Request(a)) -> Uri {
 /// Construct a request from a URI.
 ///
 pub fn from_uri(uri: Uri) -> Result(Request(String), Nil) {
-  use scheme <- result.then(
+  use scheme <- result.try(
     uri.scheme
     |> option.unwrap("")
     |> http.scheme_from_string,
   )
-  use host <- result.then(
+  use host <- result.try(
     uri.host
     |> option.to_result(Nil),
   )
@@ -216,7 +216,7 @@ pub fn new() -> Request(String) {
 pub fn to(url: String) -> Result(Request(String), Nil) {
   url
   |> uri.parse
-  |> result.then(from_uri)
+  |> result.try(from_uri)
 }
 
 /// Set the scheme (protocol) of the request.
