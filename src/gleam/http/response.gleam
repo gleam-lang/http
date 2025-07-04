@@ -9,7 +9,7 @@ import gleam/string
 ///
 /// The body of the request is parameterised. The HTTP server or client you are
 /// using will have a particular set of types it supports for the body.
-/// 
+///
 pub type Response(body) {
   Response(
     status: Int,
@@ -28,7 +28,7 @@ pub fn try_map(
   response: Response(old_body),
   transform: fn(old_body) -> Result(new_body, error),
 ) -> Result(Response(new_body), error) {
-  use body <- result.then(transform(response.body))
+  use body <- result.try(transform(response.body))
   Ok(set_body(response, body))
 }
 
@@ -113,7 +113,7 @@ pub fn redirect(uri: String) -> Response(String) {
   )
 }
 
-/// Fetch the cookies sent in a response. 
+/// Fetch the cookies sent in a response.
 ///
 /// Badly formed cookies will be discarded.
 ///
