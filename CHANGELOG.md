@@ -1,5 +1,9 @@
 # Changelog
 
+## v4.1.0 - 2025-07-06
+
+- Updated for latest `gleam_stdlib`.
+
 ## v4.0.0 - 2025-02-06
 
 - Removed `method_from_dynamic`.
