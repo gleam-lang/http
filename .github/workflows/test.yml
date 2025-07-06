@@ -3,7 +3,6 @@ name: test
 on:
   push:
     branches:
-      - master
       - main
   pull_request:
 
@@ -14,9 +13,10 @@ jobs:
       - uses: actions/checkout@v3
       - uses: erlef/setup-beam@v1
         with:
-          otp-version: "26.1"
-          gleam-version: "1.6.3"
+          otp-version: "28"
+          gleam-version: "1.11.1"
           rebar3-version: "3"
+      - run: gleam deps download
       - run: gleam test --target erlang
       - run: gleam test --target javascript
       - run: gleam format --check
