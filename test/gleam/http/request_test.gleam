@@ -451,6 +451,21 @@ pub fn set_req_cookies_test() {
   |> should.equal(Ok("k1=v1; k2=v2"))
 }
 
+pub fn set_req_cookies_overwrite_test() {
+  let request =
+    request.new()
+    |> request.set_cookie("k1", "k1")
+    |> request.set_cookie("k2", "k2")
+    |> request.set_cookie("k3", "k3")
+    |> request.set_cookie("k4", "k4")
+    |> request.set_cookie("k2", "k2-updated")
+    |> request.set_cookie("k4", "k4-updated")
+
+  request
+  |> request.get_header("cookie")
+  |> should.equal(Ok("k1=k1; k2=k2-updated; k3=k3; k4=k4-updated"))
+}
+
 pub fn remove_cookie_from_request_test() {
   let req =
     request.new()

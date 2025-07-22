@@ -243,22 +243,29 @@ pub fn set_path(req: Request(body), path: String) -> Request(body) {
   Request(..req, path: path)
 }
 
-/// Send a cookie with a request
+/// Set a cookie on a request, replacing any previous cookie with that name.
 ///
-/// Multiple cookies are added to the same cookie header.
+/// All cookies stored in a single header named `cookie`. There should be
+/// at most one header with the name `cookie`, otherwise this function cannot
+/// guarentee that previous cookies with the same name are replaced.
+///
 pub fn set_cookie(req: Request(body), name: String, value: String) {
-  let new_cookie_string = string.join([name, value], "=")
+  // Get the cookies
+  let #(cookies, headers) =
+    list.key_pop(req.headers, "cookie") |> result.unwrap(#("", req.headers))
 
-  let #(cookies_string, headers) = case list.key_pop(req.headers, "cookie") {
-    Ok(#(cookies_string, headers)) -> {
-      let cookies_string =
-        string.join([cookies_string, new_cookie_string], "; ")
-      #(cookies_string, headers)
-    }
-    Error(Nil) -> #(new_cookie_string, req.headers)
-  }
+  // Parse them
+  let cookies =
+    string.split(cookies, ";")
+    |> list.filter_map(fn(c) { string.trim_start(c) |> string.split_once("=") })
 
-  Request(..req, headers: [#("cookie", cookies_string), ..headers])
+  // Set the new cookie, replacing any previous one with the same name
+  let cookies =
+    list.key_set(cookies, name, value)
+    |> list.map(fn(pair) { pair.0 <> "=" <> pair.1 })
+    |> string.join("; ")
+
+  Request(..req, headers: [#("cookie", cookies), ..headers])
 }
 
 /// Fetch the cookies sent in a request.

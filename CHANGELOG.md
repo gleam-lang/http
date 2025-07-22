@@ -1,5 +1,9 @@
 # Changelog
 
+## v4.1.1 - 2025-07-22
+
+- Fixed a bug where `set_cookie` would fail to overwrite an existing cookie.
+
 ## v4.1.0 - 2025-07-06
 
 - Updated for latest `gleam_stdlib`.
