@@ -51,14 +51,9 @@ pub fn defaults(scheme: Scheme) {
 const epoch = "Expires=Thu, 01 Jan 1970 00:00:00 GMT"
 
 fn cookie_attributes_to_list(attributes) {
-  let Attributes(
-    max_age: max_age,
-    domain: domain,
-    path: path,
-    secure: secure,
-    http_only: http_only,
-    same_site: same_site,
-  ) = attributes
+  let Attributes(max_age:, domain:, path:, secure:, http_only:, same_site:) =
+    attributes
+
   [
     // Expires is a deprecated attribute for cookies, it has been replaced with MaxAge
     // MaxAge is widely supported and so Expires values are not set.
