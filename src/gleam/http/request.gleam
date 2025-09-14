@@ -251,15 +251,12 @@ pub fn set_cookie(req: Request(body), name: String, value: String) {
 pub fn get_cookies(req) -> List(#(String, String)) {
   let Request(headers:, ..) = req
 
-  headers
-  |> list.filter_map(fn(header) {
-    let #(name, value) = header
-    case name {
-      "cookie" -> Ok(cookie.parse(value))
-      _ -> Error(Nil)
+  list.flat_map(headers, fn(header) {
+    case header {
+      #("cookie", value) -> cookie.parse(value)
+      _ -> []
     }
   })
-  |> list.flatten()
 }
 
 /// Remove a cookie from a request
