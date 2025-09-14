@@ -119,15 +119,12 @@ pub fn redirect(uri: String) -> Response(String) {
 pub fn get_cookies(resp: Response(a)) -> List(#(String, String)) {
   let Response(headers:, ..) = resp
 
-  headers
-  |> list.filter_map(fn(header) {
-    let #(name, value) = header
-    case name {
-      "set-cookie" -> Ok(cookie.parse(value))
-      _ -> Error(Nil)
+  list.flat_map(headers, fn(header) {
+    case header {
+      #("set-cookie", value) -> cookie.parse(value)
+      _ -> []
     }
   })
-  |> list.flatten()
 }
 
 /// Set a cookie value for a client
