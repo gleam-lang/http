@@ -157,14 +157,12 @@ pub fn set_query(
   req: Request(body),
   query: List(#(String, String)),
 ) -> Request(body) {
-  let pair = fn(t: #(String, String)) {
-    uri.percent_encode(t.0) <> "=" <> uri.percent_encode(t.1)
-  }
   let query =
-    query
-    |> list.map(pair)
-    |> list.intersperse("&")
-    |> string.concat
+    list.map(query, fn(pair) {
+      let #(key, value) = pair
+      uri.percent_encode(key) <> "=" <> uri.percent_encode(value)
+    })
+    |> string.join(with: "&")
     |> option.Some
 
   Request(..req, query:)
