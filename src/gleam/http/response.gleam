@@ -116,7 +116,7 @@ pub fn redirect(uri: String) -> Response(String) {
 ///
 /// Badly formed cookies will be discarded.
 ///
-pub fn get_cookies(resp: Response(a)) -> List(#(String, String)) {
+pub fn get_cookies(resp: Response(body)) -> List(#(String, String)) {
   let Response(headers:, ..) = resp
 
   list.flat_map(headers, fn(header) {
@@ -130,11 +130,11 @@ pub fn get_cookies(resp: Response(a)) -> List(#(String, String)) {
 /// Set a cookie value for a client
 ///
 pub fn set_cookie(
-  response: Response(t),
+  response: Response(body),
   name: String,
   value: String,
   attributes: cookie.Attributes,
-) -> Response(t) {
+) -> Response(body) {
   prepend_header(
     response,
     "set-cookie",
@@ -146,10 +146,10 @@ pub fn set_cookie(
 ///
 /// Note: The attributes value should be the same as when the response cookie was set.
 pub fn expire_cookie(
-  response: Response(t),
+  response: Response(body),
   name: String,
   attributes: cookie.Attributes,
-) -> Response(t) {
+) -> Response(body) {
   let attrs = cookie.Attributes(..attributes, max_age: option.Some(0))
   set_cookie(response, name, "", attrs)
 }

@@ -27,7 +27,7 @@ pub type Request(body) {
 
 /// Return the uri that a request was sent to.
 ///
-pub fn to_uri(request: Request(a)) -> Uri {
+pub fn to_uri(request: Request(body)) -> Uri {
   Uri(
     scheme: option.Some(http.scheme_to_string(request.scheme)),
     userinfo: option.None,
