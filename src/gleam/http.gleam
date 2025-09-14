@@ -50,7 +50,7 @@ fn is_valid_token(s: String) -> Bool {
   |> do_is_valid_token(True)
 }
 
-fn do_is_valid_token(bytes: BitArray, acc: Bool) {
+fn do_is_valid_token(bytes: BitArray, acc: Bool) -> Bool {
   case bytes, acc {
     <<char, rest:bytes>>, True -> do_is_valid_token(rest, is_valid_tchar(char))
     _, _ -> acc
@@ -73,7 +73,7 @@ fn is_valid_tchar(ch: Int) -> Bool {
 
 // TODO: check if the a is a valid HTTP method (i.e. it is a token, as per the
 // spec) and return Ok(Other(s)) if so.
-pub fn parse_method(s) -> Result(Method, Nil) {
+pub fn parse_method(s: String) -> Result(Method, Nil) {
   case s {
     "CONNECT" -> Ok(Connect)
     "DELETE" -> Ok(Delete)
