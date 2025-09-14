@@ -110,13 +110,15 @@ pub fn parse(cookie_string: String) -> List(#(String, String)) {
 }
 
 fn check_token(token: String) -> Result(Nil, Nil) {
-  case string.pop_grapheme(token) {
-    Error(Nil) -> Ok(Nil)
-    Ok(#(" ", _)) -> Error(Nil)
-    Ok(#("\t", _)) -> Error(Nil)
-    Ok(#("\r", _)) -> Error(Nil)
-    Ok(#("\n", _)) -> Error(Nil)
-    Ok(#("\f", _)) -> Error(Nil)
-    Ok(#(_, rest)) -> check_token(rest)
+  let contains_invalid_charachter =
+    string.contains(token, " ")
+    || string.contains(token, "\t")
+    || string.contains(token, "\r")
+    || string.contains(token, "\n")
+    || string.contains(token, "\f")
+
+  case contains_invalid_charachter {
+    True -> Error(Nil)
+    False -> Ok(Nil)
   }
 }
