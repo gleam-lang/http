@@ -261,22 +261,20 @@ pub fn get_cookies(req) -> List(#(String, String)) {
 
 /// Remove a cookie from a request
 ///
-/// Remove a cookie from the request. If no cookie is found return the request unchanged.
-/// This will not remove the cookie from the client.
+/// Remove a cookie from the request. If no cookie is found return the request
+/// unchanged. This will not remove the cookie from the client.
 pub fn remove_cookie(req: Request(body), name: String) {
   case list.key_pop(req.headers, "cookie") {
     Ok(#(cookies_string, headers)) -> {
       let new_cookies_string =
-        string.split(cookies_string, ";")
-        |> list.filter(fn(str) {
-          string.trim(str)
-          |> string.split_once("=")
-          // Keep cookie if name does not match
-          |> result.map(fn(tup) { tup.0 != name })
-          // Don't do anything with malformed cookies
-          |> result.unwrap(True)
+        cookie.parse(cookies_string)
+        |> list.filter_map(fn(cookie) {
+          case cookie {
+            #(cookie_name, _) if cookie_name == name -> Error(Nil)
+            #(name, value) -> Ok(name <> "=" <> value)
+          }
         })
-        |> string.join(";")
+        |> string.join("; ")
 
       Request(..req, headers: [#("cookie", new_cookies_string), ..headers])
     }
