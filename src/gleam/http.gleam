@@ -118,11 +118,10 @@ pub type Scheme {
 ///
 /// # Examples
 ///
-///    > scheme_to_string(Http)
-///    "http"
-///
-///    > scheme_to_string(Https)
-///    "https"
+/// ```gleam
+/// assert "http" == scheme_to_string(Http)
+/// assert "https" == scheme_to_string(Https)
+/// ```
 ///
 pub fn scheme_to_string(scheme: Scheme) -> String {
   case scheme {
@@ -135,11 +134,10 @@ pub fn scheme_to_string(scheme: Scheme) -> String {
 ///
 /// # Examples
 ///
-///    > scheme_from_string("http")
-///    Ok(Http)
-///
-///    > scheme_from_string("ftp")
-///    Error(Nil)
+/// ```gleam
+/// assert Ok(Http) == scheme_from_string("http")
+/// assert Error(Nil) == scheme_from_string("ftp")
+/// ```
 ///
 pub fn scheme_from_string(scheme: String) -> Result(Scheme, Nil) {
   case string.lowercase(scheme) {
