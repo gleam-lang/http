@@ -1,7 +1,7 @@
 import gleam/http.{type Scheme}
 import gleam/int
 import gleam/list
-import gleam/option.{type Option, Some}
+import gleam/option.{type Option}
 import gleam/result
 import gleam/string
 
@@ -44,13 +44,13 @@ pub fn defaults(scheme: Scheme) {
     path: option.Some("/"),
     secure: scheme == http.Https,
     http_only: True,
-    same_site: Some(Lax),
+    same_site: option.Some(Lax),
   )
 }
 
 const epoch = "Expires=Thu, 01 Jan 1970 00:00:00 GMT"
 
-fn cookie_attributes_to_list(attributes) {
+fn cookie_attributes_to_list(attributes: Attributes) -> List(String) {
   let Attributes(max_age:, domain:, path:, secure:, http_only:, same_site:) =
     attributes
 
@@ -60,30 +60,29 @@ fn cookie_attributes_to_list(attributes) {
     // Only when deleting cookies is the exception made to use the old format,
     // to ensure complete clearup of cookies if required by an application.
     case max_age {
-      option.Some(0) -> option.Some([epoch])
+      option.Some(0) -> option.Some(epoch)
       _ -> option.None
     },
-    option.map(max_age, fn(max_age) { ["Max-Age=", int.to_string(max_age)] }),
-    option.map(domain, fn(domain) { ["Domain=", domain] }),
-    option.map(path, fn(path) { ["Path=", path] }),
+    option.map(max_age, fn(max_age) { "Max-Age=" <> int.to_string(max_age) }),
+    option.map(domain, fn(domain) { "Domain=" <> domain }),
+    option.map(path, fn(path) { "Path=" <> path }),
     case secure {
-      True -> option.Some(["Secure"])
+      True -> option.Some("Secure")
       False -> option.None
     },
     case http_only {
-      True -> option.Some(["HttpOnly"])
+      True -> option.Some("HttpOnly")
       False -> option.None
     },
     option.map(same_site, fn(same_site) {
-      ["SameSite=", same_site_to_string(same_site)]
+      "SameSite=" <> same_site_to_string(same_site)
     }),
   ]
   |> list.filter_map(option.to_result(_, Nil))
 }
 
 pub fn set_header(name: String, value: String, attributes: Attributes) -> String {
-  [[name, "=", value], ..cookie_attributes_to_list(attributes)]
-  |> list.map(string.join(_, ""))
+  [name <> "=" <> value, ..cookie_attributes_to_list(attributes)]
   |> string.join("; ")
 }
 
