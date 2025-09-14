@@ -10,7 +10,7 @@ pub fn req_to_uri_test() {
       method: http.Get,
       headers: [],
       body: Nil,
-      scheme: scheme,
+      scheme:,
       host: "sky.net",
       port: None,
       path: "/sarah/connor",
@@ -103,7 +103,7 @@ pub fn get_query_test() {
       host: "example.com",
       port: None,
       path: "/",
-      query: query,
+      query:,
     )
   }
 
@@ -147,7 +147,7 @@ pub fn get_req_header_test() {
   let make_request = fn(headers) {
     Request(
       method: http.Get,
-      headers: headers,
+      headers:,
       body: Nil,
       scheme: http.Https,
       host: "example.com",
@@ -339,7 +339,7 @@ pub fn prepend_req_header_test() {
   let request =
     Request(
       method: http.Get,
-      headers: headers,
+      headers:,
       body: Nil,
       scheme: http.Https,
       host: "example.com",

@@ -38,7 +38,7 @@ pub fn try_map(
 /// call to `set_body`.
 ///
 pub fn new(status: Int) -> Response(String) {
-  Response(status: status, headers: [], body: "")
+  Response(status:, headers: [], body: "")
 }
 
 /// Get the value for a given header.
@@ -62,7 +62,7 @@ pub fn set_header(
   value: String,
 ) -> Response(body) {
   let headers = list.key_set(response.headers, string.lowercase(key), value)
-  Response(..response, headers: headers)
+  Response(..response, headers:)
 }
 
 /// Prepend the header with the given value under the given header key.
@@ -79,7 +79,7 @@ pub fn prepend_header(
   value: String,
 ) -> Response(body) {
   let headers = [#(string.lowercase(key), value), ..response.headers]
-  Response(..response, headers: headers)
+  Response(..response, headers:)
 }
 
 /// Set the body of the response, overwriting any existing body.
@@ -88,8 +88,7 @@ pub fn set_body(
   response: Response(old_body),
   body: new_body,
 ) -> Response(new_body) {
-  let Response(status: status, headers: headers, ..) = response
-  Response(status: status, headers: headers, body: body)
+  Response(..response, body:)
 }
 
 /// Update the body of a response using a given function.
@@ -118,7 +117,8 @@ pub fn redirect(uri: String) -> Response(String) {
 /// Badly formed cookies will be discarded.
 ///
 pub fn get_cookies(resp) -> List(#(String, String)) {
-  let Response(headers: headers, ..) = resp
+  let Response(headers:, ..) = resp
+
   headers
   |> list.filter_map(fn(header) {
     let #(name, value) = header

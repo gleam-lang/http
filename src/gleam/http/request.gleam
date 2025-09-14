@@ -56,8 +56,8 @@ pub fn from_uri(uri: Uri) -> Result(Request(String), Nil) {
       method: Get,
       headers: [],
       body: "",
-      scheme: scheme,
-      host: host,
+      scheme:,
+      host:,
       port: uri.port,
       path: uri.path,
       query: uri.query,
@@ -89,7 +89,7 @@ pub fn set_header(
   value: String,
 ) -> Request(body) {
   let headers = list.key_set(request.headers, string.lowercase(key), value)
-  Request(..request, headers: headers)
+  Request(..request, headers:)
 }
 
 /// Prepend the header with the given value under the given header key.
@@ -106,33 +106,13 @@ pub fn prepend_header(
   value: String,
 ) -> Request(body) {
   let headers = [#(string.lowercase(key), value), ..request.headers]
-  Request(..request, headers: headers)
+  Request(..request, headers:)
 }
 
-// TODO: record update syntax, which can't be done currently as body type changes
 /// Set the body of the request, overwriting any existing body.
 ///
 pub fn set_body(req: Request(old_body), body: new_body) -> Request(new_body) {
-  let Request(
-    method: method,
-    headers: headers,
-    scheme: scheme,
-    host: host,
-    port: port,
-    path: path,
-    query: query,
-    ..,
-  ) = req
-  Request(
-    method: method,
-    headers: headers,
-    body: body,
-    scheme: scheme,
-    host: host,
-    port: port,
-    path: path,
-    query: query,
-  )
+  Request(..req, body:)
 }
 
 /// Update the body of a request using a given function.
@@ -186,13 +166,14 @@ pub fn set_query(
     |> list.intersperse("&")
     |> string.concat
     |> option.Some
-  Request(..req, query: query)
+
+  Request(..req, query:)
 }
 
 /// Set the method of the request.
 ///
 pub fn set_method(req: Request(body), method: Method) -> Request(body) {
-  Request(..req, method: method)
+  Request(..req, method:)
 }
 
 /// A request with commonly used default values. This request can be used as
@@ -222,13 +203,13 @@ pub fn to(url: String) -> Result(Request(String), Nil) {
 /// Set the scheme (protocol) of the request.
 ///
 pub fn set_scheme(req: Request(body), scheme: Scheme) -> Request(body) {
-  Request(..req, scheme: scheme)
+  Request(..req, scheme:)
 }
 
 /// Set the host of the request.
 ///
 pub fn set_host(req: Request(body), host: String) -> Request(body) {
-  Request(..req, host: host)
+  Request(..req, host:)
 }
 
 /// Set the port of the request.
@@ -240,7 +221,7 @@ pub fn set_port(req: Request(body), port: Int) -> Request(body) {
 /// Set the path of the request.
 ///
 pub fn set_path(req: Request(body), path: String) -> Request(body) {
-  Request(..req, path: path)
+  Request(..req, path:)
 }
 
 /// Set a cookie on a request, replacing any previous cookie with that name.
@@ -273,7 +254,7 @@ pub fn set_cookie(req: Request(body), name: String, value: String) {
 /// Note badly formed cookie pairs will be ignored.
 /// RFC6265 specifies that invalid cookie names/attributes should be ignored.
 pub fn get_cookies(req) -> List(#(String, String)) {
-  let Request(headers: headers, ..) = req
+  let Request(headers:, ..) = req
 
   headers
   |> list.filter_map(fn(header) {
