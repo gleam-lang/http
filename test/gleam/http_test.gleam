@@ -1,252 +1,147 @@
 import gleam/http
-import gleeunit/should
 
 pub fn parse_method_test() {
-  "Connect"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("Connect")))
+  assert http.parse_method("Connect") == Ok(http.Other("Connect"))
 
-  "CONNECT"
-  |> http.parse_method
-  |> should.equal(Ok(http.Connect))
+  assert http.parse_method("CONNECT") == Ok(http.Connect)
 
-  "connect"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("connect")))
+  assert http.parse_method("connect") == Ok(http.Other("connect"))
 
-  "Delete"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("Delete")))
+  assert http.parse_method("Delete") == Ok(http.Other("Delete"))
 
-  "DELETE"
-  |> http.parse_method
-  |> should.equal(Ok(http.Delete))
+  assert http.parse_method("DELETE") == Ok(http.Delete)
 
-  "delete"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("delete")))
+  assert http.parse_method("delete") == Ok(http.Other("delete"))
 
-  "Get"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("Get")))
+  assert http.parse_method("Get") == Ok(http.Other("Get"))
 
-  "GET"
-  |> http.parse_method
-  |> should.equal(Ok(http.Get))
+  assert http.parse_method("GET") == Ok(http.Get)
 
-  "get"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("get")))
+  assert http.parse_method("get") == Ok(http.Other("get"))
 
-  "Head"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("Head")))
+  assert http.parse_method("Head") == Ok(http.Other("Head"))
 
-  "HEAD"
-  |> http.parse_method
-  |> should.equal(Ok(http.Head))
+  assert http.parse_method("HEAD") == Ok(http.Head)
 
-  "head"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("head")))
+  assert http.parse_method("head") == Ok(http.Other("head"))
 
-  "Options"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("Options")))
+  assert http.parse_method("Options") == Ok(http.Other("Options"))
 
-  "OPTIONS"
-  |> http.parse_method
-  |> should.equal(Ok(http.Options))
+  assert http.parse_method("OPTIONS") == Ok(http.Options)
 
-  "options"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("options")))
+  assert http.parse_method("options") == Ok(http.Other("options"))
 
-  "Patch"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("Patch")))
+  assert http.parse_method("Patch") == Ok(http.Other("Patch"))
 
-  "PATCH"
-  |> http.parse_method
-  |> should.equal(Ok(http.Patch))
+  assert http.parse_method("PATCH") == Ok(http.Patch)
 
-  "patch"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("patch")))
+  assert http.parse_method("patch") == Ok(http.Other("patch"))
 
-  "Post"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("Post")))
+  assert http.parse_method("Post") == Ok(http.Other("Post"))
 
-  "POST"
-  |> http.parse_method
-  |> should.equal(Ok(http.Post))
+  assert http.parse_method("POST") == Ok(http.Post)
 
-  "post"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("post")))
+  assert http.parse_method("post") == Ok(http.Other("post"))
 
-  "Put"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("Put")))
+  assert http.parse_method("Put") == Ok(http.Other("Put"))
 
-  "PUT"
-  |> http.parse_method
-  |> should.equal(Ok(http.Put))
+  assert http.parse_method("PUT") == Ok(http.Put)
 
-  "put"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("put")))
+  assert http.parse_method("put") == Ok(http.Other("put"))
 
-  "Trace"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("Trace")))
+  assert http.parse_method("Trace") == Ok(http.Other("Trace"))
 
-  "TRACE"
-  |> http.parse_method
-  |> should.equal(Ok(http.Trace))
+  assert http.parse_method("TRACE") == Ok(http.Trace)
 
-  "trace"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("trace")))
+  assert http.parse_method("trace") == Ok(http.Other("trace"))
 
-  "thingy"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("thingy")))
+  assert http.parse_method("thingy") == Ok(http.Other("thingy"))
 
-  "!#$%&'*+-.^_`|~abcABC123"
-  |> http.parse_method
-  |> should.equal(Ok(http.Other("!#$%&'*+-.^_`|~abcABC123")))
+  assert http.parse_method("!#$%&'*+-.^_`|~abcABC123")
+    == Ok(http.Other("!#$%&'*+-.^_`|~abcABC123"))
 
-  "In-valid method"
-  |> http.parse_method
-  |> should.equal(Error(Nil))
+  assert http.parse_method("In-valid method") == Error(Nil)
 }
 
 pub fn method_to_string_test() {
-  http.Connect
-  |> http.method_to_string
-  |> should.equal("CONNECT")
+  assert http.method_to_string(http.Connect) == "CONNECT"
 
-  http.Delete
-  |> http.method_to_string
-  |> should.equal("DELETE")
+  assert http.method_to_string(http.Delete) == "DELETE"
 
-  http.Get
-  |> http.method_to_string
-  |> should.equal("GET")
+  assert http.method_to_string(http.Get) == "GET"
 
-  http.Head
-  |> http.method_to_string
-  |> should.equal("HEAD")
+  assert http.method_to_string(http.Head) == "HEAD"
 
-  http.Options
-  |> http.method_to_string
-  |> should.equal("OPTIONS")
+  assert http.method_to_string(http.Options) == "OPTIONS"
 
-  http.Patch
-  |> http.method_to_string
-  |> should.equal("PATCH")
+  assert http.method_to_string(http.Patch) == "PATCH"
 
-  http.Post
-  |> http.method_to_string
-  |> should.equal("POST")
+  assert http.method_to_string(http.Post) == "POST"
 
-  http.Put
-  |> http.method_to_string
-  |> should.equal("PUT")
+  assert http.method_to_string(http.Put) == "PUT"
 
-  http.Trace
-  |> http.method_to_string
-  |> should.equal("TRACE")
+  assert http.method_to_string(http.Trace) == "TRACE"
 
-  http.Other("ok")
-  |> http.method_to_string
-  |> should.equal("ok")
+  assert http.method_to_string(http.Other("ok")) == "ok"
 
-  http.Other("nope")
-  |> http.method_to_string
-  |> should.equal("nope")
+  assert http.method_to_string(http.Other("nope")) == "nope"
 }
 
 pub fn scheme_to_string_test() {
-  http.Http
-  |> http.scheme_to_string
-  |> should.equal("http")
+  assert http.scheme_to_string(http.Http) == "http"
 
-  http.Https
-  |> http.scheme_to_string
-  |> should.equal("https")
+  assert http.scheme_to_string(http.Https) == "https"
 }
 
 pub fn scheme_from_string_test() {
-  "http"
-  |> http.scheme_from_string
-  |> should.equal(Ok(http.Http))
+  assert http.scheme_from_string("http") == Ok(http.Http)
 
-  "https"
-  |> http.scheme_from_string
-  |> should.equal(Ok(http.Https))
+  assert http.scheme_from_string("https") == Ok(http.Https)
 
-  "ftp"
-  |> http.scheme_from_string
-  |> should.equal(Error(Nil))
+  assert http.scheme_from_string("ftp") == Error(Nil)
 }
 
 pub fn parse_content_disposition_1_test() {
-  http.parse_content_disposition("inline")
-  |> should.equal(Ok(http.ContentDisposition("inline", [])))
+  assert http.parse_content_disposition("inline")
+    == Ok(http.ContentDisposition("inline", []))
 
-  http.parse_content_disposition("attachment")
-  |> should.equal(Ok(http.ContentDisposition("attachment", [])))
+  assert http.parse_content_disposition("attachment")
+    == Ok(http.ContentDisposition("attachment", []))
 
-  http.parse_content_disposition(
-    "attachment; filename=genome.jpeg; modification-date=\"Wed, 12 Feb 1997 16:29:51 -0500\";",
-  )
-  |> should.equal(
-    Ok(
+  assert http.parse_content_disposition(
+      "attachment; filename=genome.jpeg; modification-date=\"Wed, 12 Feb 1997 16:29:51 -0500\";",
+    )
+    == Ok(
       http.ContentDisposition("attachment", [
         #("filename", "genome.jpeg"),
         #("modification-date", "Wed, 12 Feb 1997 16:29:51 -0500"),
       ]),
-    ),
-  )
+    )
 
-  http.parse_content_disposition("form-data; name=\"user\"")
-  |> should.equal(Ok(http.ContentDisposition("form-data", [#("name", "user")])))
+  assert http.parse_content_disposition("form-data; name=\"user\"")
+    == Ok(http.ContentDisposition("form-data", [#("name", "user")]))
 
-  http.parse_content_disposition("form-data; NAME=\"submit-name\"")
-  |> should.equal(
-    Ok(http.ContentDisposition("form-data", [#("name", "submit-name")])),
-  )
+  assert http.parse_content_disposition("form-data; NAME=\"submit-name\"")
+    == Ok(http.ContentDisposition("form-data", [#("name", "submit-name")]))
 
-  http.parse_content_disposition(
-    "form-data; name=\"files\"; filename=\"file1.txt\"",
-  )
-  |> should.equal(
-    Ok(
+  assert http.parse_content_disposition(
+      "form-data; name=\"files\"; filename=\"file1.txt\"",
+    )
+    == Ok(
       http.ContentDisposition("form-data", [
         #("name", "files"),
         #("filename", "file1.txt"),
       ]),
-    ),
-  )
+    )
 
-  http.parse_content_disposition("file; filename=\"file1.txt\"")
-  |> should.equal(
-    Ok(http.ContentDisposition("file", [#("filename", "file1.txt")])),
-  )
+  assert http.parse_content_disposition("file; filename=\"file1.txt\"")
+    == Ok(http.ContentDisposition("file", [#("filename", "file1.txt")]))
 
-  http.parse_content_disposition("file; filename=\"file2.gif\"")
-  |> should.equal(
-    Ok(http.ContentDisposition("file", [#("filename", "file2.gif")])),
-  )
+  assert http.parse_content_disposition("file; filename=\"file2.gif\"")
+    == Ok(http.ContentDisposition("file", [#("filename", "file2.gif")]))
 
-  http.parse_content_disposition("file; filename=\"file2\\\".gif\"")
-  |> should.equal(
-    Ok(http.ContentDisposition("file", [#("filename", "file2\".gif")])),
-  )
+  assert http.parse_content_disposition("file; filename=\"file2\\\".gif\"")
+    == Ok(http.ContentDisposition("file", [#("filename", "file2\".gif")]))
 
-  http.parse_content_disposition("file; filename=\"file2")
-  |> should.equal(Error(Nil))
+  assert http.parse_content_disposition("file; filename=\"file2") == Error(Nil)
 }
