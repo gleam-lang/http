@@ -28,6 +28,25 @@ pub type Method {
   Other(String)
 }
 
+pub fn parse_method(method: String) -> Result(Method, Nil) {
+  case method {
+    "CONNECT" -> Ok(Connect)
+    "DELETE" -> Ok(Delete)
+    "GET" -> Ok(Get)
+    "HEAD" -> Ok(Head)
+    "OPTIONS" -> Ok(Options)
+    "PATCH" -> Ok(Patch)
+    "POST" -> Ok(Post)
+    "PUT" -> Ok(Put)
+    "TRACE" -> Ok(Trace)
+    method ->
+      case is_valid_token(method) {
+        True -> Ok(Other(method))
+        False -> Error(Nil)
+      }
+  }
+}
+
 // A token is defined as:
 //
 //   token         = 1*tchar
@@ -46,52 +65,97 @@ pub type Method {
 // (From https://www.rfc-editor.org/rfc/rfc5234#appendix-B.1)
 //
 fn is_valid_token(token: String) -> Bool {
-  bit_array.from_string(token)
-  |> do_is_valid_token(True)
-}
-
-fn do_is_valid_token(bytes: BitArray, acc: Bool) -> Bool {
-  case bytes, acc {
-    <<char, rest:bytes>>, True -> do_is_valid_token(rest, is_valid_tchar(char))
-    _, _ -> acc
+  case token {
+    // A token must have at least a single valid characther
+    "" -> False
+    _ -> is_valid_token_loop(token)
   }
 }
 
-fn is_valid_tchar(character: Int) -> Bool {
-  case character {
-    // "!" | "#" | "$" | "%" | "&" | "'" | "*" | "+" | "-"
-    // | "." | "^" | "_" | "`" | "|" | "~"
-    33 | 35 | 36 | 37 | 38 | 39 | 42 | 43 | 45 | 46 | 94 | 95 | 96 | 124 | 126 ->
-      True
-    // DIGIT
-    character if character >= 0x30 && character <= 0x39 -> True
-    // ALPHA
-    character
-      if { character >= 0x41 && character <= 0x5A }
-      || { character >= 0x61 && character <= 0x7A }
-    -> True
+fn is_valid_token_loop(token: String) -> Bool {
+  case token {
+    "" -> True
+    // SYMBOLS
+    "!" <> rest
+    | "#" <> rest
+    | "$" <> rest
+    | "%" <> rest
+    | "&" <> rest
+    | "'" <> rest
+    | "*" <> rest
+    | "+" <> rest
+    | "-" <> rest
+    | "." <> rest
+    | "^" <> rest
+    | "_" <> rest
+    | "`" <> rest
+    | "|" <> rest
+    | "~" <> rest
+    | // DIGITS
+      "0" <> rest
+    | "1" <> rest
+    | "2" <> rest
+    | "3" <> rest
+    | "4" <> rest
+    | "5" <> rest
+    | "6" <> rest
+    | "7" <> rest
+    | "8" <> rest
+    | "9" <> rest
+    | // ALPHA
+      "A" <> rest
+    | "B" <> rest
+    | "C" <> rest
+    | "D" <> rest
+    | "E" <> rest
+    | "F" <> rest
+    | "G" <> rest
+    | "H" <> rest
+    | "I" <> rest
+    | "J" <> rest
+    | "K" <> rest
+    | "L" <> rest
+    | "M" <> rest
+    | "N" <> rest
+    | "O" <> rest
+    | "P" <> rest
+    | "Q" <> rest
+    | "R" <> rest
+    | "S" <> rest
+    | "T" <> rest
+    | "U" <> rest
+    | "V" <> rest
+    | "W" <> rest
+    | "X" <> rest
+    | "Y" <> rest
+    | "Z" <> rest
+    | "a" <> rest
+    | "b" <> rest
+    | "c" <> rest
+    | "d" <> rest
+    | "e" <> rest
+    | "f" <> rest
+    | "g" <> rest
+    | "h" <> rest
+    | "i" <> rest
+    | "j" <> rest
+    | "k" <> rest
+    | "l" <> rest
+    | "m" <> rest
+    | "n" <> rest
+    | "o" <> rest
+    | "p" <> rest
+    | "q" <> rest
+    | "r" <> rest
+    | "s" <> rest
+    | "t" <> rest
+    | "u" <> rest
+    | "v" <> rest
+    | "w" <> rest
+    | "x" <> rest
+    | "y" <> rest
+    | "z" <> rest -> is_valid_token_loop(rest)
     _ -> False
-  }
-}
-
-// TODO: check if the a is a valid HTTP method (i.e. it is a token, as per the
-// spec) and return Ok(Other(s)) if so.
-pub fn parse_method(method: String) -> Result(Method, Nil) {
-  case method {
-    "CONNECT" -> Ok(Connect)
-    "DELETE" -> Ok(Delete)
-    "GET" -> Ok(Get)
-    "HEAD" -> Ok(Head)
-    "OPTIONS" -> Ok(Options)
-    "PATCH" -> Ok(Patch)
-    "POST" -> Ok(Post)
-    "PUT" -> Ok(Put)
-    "TRACE" -> Ok(Trace)
-    method ->
-      case is_valid_token(method) {
-        True -> Ok(Other(method))
-        False -> Error(Nil)
-      }
   }
 }
 
