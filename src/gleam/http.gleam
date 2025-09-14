@@ -45,8 +45,8 @@ pub type Method {
 //
 // (From https://www.rfc-editor.org/rfc/rfc5234#appendix-B.1)
 //
-fn is_valid_token(s: String) -> Bool {
-  bit_array.from_string(s)
+fn is_valid_token(token: String) -> Bool {
+  bit_array.from_string(token)
   |> do_is_valid_token(True)
 }
 
@@ -57,24 +57,27 @@ fn do_is_valid_token(bytes: BitArray, acc: Bool) -> Bool {
   }
 }
 
-fn is_valid_tchar(ch: Int) -> Bool {
-  case ch {
+fn is_valid_tchar(character: Int) -> Bool {
+  case character {
     // "!" | "#" | "$" | "%" | "&" | "'" | "*" | "+" | "-"
     // | "." | "^" | "_" | "`" | "|" | "~"
     33 | 35 | 36 | 37 | 38 | 39 | 42 | 43 | 45 | 46 | 94 | 95 | 96 | 124 | 126 ->
       True
     // DIGIT
-    ch if ch >= 0x30 && ch <= 0x39 -> True
+    character if character >= 0x30 && character <= 0x39 -> True
     // ALPHA
-    ch if ch >= 0x41 && ch <= 0x5A || ch >= 0x61 && ch <= 0x7A -> True
+    character
+      if { character >= 0x41 && character <= 0x5A }
+      || { character >= 0x61 && character <= 0x7A }
+    -> True
     _ -> False
   }
 }
 
 // TODO: check if the a is a valid HTTP method (i.e. it is a token, as per the
 // spec) and return Ok(Other(s)) if so.
-pub fn parse_method(s: String) -> Result(Method, Nil) {
-  case s {
+pub fn parse_method(method: String) -> Result(Method, Nil) {
+  case method {
     "CONNECT" -> Ok(Connect)
     "DELETE" -> Ok(Delete)
     "GET" -> Ok(Get)
@@ -84,9 +87,9 @@ pub fn parse_method(s: String) -> Result(Method, Nil) {
     "POST" -> Ok(Post)
     "PUT" -> Ok(Put)
     "TRACE" -> Ok(Trace)
-    s ->
-      case is_valid_token(s) {
-        True -> Ok(Other(s))
+    method ->
+      case is_valid_token(method) {
+        True -> Ok(Other(method))
         False -> Error(Nil)
       }
   }
@@ -103,7 +106,7 @@ pub fn method_to_string(method: Method) -> String {
     Post -> "POST"
     Put -> "PUT"
     Trace -> "TRACE"
-    Other(s) -> s
+    Other(method) -> method
   }
 }
 
