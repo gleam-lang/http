@@ -224,23 +224,20 @@ pub fn set_path(req: Request(body), path: String) -> Request(body) {
 
 /// Set a cookie on a request, replacing any previous cookie with that name.
 ///
-/// All cookies stored in a single header named `cookie`. There should be
-/// at most one header with the name `cookie`, otherwise this function cannot
-/// guarentee that previous cookies with the same name are replaced.
+/// All cookies should be stored in a single header named `cookie`.
+/// There should be at most one header with the name `cookie`, otherwise this
+/// function cannot guarentee that previous cookies with the same name are
+/// replaced.
 ///
 pub fn set_cookie(req: Request(body), name: String, value: String) {
   // Get the cookies
   let #(cookies, headers) =
     list.key_pop(req.headers, "cookie") |> result.unwrap(#("", req.headers))
 
-  // Parse them
-  let cookies =
-    string.split(cookies, ";")
-    |> list.filter_map(fn(c) { string.trim_start(c) |> string.split_once("=") })
-
   // Set the new cookie, replacing any previous one with the same name
   let cookies =
-    list.key_set(cookies, name, value)
+    cookie.parse(cookies)
+    |> list.key_set(name, value)
     |> list.map(fn(pair) { pair.0 <> "=" <> pair.1 })
     |> string.join("; ")
 
