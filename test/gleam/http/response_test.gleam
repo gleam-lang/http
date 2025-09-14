@@ -3,12 +3,11 @@ import gleam/http/cookie
 import gleam/http/response.{Response}
 import gleam/option.{None, Some}
 import gleam/string
-import gleeunit/should
 
 pub fn redirect_test() {
   let response = response.redirect("/other")
-  should.equal(303, response.status)
-  should.equal(Ok("/other"), response.get_header(response, "location"))
+  assert 303 == response.status
+  assert Ok("/other") == response.get_header(response, "location")
 }
 
 pub fn map_body_test() {
@@ -18,22 +17,21 @@ pub fn map_body_test() {
     response
     |> response.map(string.reverse)
 
-  updated_response.body
-  |> should.equal(expected_updated_body)
+  assert updated_response.body == expected_updated_body
 }
 
 pub fn try_map_body_test() {
   let transform = fn(_old_body) { Ok("new body") }
 
   let response = response.new(200)
-  response.try_map(response, transform)
-  |> should.equal(Ok(Response(200, [], "new body")))
+  assert response.try_map(response, transform)
+    == Ok(Response(200, [], "new body"))
 
   // transform function which fails should propogate error
   let transform_failure = fn(_old_body) { Error("transform failure") }
 
-  response.try_map(response, transform_failure)
-  |> should.equal(Error("transform failure"))
+  assert response.try_map(response, transform_failure)
+    == Error("transform failure")
 }
 
 pub fn get_header_test() {
@@ -42,17 +40,13 @@ pub fn get_header_test() {
     |> response.prepend_header("x-foo", "x")
     |> response.prepend_header("x-BAR", "y")
 
-  response.get_header(response, "x-foo")
-  |> should.equal(Ok("x"))
+  assert response.get_header(response, "x-foo") == Ok("x")
 
-  response.get_header(response, "X-Foo")
-  |> should.equal(Ok("x"))
+  assert response.get_header(response, "X-Foo") == Ok("x")
 
-  response.get_header(response, "x-baz")
-  |> should.equal(Error(Nil))
+  assert response.get_header(response, "x-baz") == Error(Nil)
 
-  response.headers
-  |> should.equal([#("x-bar", "y"), #("x-foo", "x")])
+  assert response.headers == [#("x-bar", "y"), #("x-foo", "x")]
 }
 
 pub fn set_header_test() {
@@ -63,8 +57,7 @@ pub fn set_header_test() {
     |> response.set_header("x-one", "x")
     |> response.set_header("x-two", "UPPERCASE")
 
-  response.headers
-  |> should.equal([#("x-one", "x"), #("x-two", "UPPERCASE")])
+  assert response.headers == [#("x-one", "x"), #("x-two", "UPPERCASE")]
 }
 
 pub fn set_body_test() {
@@ -72,8 +65,7 @@ pub fn set_body_test() {
     response.new(200)
     |> response.set_body("Hello, World!")
 
-  response.body
-  |> should.equal("Hello, World!")
+  assert response.body == "Hello, World!"
 }
 
 pub fn get_resp_cookies_test() {
@@ -87,10 +79,10 @@ pub fn get_resp_cookies_test() {
       same_site: None,
     )
 
-  response.new(200)
-  |> response.set_cookie("k1", "v1", empty)
-  |> response.get_cookies
-  |> should.equal([#("k1", "v1")])
+  assert response.new(200)
+    |> response.set_cookie("k1", "v1", empty)
+    |> response.get_cookies
+    == [#("k1", "v1")]
 
   let secure_with_attributes =
     cookie.Attributes(
@@ -102,21 +94,21 @@ pub fn get_resp_cookies_test() {
       same_site: None,
     )
 
-  response.new(200)
-  |> response.set_cookie("k1", "v1", secure_with_attributes)
-  |> response.get_cookies
-  |> should.equal([
-    #("k1", "v1"),
-    #("Max-Age", "100"),
-    #("Domain", "domain.test"),
-    #("Path", "/foo"),
-  ])
+  assert response.new(200)
+    |> response.set_cookie("k1", "v1", secure_with_attributes)
+    |> response.get_cookies
+    == [
+      #("k1", "v1"),
+      #("Max-Age", "100"),
+      #("Domain", "domain.test"),
+      #("Path", "/foo"),
+    ]
 
   // no response cookie
-  response.new(200)
-  |> response.prepend_header("k1", "v1")
-  |> response.get_cookies
-  |> should.equal([])
+  assert response.new(200)
+    |> response.prepend_header("k1", "v1")
+    |> response.get_cookies
+    == []
 }
 
 pub fn set_resp_cookie_test() {
@@ -129,15 +121,15 @@ pub fn set_resp_cookie_test() {
       http_only: False,
       same_site: None,
     )
-  response.new(200)
-  |> response.set_cookie("k1", "v1", empty)
-  |> response.get_header("set-cookie")
-  |> should.equal(Ok("k1=v1"))
+  assert response.new(200)
+    |> response.set_cookie("k1", "v1", empty)
+    |> response.get_header("set-cookie")
+    == Ok("k1=v1")
 
-  response.new(200)
-  |> response.set_cookie("k1", "v1", cookie.defaults(Http))
-  |> response.get_header("set-cookie")
-  |> should.equal(Ok("k1=v1; Path=/; HttpOnly; SameSite=Lax"))
+  assert response.new(200)
+    |> response.set_cookie("k1", "v1", cookie.defaults(Http))
+    |> response.get_header("set-cookie")
+    == Ok("k1=v1; Path=/; HttpOnly; SameSite=Lax")
 
   let secure =
     cookie.Attributes(
@@ -148,19 +140,19 @@ pub fn set_resp_cookie_test() {
       http_only: True,
       same_site: Some(cookie.Strict),
     )
-  response.new(200)
-  |> response.set_cookie("k1", "v1", secure)
-  |> response.get_header("set-cookie")
-  |> should.equal(Ok(
-    "k1=v1; Max-Age=100; Domain=domain.test; Path=/foo; Secure; HttpOnly; SameSite=Strict",
-  ))
+  assert response.new(200)
+    |> response.set_cookie("k1", "v1", secure)
+    |> response.get_header("set-cookie")
+    == Ok(
+      "k1=v1; Max-Age=100; Domain=domain.test; Path=/foo; Secure; HttpOnly; SameSite=Strict",
+    )
 }
 
 pub fn expire_resp_cookie_test() {
-  response.new(200)
-  |> response.expire_cookie("k1", cookie.defaults(Http))
-  |> response.get_header("set-cookie")
-  |> should.equal(Ok(
-    "k1=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; Path=/; HttpOnly; SameSite=Lax",
-  ))
+  assert response.new(200)
+    |> response.expire_cookie("k1", cookie.defaults(Http))
+    |> response.get_header("set-cookie")
+    == Ok(
+      "k1=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; Path=/; HttpOnly; SameSite=Lax",
+    )
 }
