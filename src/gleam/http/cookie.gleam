@@ -98,8 +98,8 @@ pub fn parse(cookie_string: String) -> List(#(String, String)) {
       Ok(#("", _)) -> Error(Nil)
       Ok(#(key, value)) -> {
         let key = string.trim(key)
-        let value = string.trim(value)
         use _ <- result.try(check_token(key))
+        let value = string.trim(value)
         use _ <- result.try(check_token(value))
         Ok(#(key, value))
       }
