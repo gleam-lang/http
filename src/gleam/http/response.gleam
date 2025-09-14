@@ -116,7 +116,7 @@ pub fn redirect(uri: String) -> Response(String) {
 ///
 /// Badly formed cookies will be discarded.
 ///
-pub fn get_cookies(resp) -> List(#(String, String)) {
+pub fn get_cookies(resp: Response(a)) -> List(#(String, String)) {
   let Response(headers:, ..) = resp
 
   headers

@@ -14,7 +14,7 @@ pub type SameSitePolicy {
   None
 }
 
-fn same_site_to_string(policy) {
+fn same_site_to_string(policy: SameSitePolicy) -> String {
   case policy {
     Lax -> "Lax"
     Strict -> "Strict"
@@ -37,7 +37,7 @@ pub type Attributes {
 /// Helper to create sensible default attributes for a set cookie.
 ///
 /// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#Attributes
-pub fn defaults(scheme: Scheme) {
+pub fn defaults(scheme: Scheme) -> Attributes {
   Attributes(
     max_age: option.None,
     domain: option.None,

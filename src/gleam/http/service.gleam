@@ -14,7 +14,10 @@ pub type Middleware(before_req, before_resp, after_req, after_resp) =
     fn(Request(after_req)) -> Response(after_resp)
 
 @deprecated("Use middleware packages such as Wisp or Glen instead")
-pub fn map_response_body(service, with mapper: fn(a) -> b) {
+pub fn map_response_body(
+  service: fn(c) -> Response(a),
+  with mapper: fn(a) -> b,
+) -> fn(c) -> Response(b) {
   fn(req) {
     req
     |> service
@@ -23,7 +26,11 @@ pub fn map_response_body(service, with mapper: fn(a) -> b) {
 }
 
 @deprecated("Use middleware packages such as Wisp or Glen instead")
-pub fn prepend_response_header(service, key: String, value: String) {
+pub fn prepend_response_header(
+  service: fn(a) -> Response(b),
+  key: String,
+  value: String,
+) -> fn(a) -> Response(b) {
   fn(req) {
     req
     |> service
@@ -31,7 +38,7 @@ pub fn prepend_response_header(service, key: String, value: String) {
   }
 }
 
-fn ensure_post(req: Request(a)) {
+fn ensure_post(req: Request(a)) -> Result(Request(a), Nil) {
   case req.method {
     Post -> Ok(req)
     _ -> Error(Nil)
@@ -49,7 +56,7 @@ fn get_override_method(request: Request(t)) -> Result(http.Method, Nil) {
 }
 
 @deprecated("Use middleware packages such as Wisp or Glen instead")
-pub fn method_override(service) {
+pub fn method_override(service: fn(Request(a)) -> b) -> fn(Request(a)) -> b {
   fn(request) {
     request
     |> ensure_post

@@ -229,7 +229,11 @@ pub fn set_path(req: Request(body), path: String) -> Request(body) {
 /// function cannot guarentee that previous cookies with the same name are
 /// replaced.
 ///
-pub fn set_cookie(req: Request(body), name: String, value: String) {
+pub fn set_cookie(
+  req: Request(body),
+  name: String,
+  value: String,
+) -> Request(body) {
   // Get the cookies
   let #(cookies, headers) =
     list.key_pop(req.headers, "cookie") |> result.unwrap(#("", req.headers))
@@ -248,7 +252,7 @@ pub fn set_cookie(req: Request(body), name: String, value: String) {
 ///
 /// Note badly formed cookie pairs will be ignored.
 /// RFC6265 specifies that invalid cookie names/attributes should be ignored.
-pub fn get_cookies(req) -> List(#(String, String)) {
+pub fn get_cookies(req: Request(body)) -> List(#(String, String)) {
   let Request(headers:, ..) = req
 
   list.flat_map(headers, fn(header) {
@@ -263,7 +267,7 @@ pub fn get_cookies(req) -> List(#(String, String)) {
 ///
 /// Remove a cookie from the request. If no cookie is found return the request
 /// unchanged. This will not remove the cookie from the client.
-pub fn remove_cookie(req: Request(body), name: String) {
+pub fn remove_cookie(req: Request(body), name: String) -> Request(body) {
   case list.key_pop(req.headers, "cookie") {
     Ok(#(cookies_string, headers)) -> {
       let new_cookies_string =
