@@ -348,7 +348,7 @@ fn do_parse_headers(data: BitArray) -> Result(MultipartHeaders, Nil) {
     <<"\r\n\r\n", data:bytes>> -> Ok(MultipartHeaders([], remaining: data))
 
     // Skip the line break after the boundary.
-    <<"\r\n", data:bytes>> -> parse_header_name(data, [], <<>>)
+    <<"\r\n", data:bytes>> -> parse_header_name(data, [])
 
     <<"\r">> | <<>> -> more_please_headers(data, do_parse_headers)
 
@@ -356,32 +356,51 @@ fn do_parse_headers(data: BitArray) -> Result(MultipartHeaders, Nil) {
   }
 }
 
-fn skip_whitespace(data: BitArray) -> BitArray {
-  case data {
-    <<" ", data:bytes>> | <<"\t", data:bytes>> -> skip_whitespace(data)
-    _ -> data
-  }
-}
-
 fn parse_header_name(
   data: BitArray,
   headers: List(Header),
-  name: BitArray,
 ) -> Result(MultipartHeaders, Nil) {
-  case skip_whitespace(data) {
-    <<":", data:bytes>> ->
-      data
-      |> skip_whitespace
-      |> parse_header_value(headers, name, <<>>)
+  case data {
+    // We first have to skip all whitespace preceding the name.
+    <<" ", rest:bits>> | <<"\t", rest:bits>> -> parse_header_name(rest, headers)
+    <<_, _:bits>> -> parse_header_name_loop(data, headers, <<>>)
 
-    <<char, data:bytes>> ->
-      parse_header_name(data, headers, <<name:bits, char>>)
-
-    _ -> more_please_headers(data, parse_header_name(_, headers, name))
+    // We don't have enough bits to make a choice and will have to wait for more
+    // to come.
+    _ -> more_please_headers(data, parse_header_name(_, headers))
   }
 }
 
-fn parse_header_value(
+fn parse_header_name_loop(data: BitArray, headers: List(Header), name: BitArray) {
+  case data {
+    // We've found the end of the header, we can now start parsing its value.
+    <<":", data:bits>> -> parse_header_value(data, headers, name)
+
+    // Otherwise the character belongs to the header.
+    <<char, data:bits>> ->
+      parse_header_name_loop(data, headers, <<name:bits, char>>)
+
+    // We don't have enough bits to make a choice and have to wait for more to
+    // come.
+    _ -> more_please_headers(data, parse_header_name_loop(_, headers, name))
+  }
+}
+
+fn parse_header_value(data: BitArray, headers: List(Header), name: BitArray) {
+  case data {
+    // We first have to skip all whitespace preceding the value.
+    <<" ", rest:bits>> | <<"\t", rest:bits>> ->
+      parse_header_value(rest, headers, name)
+
+    <<_, _:bits>> -> parse_header_value_loop(data, headers, name, <<>>)
+
+    // We don't have enough bits to make a choice and will have to wait for more
+    // to come.
+    _ -> more_please_headers(data, parse_header_value(_, headers, name))
+  }
+}
+
+fn parse_header_value_loop(
   data: BitArray,
   headers: List(Header),
   name: BitArray,
@@ -391,9 +410,7 @@ fn parse_header_value(
     // We need at least 4 bytes to check for the end of the headers.
     <<>> | <<_>> | <<_, _>> | <<_, _, _>> ->
       more_please_headers(data, fn(data) {
-        data
-        |> skip_whitespace
-        |> parse_header_value(headers, name, value)
+        parse_header_value_loop(data, headers, name, value)
       })
 
     <<"\r\n\r\n", data:bytes>> -> {
@@ -403,19 +420,18 @@ fn parse_header_value(
       MultipartHeaders(headers:, remaining: data)
     }
 
-    // \r\n\s
-    <<"\r\n", 32, data:bytes>> | <<"\r\n\t", data:bytes>> ->
-      parse_header_value(data, headers, name, value)
+    <<"\r\n ", data:bytes>> | <<"\r\n\t", data:bytes>> ->
+      parse_header_value_loop(data, headers, name, value)
 
     <<"\r\n", data:bytes>> -> {
       use name <- result.try(bit_array.to_string(name))
       use value <- result.try(bit_array.to_string(value))
       let headers = [#(string.lowercase(name), value), ..headers]
-      parse_header_name(data, headers, <<>>)
+      parse_header_name(data, headers)
     }
 
     <<char, rest:bytes>> ->
-      parse_header_value(rest, headers, name, <<value:bits, char>>)
+      parse_header_value_loop(rest, headers, name, <<value:bits, char>>)
 
     _ -> Error(Nil)
   }
