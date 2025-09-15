@@ -342,6 +342,85 @@ fn skip_preamble(
   }
 }
 
+fn do_parse_headers(data: BitArray) -> Result(MultipartHeaders, Nil) {
+  case data {
+    // We've reached the end, there are no headers.
+    <<"\r\n\r\n", data:bytes>> -> Ok(MultipartHeaders([], remaining: data))
+
+    // Skip the line break after the boundary.
+    <<"\r\n", data:bytes>> -> parse_header_name(data, [], <<>>)
+
+    <<"\r">> | <<>> -> more_please_headers(data, do_parse_headers)
+
+    _ -> Error(Nil)
+  }
+}
+
+fn skip_whitespace(data: BitArray) -> BitArray {
+  case data {
+    <<" ", data:bytes>> | <<"\t", data:bytes>> -> skip_whitespace(data)
+    _ -> data
+  }
+}
+
+fn parse_header_name(
+  data: BitArray,
+  headers: List(Header),
+  name: BitArray,
+) -> Result(MultipartHeaders, Nil) {
+  case skip_whitespace(data) {
+    <<":", data:bytes>> ->
+      data
+      |> skip_whitespace
+      |> parse_header_value(headers, name, <<>>)
+
+    <<char, data:bytes>> ->
+      parse_header_name(data, headers, <<name:bits, char>>)
+
+    _ -> more_please_headers(data, parse_header_name(_, headers, name))
+  }
+}
+
+fn parse_header_value(
+  data: BitArray,
+  headers: List(Header),
+  name: BitArray,
+  value: BitArray,
+) -> Result(MultipartHeaders, Nil) {
+  case data {
+    // We need at least 4 bytes to check for the end of the headers.
+    <<>> | <<_>> | <<_, _>> | <<_, _, _>> ->
+      more_please_headers(data, fn(data) {
+        data
+        |> skip_whitespace
+        |> parse_header_value(headers, name, value)
+      })
+
+    <<"\r\n\r\n", data:bytes>> -> {
+      use name <- result.try(bit_array.to_string(name))
+      use value <- result.map(bit_array.to_string(value))
+      let headers = list.reverse([#(string.lowercase(name), value), ..headers])
+      MultipartHeaders(headers:, remaining: data)
+    }
+
+    // \r\n\s
+    <<"\r\n", 32, data:bytes>> | <<"\r\n\t", data:bytes>> ->
+      parse_header_value(data, headers, name, value)
+
+    <<"\r\n", data:bytes>> -> {
+      use name <- result.try(bit_array.to_string(name))
+      use value <- result.try(bit_array.to_string(value))
+      let headers = [#(string.lowercase(name), value), ..headers]
+      parse_header_name(data, headers, <<>>)
+    }
+
+    <<char, rest:bytes>> ->
+      parse_header_value(rest, headers, name, <<value:bits, char>>)
+
+    _ -> Error(Nil)
+  }
+}
+
 /// Parse the body for part of a multipart message, as defined in RFC 2045. The
 /// body is everything until the next boundary. This function is generally to be
 /// called after calling `parse_multipart_headers` for a given part.
@@ -417,95 +496,6 @@ fn parse_body_loop(
     }
 
     _ -> panic as "unreachable"
-  }
-}
-
-fn skip_whitespace(data: BitArray) -> BitArray {
-  case data {
-    // Space or tab.
-    <<32, data:bytes>> | <<9, data:bytes>> -> skip_whitespace(data)
-    _ -> data
-  }
-}
-
-fn do_parse_headers(data: BitArray) -> Result(MultipartHeaders, Nil) {
-  case data {
-    // \r\n\r\n
-    // We've reached the end, there are no headers.
-    <<13, 10, 13, 10, data:bytes>> -> Ok(MultipartHeaders([], remaining: data))
-
-    // \r\n
-    // Skip the line break after the boundary.
-    <<13, 10, data:bytes>> -> parse_header_name(data, [], <<>>)
-
-    <<13>> | <<>> -> more_please_headers(data, do_parse_headers)
-
-    _ -> Error(Nil)
-  }
-}
-
-fn parse_header_name(
-  data: BitArray,
-  headers: List(Header),
-  name: BitArray,
-) -> Result(MultipartHeaders, Nil) {
-  case skip_whitespace(data) {
-    // :
-    <<58, data:bytes>> ->
-      data
-      |> skip_whitespace
-      |> parse_header_value(headers, name, <<>>)
-
-    <<char, data:bytes>> ->
-      parse_header_name(data, headers, <<name:bits, char>>)
-
-    _ -> more_please_headers(data, parse_header_name(_, headers, name))
-  }
-}
-
-fn parse_header_value(
-  data: BitArray,
-  headers: List(Header),
-  name: BitArray,
-  value: BitArray,
-) -> Result(MultipartHeaders, Nil) {
-  let size = bit_array.byte_size(data)
-  case data {
-    // We need at least 4 bytes to check for the end of the headers.
-    _ if size < 4 ->
-      more_please_headers(data, fn(data) {
-        data
-        |> skip_whitespace
-        |> parse_header_value(headers, name, value)
-      })
-
-    // \r\n\r\n
-    <<13, 10, 13, 10, data:bytes>> -> {
-      use name <- result.try(bit_array.to_string(name))
-      use value <- result.map(bit_array.to_string(value))
-      let headers = list.reverse([#(string.lowercase(name), value), ..headers])
-      MultipartHeaders(headers, data)
-    }
-
-    // \r\n\s
-    // \r\n\t
-    <<13, 10, 32, data:bytes>> | <<13, 10, 9, data:bytes>> ->
-      parse_header_value(data, headers, name, value)
-
-    // \r\n
-    <<13, 10, data:bytes>> -> {
-      use name <- result.try(bit_array.to_string(name))
-      use value <- result.try(bit_array.to_string(value))
-      let headers = [#(string.lowercase(name), value), ..headers]
-      parse_header_name(data, headers, <<>>)
-    }
-
-    <<char, rest:bytes>> -> {
-      let value = <<value:bits, char>>
-      parse_header_value(rest, headers, name, value)
-    }
-
-    _ -> Error(Nil)
   }
 }
 
