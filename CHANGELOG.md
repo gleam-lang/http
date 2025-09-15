@@ -1,5 +1,10 @@
 # Changelog
 
+## v4.2.0 - 2025-09-15
+
+- The performance of the cookie and method parsing functions have been
+  improved.
+
 ## v4.1.1 - 2025-07-22
 
 - Fixed a bug where `set_cookie` would fail to overwrite an existing cookie.

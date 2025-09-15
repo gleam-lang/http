@@ -1,5 +1,5 @@
 name = "gleam_http"
-version = "4.1.1"
+version = "4.2.0"
 licences = ["Apache-2.0"]
 description = "Types and functions for Gleam HTTP clients and servers"
 gleam = ">= 1.11.0"
