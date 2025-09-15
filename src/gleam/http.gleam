@@ -273,14 +273,35 @@ pub fn parse_multipart_headers(
   boundary: String,
 ) -> Result(MultipartHeaders, Nil) {
   let boundary = bit_array.from_string(boundary)
-  // TODO: rewrite this to use a bit pattern once JavaScript supports
-  // the `b:binary-size(bsize)` pattern.
-  let prefix = <<45, 45, boundary:bits>>
-  case bit_array.slice(data, 0, bit_array.byte_size(prefix)) == Ok(prefix) {
-    // There is no preamble, parse the headers.
-    True -> parse_headers_after_prelude(data, boundary)
-    // There is a preamble, skip it before parsing.
-    False -> skip_preamble(data, boundary)
+  let boundary_bytes = bit_array.byte_size(boundary)
+  do_parse_multipart_headers(data, boundary, boundary_bytes)
+}
+
+fn do_parse_multipart_headers(
+  data: BitArray,
+  boundary: BitArray,
+  boundary_bytes: Int,
+) -> Result(MultipartHeaders, Nil) {
+  case data {
+    // The headers start right away with a boundary.
+    <<"--", found:size(boundary_bytes)-bytes, rest:bits>> if found == boundary ->
+      case rest {
+        // Final boundary `--boundary--`.
+        <<"--", rest:bits>> -> Ok(MultipartHeaders([], remaining: rest))
+
+        // Regular boundary `--boundary`.
+        <<_, _, _:bits>> -> do_parse_headers(rest)
+
+        // Not enough bytes to make a choice, we have to wait for more.
+        _ ->
+          more_please_headers(
+            do_parse_multipart_headers(_, boundary, boundary_bytes),
+            data,
+          )
+      }
+
+    // The headers start with a preamble we need to skip.
+    _ -> skip_preamble(data, boundary)
   }
 }
 
@@ -359,48 +380,6 @@ fn parse_body_loop(
     }
 
     _ -> panic as "unreachable"
-  }
-}
-
-fn parse_headers_after_prelude(
-  data: BitArray,
-  boundary: BitArray,
-) -> Result(MultipartHeaders, Nil) {
-  let dsize = bit_array.byte_size(data)
-  let bsize = bit_array.byte_size(boundary)
-  let required_size = bsize + 4
-
-  // TODO: this could be written as a single case expression if JavaScript had
-  // support for the `b:binary-size(bsize)` pattern. Rewrite this once the
-  // compiler support this.
-
-  use <- bool.guard(
-    when: dsize < required_size,
-    return: more_please_headers(parse_headers_after_prelude(_, boundary), data),
-  )
-
-  use prefix <- result.try(bit_array.slice(data, 0, required_size - 2))
-  use second <- result.try(bit_array.slice(data, 2 + bsize, 2))
-  let desired = <<45, 45, boundary:bits>>
-
-  use <- bool.guard(prefix != desired, return: Error(Nil))
-
-  case second == <<45, 45>> {
-    // --boundary--
-    // The last boundary. Return the epilogue.
-    True -> {
-      let rest_size = dsize - required_size
-      use data <- result.map(bit_array.slice(data, required_size, rest_size))
-      MultipartHeaders([], remaining: data)
-    }
-
-    // --boundary
-    False -> {
-      let start = required_size - 2
-      let rest_size = dsize - required_size + 2
-      use data <- result.try(bit_array.slice(data, start, rest_size))
-      do_parse_headers(data)
-    }
   }
 }
 
