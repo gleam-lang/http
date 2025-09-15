@@ -455,20 +455,20 @@ pub fn parse_multipart_body(
   data: BitArray,
   boundary: String,
 ) -> Result(MultipartBody, Nil) {
-  boundary
-  |> bit_array.from_string
-  |> parse_body_with_bit_array(data, _)
+  let boundary = bit_array.from_string(boundary)
+  let boundary_bytes = bit_array.byte_size(boundary)
+  do_parse_multipart_body(data, boundary, boundary_bytes)
 }
 
-fn parse_body_with_bit_array(
+fn do_parse_multipart_body(
   data: BitArray,
   boundary: BitArray,
+  boundary_bytes: Int,
 ) -> Result(MultipartBody, Nil) {
-  let bsize = bit_array.byte_size(boundary)
-  let prefix = bit_array.slice(data, 0, 2 + bsize)
-  case prefix == Ok(<<45, 45, boundary:bits>>) {
-    True -> Ok(MultipartBody(<<>>, done: False, remaining: data))
-    False -> parse_body_loop(data, boundary, <<>>)
+  case data {
+    <<"--", found:size(boundary_bytes)-bytes, _:bits>> if found == boundary ->
+      Ok(MultipartBody(<<>>, done: False, remaining: data))
+    _ -> parse_body_loop(data, boundary, <<>>)
   }
 }
 
