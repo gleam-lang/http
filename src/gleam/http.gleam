@@ -300,7 +300,45 @@ fn do_parse_multipart_headers(
       }
 
     // The headers start with a preamble we need to skip.
-    _ -> skip_preamble(data, boundary)
+    _ -> skip_preamble(data, boundary, boundary_bytes)
+  }
+}
+
+fn skip_preamble(
+  data: BitArray,
+  boundary: BitArray,
+  boundary_bytes: Int,
+) -> Result(MultipartHeaders, Nil) {
+  case data {
+    // We might have found the preamble end!
+    <<"\r\n--", rest:bytes>> -> {
+      case rest {
+        // It is indeed the end, we go on parsing the headers that come after
+        // the boundary.
+        <<found:size(boundary_bytes)-bytes, rest:bits>> if found == boundary ->
+          do_parse_headers(rest)
+
+        // This was not the end because `\r\n--` is not followed by the expected
+        // boundary, so we keep ignoring bytes.
+        <<_found:size(boundary_bytes)-bytes, _:bits>> ->
+          skip_preamble(rest, boundary, boundary_bytes)
+
+        // There's not enough bytes to make sure the `\r\n--` is not followed
+        // by the closing boundary so we have to wait for more to come.
+        _ ->
+          more_please_headers(data, skip_preamble(_, boundary, boundary_bytes))
+      }
+    }
+
+    // We don't have enough bytes to be sure this is not the end of the preamble
+    // so we have to wait for more to come.
+    <<>> | <<"\r">> | <<"\r\n">> | <<"\r\n-">> ->
+      more_please_headers(data, skip_preamble(_, boundary, boundary_bytes))
+
+    // The byte is surely part of the preamble and can be skipped.
+    <<_, data:bytes>> -> skip_preamble(data, boundary, boundary_bytes)
+
+    _ -> panic as "unreachable"
   }
 }
 
@@ -377,40 +415,6 @@ fn parse_body_loop(
     <<char, data:bytes>> -> {
       parse_body_loop(data, boundary, <<body:bits, char>>)
     }
-
-    _ -> panic as "unreachable"
-  }
-}
-
-fn skip_preamble(
-  data: BitArray,
-  boundary: BitArray,
-) -> Result(MultipartHeaders, Nil) {
-  let data_size = bit_array.byte_size(data)
-  let boundary_size = bit_array.byte_size(boundary)
-  let required = boundary_size + 4
-  case data {
-    _ if data_size < required ->
-      more_please_headers(data, skip_preamble(_, boundary))
-
-    // TODO: change this to use one non-nested case expression once the compiler
-    // supports the `b:binary-size(bsize)` pattern on JS.
-    // \r\n--
-    <<13, 10, 45, 45, data:bytes>> -> {
-      case bit_array.slice(data, 0, boundary_size) {
-        // --boundary
-        Ok(prefix) if prefix == boundary -> {
-          let start = boundary_size
-          let length = bit_array.byte_size(data) - boundary_size
-          use rest <- result.try(bit_array.slice(data, start, length))
-          do_parse_headers(rest)
-        }
-        Ok(_) -> skip_preamble(data, boundary)
-        Error(_) -> Error(Nil)
-      }
-    }
-
-    <<_, data:bytes>> -> skip_preamble(data, boundary)
 
     _ -> panic as "unreachable"
   }
