@@ -466,51 +466,45 @@ fn do_parse_multipart_body(
   boundary_bytes: Int,
 ) -> Result(MultipartBody, Nil) {
   case data {
-    <<"--", found:size(boundary_bytes)-bytes, _:bits>> if found == boundary ->
+    <<"--", found:size(boundary_bytes)-bytes, _:bytes>> if found == boundary ->
       Ok(MultipartBody(<<>>, done: False, remaining: data))
-    _ -> parse_body_loop(data, boundary, <<>>)
+    _ -> parse_body_loop(data, boundary, boundary_bytes, <<>>)
   }
 }
 
 fn parse_body_loop(
   data: BitArray,
   boundary: BitArray,
+  boundary_bytes: Int,
   body: BitArray,
 ) -> Result(MultipartBody, Nil) {
-  let dsize = bit_array.byte_size(data)
-  let bsize = bit_array.byte_size(boundary)
-  let required = 6 + bsize
   case data {
-    _ if dsize < required ->
-      more_please_body(body, data, parse_body_loop(_, boundary, <<>>))
+    <<>> | <<"\r">> ->
+      more_please_body(body, data, fn(data) {
+        parse_body_loop(data, boundary, boundary_bytes, <<>>)
+      })
 
-    // TODO: flatten this into a single case expression once JavaScript supports
-    // the `b:binary-size(bsize)` pattern.
-    //
-    // \r\n
-    <<13, 10, data:bytes>> -> {
-      let desired = <<45, 45, boundary:bits>>
-      let size = bit_array.byte_size(desired)
-      let dsize = bit_array.byte_size(data)
-      let prefix = bit_array.slice(data, 0, size)
-      let rest = bit_array.slice(data, size, dsize - size)
-      case prefix == Ok(desired), rest {
-        // --boundary\r\n
-        True, Ok(<<13, 10, _:bytes>>) ->
-          Ok(MultipartBody(body, done: False, remaining: data))
+    <<"\r\n", rest:bits>> ->
+      case rest {
+        <<"--", found:size(boundary_bytes)-bytes, "\r\n", _:bits>>
+          if found == boundary
+        -> Ok(MultipartBody(body, done: False, remaining: rest))
 
-        // --boundary--
-        True, Ok(<<45, 45, data:bytes>>) ->
-          Ok(MultipartBody(body, done: True, remaining: data))
+        <<"--", found:size(boundary_bytes)-bytes, "--", rest:bits>>
+          if found == boundary
+        -> Ok(MultipartBody(body, done: True, remaining: rest))
 
-        False, _ -> parse_body_loop(data, boundary, <<body:bits, 13, 10>>)
-        _, _ -> Error(Nil)
+        <<_, _, _:size(boundary_bytes)-bytes, _, _, _:bits>> ->
+          parse_body_loop(rest, boundary, boundary_bytes, <<body:bits, "\r\n">>)
+
+        _ ->
+          more_please_body(body, data, fn(data) {
+            parse_body_loop(data, boundary, boundary_bytes, <<>>)
+          })
       }
-    }
 
-    <<char, data:bytes>> -> {
-      parse_body_loop(data, boundary, <<body:bits, char>>)
-    }
+    <<char, data:bits>> ->
+      parse_body_loop(data, boundary, boundary_bytes, <<body:bits, char>>)
 
     _ -> panic as "unreachable"
   }
