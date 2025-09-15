@@ -90,6 +90,13 @@ pub fn set_header(name: String, value: String, attributes: Attributes) -> String
 /// Parse a list of cookies from a header string. Any malformed cookies will be
 /// discarded.
 ///
+/// ## Backwards compatibility
+///
+/// RFC 6265 states that cookies in the cookie header should be separated by a
+/// `;`, however this function will also accept a `,` separator to remain
+/// compatible with the now-deprecated RFC 2965, and any older software
+/// following that specification.
+///
 pub fn parse(cookie_string: String) -> List(#(String, String)) {
   cookie_string
   |> string.split(";")
