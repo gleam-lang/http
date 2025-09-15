@@ -294,10 +294,9 @@ fn do_parse_multipart_headers(
 
         // Not enough bytes to make a choice, we have to wait for more.
         _ ->
-          more_please_headers(
-            do_parse_multipart_headers(_, boundary, boundary_bytes),
-            data,
-          )
+          more_please_headers(data, fn(data) {
+            do_parse_multipart_headers(data, boundary, boundary_bytes)
+          })
       }
 
     // The headers start with a preamble we need to skip.
@@ -392,7 +391,7 @@ fn skip_preamble(
   let required = boundary_size + 4
   case data {
     _ if data_size < required ->
-      more_please_headers(skip_preamble(_, boundary), data)
+      more_please_headers(data, skip_preamble(_, boundary))
 
     // TODO: change this to use one non-nested case expression once the compiler
     // supports the `b:binary-size(bsize)` pattern on JS.
@@ -435,7 +434,7 @@ fn do_parse_headers(data: BitArray) -> Result(MultipartHeaders, Nil) {
     // Skip the line break after the boundary.
     <<13, 10, data:bytes>> -> parse_header_name(data, [], <<>>)
 
-    <<13>> | <<>> -> more_please_headers(do_parse_headers, data)
+    <<13>> | <<>> -> more_please_headers(data, do_parse_headers)
 
     _ -> Error(Nil)
   }
@@ -456,7 +455,7 @@ fn parse_header_name(
     <<char, data:bytes>> ->
       parse_header_name(data, headers, <<name:bits, char>>)
 
-    _ -> more_please_headers(parse_header_name(_, headers, name), data)
+    _ -> more_please_headers(data, parse_header_name(_, headers, name))
   }
 }
 
@@ -470,12 +469,11 @@ fn parse_header_value(
   case data {
     // We need at least 4 bytes to check for the end of the headers.
     _ if size < 4 ->
-      fn(data) {
+      more_please_headers(data, fn(data) {
         data
         |> skip_whitespace
         |> parse_header_value(headers, name, value)
-      }
-      |> more_please_headers(data)
+      })
 
     // \r\n\r\n
     <<13, 10, 13, 10, data:bytes>> -> {
@@ -508,8 +506,8 @@ fn parse_header_value(
 }
 
 fn more_please_headers(
-  continuation: fn(BitArray) -> Result(MultipartHeaders, Nil),
   existing: BitArray,
+  continuation: fn(BitArray) -> Result(MultipartHeaders, Nil),
 ) -> Result(MultipartHeaders, Nil) {
   Ok(
     MoreRequiredForHeaders(fn(more) {
