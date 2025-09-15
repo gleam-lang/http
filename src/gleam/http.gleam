@@ -481,9 +481,8 @@ fn parse_body_loop(
   let bsize = bit_array.byte_size(boundary)
   let required = 6 + bsize
   case data {
-    _ if dsize < required -> {
-      more_please_body(parse_body_loop(_, boundary, <<>>), body, data)
-    }
+    _ if dsize < required ->
+      more_please_body(body, data, parse_body_loop(_, boundary, <<>>))
 
     // TODO: flatten this into a single case expression once JavaScript supports
     // the `b:binary-size(bsize)` pattern.
@@ -523,6 +522,19 @@ fn more_please_headers(
 ) -> Result(MultipartHeaders, Nil) {
   Ok(
     MoreRequiredForHeaders(fn(more) {
+      use <- bool.guard(more == <<>>, return: Error(Nil))
+      continuation(<<existing:bits, more:bits>>)
+    }),
+  )
+}
+
+fn more_please_body(
+  chunk: BitArray,
+  existing: BitArray,
+  continuation: fn(BitArray) -> Result(MultipartBody, Nil),
+) -> Result(MultipartBody, Nil) {
+  Ok(
+    MoreRequiredForBody(chunk, fn(more) {
       use <- bool.guard(more == <<>>, return: Error(Nil))
       continuation(<<existing:bits, more:bits>>)
     }),
@@ -631,19 +643,6 @@ fn parse_rfc_2045_parameter_unquoted_value(
     Ok(#(grapheme, rest)) ->
       parse_rfc_2045_parameter_unquoted_value(rest, name, value <> grapheme)
   }
-}
-
-fn more_please_body(
-  continuation: fn(BitArray) -> Result(MultipartBody, Nil),
-  chunk: BitArray,
-  existing: BitArray,
-) -> Result(MultipartBody, Nil) {
-  fn(more) {
-    use <- bool.guard(more == <<>>, return: Error(Nil))
-    continuation(<<existing:bits, more:bits>>)
-  }
-  |> MoreRequiredForBody(chunk, _)
-  |> Ok
 }
 
 /// A HTTP header is a key-value pair. Header keys must be all lowercase
