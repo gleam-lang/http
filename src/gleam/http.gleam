@@ -374,7 +374,11 @@ fn parse_header_name(
 fn parse_header_name_loop(data: BitArray, headers: List(Header), name: BitArray) {
   case data {
     // We've found the end of the header, we can now start parsing its value.
-    <<":", data:bits>> -> parse_header_value(data, headers, name)
+    <<":", data:bits>> ->
+      case bit_array.to_string(name) {
+        Ok(name) -> parse_header_value(data, headers, name)
+        Error(Nil) -> Error(Nil)
+      }
 
     // Otherwise the character belongs to the header.
     <<char, data:bits>> ->
@@ -386,7 +390,7 @@ fn parse_header_name_loop(data: BitArray, headers: List(Header), name: BitArray)
   }
 }
 
-fn parse_header_value(data: BitArray, headers: List(Header), name: BitArray) {
+fn parse_header_value(data: BitArray, headers: List(Header), name: String) {
   case data {
     // We first have to skip all whitespace preceding the value.
     <<" ", rest:bits>> | <<"\t", rest:bits>> ->
@@ -403,7 +407,7 @@ fn parse_header_value(data: BitArray, headers: List(Header), name: BitArray) {
 fn parse_header_value_loop(
   data: BitArray,
   headers: List(Header),
-  name: BitArray,
+  name: String,
   value: BitArray,
 ) -> Result(MultipartHeaders, Nil) {
   case data {
@@ -414,7 +418,6 @@ fn parse_header_value_loop(
       })
 
     <<"\r\n\r\n", data:bytes>> -> {
-      use name <- result.try(bit_array.to_string(name))
       use value <- result.map(bit_array.to_string(value))
       let headers = list.reverse([#(string.lowercase(name), value), ..headers])
       MultipartHeaders(headers:, remaining: data)
@@ -424,7 +427,6 @@ fn parse_header_value_loop(
       parse_header_value_loop(data, headers, name, value)
 
     <<"\r\n", data:bytes>> -> {
-      use name <- result.try(bit_array.to_string(name))
       use value <- result.try(bit_array.to_string(value))
       let headers = [#(string.lowercase(name), value), ..headers]
       parse_header_name(data, headers)
