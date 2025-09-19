@@ -486,11 +486,22 @@ fn parse_body_loop(
 
     <<"\r\n", rest:bits>> ->
       case rest {
-        <<"--", found:size(boundary_bytes)-bytes, "\r\n", _:bits>>
+        // This string match is written as `"\r", "\n"` (instead of just
+        // `"\r\n"`) to work around this compiler bug:
+        // https://github.com/gleam-lang/gleam/issues/4993
+        //
+        // Even after that is fixed want to keep it like this to make sure the
+        // http library will work with older gleam versions on the js target.
+        // So please don't change it!
+        //
+        //                                        vvvvvvvvvv This one right here!
+        <<"--", found:size(boundary_bytes)-bytes, "\r", "\n", _:bits>>
           if found == boundary
         -> Ok(MultipartBody(body, done: False, remaining: rest))
 
-        <<"--", found:size(boundary_bytes)-bytes, "--", rest:bits>>
+        // Same goes for this match as well!
+        //                                        vvvvvvvvvv This one right here!
+        <<"--", found:size(boundary_bytes)-bytes, "-", "-", rest:bits>>
           if found == boundary
         -> Ok(MultipartBody(body, done: True, remaining: rest))
 
