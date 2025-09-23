@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- The performance of the `parse_multipart_headers` and `parse_multipart_body`
+  functions has been improved.
+
 ## v4.2.0 - 2025-09-15
 
 - The performance of the cookie and method parsing functions have been

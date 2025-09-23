@@ -273,14 +273,169 @@ pub fn parse_multipart_headers(
   boundary: String,
 ) -> Result(MultipartHeaders, Nil) {
   let boundary = bit_array.from_string(boundary)
-  // TODO: rewrite this to use a bit pattern once JavaScript supports
-  // the `b:binary-size(bsize)` pattern.
-  let prefix = <<45, 45, boundary:bits>>
-  case bit_array.slice(data, 0, bit_array.byte_size(prefix)) == Ok(prefix) {
-    // There is no preamble, parse the headers.
-    True -> parse_headers_after_prelude(data, boundary)
-    // There is a preamble, skip it before parsing.
-    False -> skip_preamble(data, boundary)
+  let boundary_bytes = bit_array.byte_size(boundary)
+  do_parse_multipart_headers(data, boundary, boundary_bytes)
+}
+
+fn do_parse_multipart_headers(
+  data: BitArray,
+  boundary: BitArray,
+  boundary_bytes: Int,
+) -> Result(MultipartHeaders, Nil) {
+  case data {
+    // The headers start right away with a boundary.
+    <<"--", found:size(boundary_bytes)-bytes, rest:bits>> if found == boundary ->
+      case rest {
+        // Final boundary `--boundary--`.
+        <<"--", rest:bits>> -> Ok(MultipartHeaders([], remaining: rest))
+
+        // Regular boundary `--boundary`.
+        <<_, _, _:bits>> -> do_parse_headers(rest)
+
+        // Not enough bytes to make a choice, we have to wait for more.
+        _ ->
+          more_please_headers(data, fn(data) {
+            do_parse_multipart_headers(data, boundary, boundary_bytes)
+          })
+      }
+
+    // The headers start with a preamble we need to skip.
+    _ -> skip_preamble(data, boundary, boundary_bytes)
+  }
+}
+
+fn skip_preamble(
+  data: BitArray,
+  boundary: BitArray,
+  boundary_bytes: Int,
+) -> Result(MultipartHeaders, Nil) {
+  case data {
+    // We might have found the preamble end!
+    <<"\r\n--", rest:bytes>> -> {
+      case rest {
+        // It is indeed the end, we go on parsing the headers that come after
+        // the boundary.
+        <<found:size(boundary_bytes)-bytes, rest:bits>> if found == boundary ->
+          do_parse_headers(rest)
+
+        // This was not the end because `\r\n--` is not followed by the expected
+        // boundary, so we keep ignoring bytes.
+        <<_found:size(boundary_bytes)-bytes, _:bits>> ->
+          skip_preamble(rest, boundary, boundary_bytes)
+
+        // There's not enough bytes to make sure the `\r\n--` is not followed
+        // by the closing boundary so we have to wait for more to come.
+        _ ->
+          more_please_headers(data, skip_preamble(_, boundary, boundary_bytes))
+      }
+    }
+
+    // We don't have enough bytes to be sure this is not the end of the preamble
+    // so we have to wait for more to come.
+    <<>> | <<"\r">> | <<"\r\n">> | <<"\r\n-">> ->
+      more_please_headers(data, skip_preamble(_, boundary, boundary_bytes))
+
+    // The byte is surely part of the preamble and can be skipped.
+    <<_, data:bytes>> -> skip_preamble(data, boundary, boundary_bytes)
+
+    _ -> panic as "unreachable"
+  }
+}
+
+fn do_parse_headers(data: BitArray) -> Result(MultipartHeaders, Nil) {
+  case data {
+    // We've reached the end, there are no headers.
+    <<"\r\n\r\n", data:bytes>> -> Ok(MultipartHeaders([], remaining: data))
+
+    // Skip the line break after the boundary.
+    <<"\r\n", data:bytes>> -> parse_header_name(data, [])
+
+    <<"\r">> | <<>> -> more_please_headers(data, do_parse_headers)
+
+    _ -> Error(Nil)
+  }
+}
+
+fn parse_header_name(
+  data: BitArray,
+  headers: List(Header),
+) -> Result(MultipartHeaders, Nil) {
+  case data {
+    // We first have to skip all whitespace preceding the name.
+    <<" ", rest:bits>> | <<"\t", rest:bits>> -> parse_header_name(rest, headers)
+    <<_, _:bits>> -> parse_header_name_loop(data, headers, <<>>)
+
+    // We don't have enough bits to make a choice and will have to wait for more
+    // to come.
+    _ -> more_please_headers(data, parse_header_name(_, headers))
+  }
+}
+
+fn parse_header_name_loop(data: BitArray, headers: List(Header), name: BitArray) {
+  case data {
+    // We've found the end of the header, we can now start parsing its value.
+    <<":", data:bits>> ->
+      case bit_array.to_string(name) {
+        Ok(name) -> parse_header_value(data, headers, name)
+        Error(Nil) -> Error(Nil)
+      }
+
+    // Otherwise the character belongs to the header.
+    <<char, data:bits>> ->
+      parse_header_name_loop(data, headers, <<name:bits, char>>)
+
+    // We don't have enough bits to make a choice and have to wait for more to
+    // come.
+    _ -> more_please_headers(data, parse_header_name_loop(_, headers, name))
+  }
+}
+
+fn parse_header_value(data: BitArray, headers: List(Header), name: String) {
+  case data {
+    // We first have to skip all whitespace preceding the value.
+    <<" ", rest:bits>> | <<"\t", rest:bits>> ->
+      parse_header_value(rest, headers, name)
+
+    <<_, _:bits>> -> parse_header_value_loop(data, headers, name, <<>>)
+
+    // We don't have enough bits to make a choice and will have to wait for more
+    // to come.
+    _ -> more_please_headers(data, parse_header_value(_, headers, name))
+  }
+}
+
+fn parse_header_value_loop(
+  data: BitArray,
+  headers: List(Header),
+  name: String,
+  value: BitArray,
+) -> Result(MultipartHeaders, Nil) {
+  case data {
+    // We need at least 4 bytes to check for the end of the headers.
+    <<>> | <<_>> | <<_, _>> | <<_, _, _>> ->
+      more_please_headers(data, fn(data) {
+        parse_header_value_loop(data, headers, name, value)
+      })
+
+    <<"\r\n\r\n", data:bytes>> -> {
+      use value <- result.map(bit_array.to_string(value))
+      let headers = list.reverse([#(string.lowercase(name), value), ..headers])
+      MultipartHeaders(headers:, remaining: data)
+    }
+
+    <<"\r\n ", data:bytes>> | <<"\r\n\t", data:bytes>> ->
+      parse_header_value_loop(data, headers, name, value)
+
+    <<"\r\n", data:bytes>> -> {
+      use value <- result.try(bit_array.to_string(value))
+      let headers = [#(string.lowercase(name), value), ..headers]
+      parse_header_name(data, headers)
+    }
+
+    <<char, rest:bytes>> ->
+      parse_header_value_loop(rest, headers, name, <<value:bits, char>>)
+
+    _ -> Error(Nil)
   }
 }
 
@@ -300,240 +455,91 @@ pub fn parse_multipart_body(
   data: BitArray,
   boundary: String,
 ) -> Result(MultipartBody, Nil) {
-  boundary
-  |> bit_array.from_string
-  |> parse_body_with_bit_array(data, _)
+  let boundary = bit_array.from_string(boundary)
+  let boundary_bytes = bit_array.byte_size(boundary)
+  do_parse_multipart_body(data, boundary, boundary_bytes)
 }
 
-fn parse_body_with_bit_array(
+fn do_parse_multipart_body(
   data: BitArray,
   boundary: BitArray,
+  boundary_bytes: Int,
 ) -> Result(MultipartBody, Nil) {
-  let bsize = bit_array.byte_size(boundary)
-  let prefix = bit_array.slice(data, 0, 2 + bsize)
-  case prefix == Ok(<<45, 45, boundary:bits>>) {
-    True -> Ok(MultipartBody(<<>>, done: False, remaining: data))
-    False -> parse_body_loop(data, boundary, <<>>)
+  case data {
+    <<"--", found:size(boundary_bytes)-bytes, _:bytes>> if found == boundary ->
+      Ok(MultipartBody(<<>>, done: False, remaining: data))
+    _ -> parse_body_loop(data, boundary, boundary_bytes, <<>>)
   }
 }
 
 fn parse_body_loop(
   data: BitArray,
   boundary: BitArray,
+  boundary_bytes: Int,
   body: BitArray,
 ) -> Result(MultipartBody, Nil) {
-  let dsize = bit_array.byte_size(data)
-  let bsize = bit_array.byte_size(boundary)
-  let required = 6 + bsize
   case data {
-    _ if dsize < required -> {
-      more_please_body(parse_body_loop(_, boundary, <<>>), body, data)
-    }
+    <<>> | <<"\r">> ->
+      more_please_body(body, data, fn(data) {
+        parse_body_loop(data, boundary, boundary_bytes, <<>>)
+      })
 
-    // TODO: flatten this into a single case expression once JavaScript supports
-    // the `b:binary-size(bsize)` pattern.
-    //
-    // \r\n
-    <<13, 10, data:bytes>> -> {
-      let desired = <<45, 45, boundary:bits>>
-      let size = bit_array.byte_size(desired)
-      let dsize = bit_array.byte_size(data)
-      let prefix = bit_array.slice(data, 0, size)
-      let rest = bit_array.slice(data, size, dsize - size)
-      case prefix == Ok(desired), rest {
-        // --boundary\r\n
-        True, Ok(<<13, 10, _:bytes>>) ->
-          Ok(MultipartBody(body, done: False, remaining: data))
+    <<"\r\n", rest:bits>> ->
+      case rest {
+        // This string match is written as `"\r", "\n"` (instead of just
+        // `"\r\n"`) to work around this compiler bug:
+        // https://github.com/gleam-lang/gleam/issues/4993
+        //
+        // Even after that is fixed want to keep it like this to make sure the
+        // http library will work with older gleam versions on the js target.
+        // So please don't change it!
+        //
+        //                                        vvvvvvvvvv This one right here!
+        <<"--", found:size(boundary_bytes)-bytes, "\r", "\n", _:bits>>
+          if found == boundary
+        -> Ok(MultipartBody(body, done: False, remaining: rest))
 
-        // --boundary--
-        True, Ok(<<45, 45, data:bytes>>) ->
-          Ok(MultipartBody(body, done: True, remaining: data))
+        // Same goes for this match as well!
+        //                                        vvvvvvvvvv This one right here!
+        <<"--", found:size(boundary_bytes)-bytes, "-", "-", rest:bits>>
+          if found == boundary
+        -> Ok(MultipartBody(body, done: True, remaining: rest))
 
-        False, _ -> parse_body_loop(data, boundary, <<body:bits, 13, 10>>)
-        _, _ -> Error(Nil)
+        <<_, _, _:size(boundary_bytes)-bytes, _, _, _:bits>> ->
+          parse_body_loop(rest, boundary, boundary_bytes, <<body:bits, "\r\n">>)
+
+        _ ->
+          more_please_body(body, data, fn(data) {
+            parse_body_loop(data, boundary, boundary_bytes, <<>>)
+          })
       }
-    }
 
-    <<char, data:bytes>> -> {
-      parse_body_loop(data, boundary, <<body:bits, char>>)
-    }
+    <<char, data:bits>> ->
+      parse_body_loop(data, boundary, boundary_bytes, <<body:bits, char>>)
 
     _ -> panic as "unreachable"
-  }
-}
-
-fn parse_headers_after_prelude(
-  data: BitArray,
-  boundary: BitArray,
-) -> Result(MultipartHeaders, Nil) {
-  let dsize = bit_array.byte_size(data)
-  let bsize = bit_array.byte_size(boundary)
-  let required_size = bsize + 4
-
-  // TODO: this could be written as a single case expression if JavaScript had
-  // support for the `b:binary-size(bsize)` pattern. Rewrite this once the
-  // compiler support this.
-
-  use <- bool.guard(
-    when: dsize < required_size,
-    return: more_please_headers(parse_headers_after_prelude(_, boundary), data),
-  )
-
-  use prefix <- result.try(bit_array.slice(data, 0, required_size - 2))
-  use second <- result.try(bit_array.slice(data, 2 + bsize, 2))
-  let desired = <<45, 45, boundary:bits>>
-
-  use <- bool.guard(prefix != desired, return: Error(Nil))
-
-  case second == <<45, 45>> {
-    // --boundary--
-    // The last boundary. Return the epilogue.
-    True -> {
-      let rest_size = dsize - required_size
-      use data <- result.map(bit_array.slice(data, required_size, rest_size))
-      MultipartHeaders([], remaining: data)
-    }
-
-    // --boundary
-    False -> {
-      let start = required_size - 2
-      let rest_size = dsize - required_size + 2
-      use data <- result.try(bit_array.slice(data, start, rest_size))
-      do_parse_headers(data)
-    }
-  }
-}
-
-fn skip_preamble(
-  data: BitArray,
-  boundary: BitArray,
-) -> Result(MultipartHeaders, Nil) {
-  let data_size = bit_array.byte_size(data)
-  let boundary_size = bit_array.byte_size(boundary)
-  let required = boundary_size + 4
-  case data {
-    _ if data_size < required ->
-      more_please_headers(skip_preamble(_, boundary), data)
-
-    // TODO: change this to use one non-nested case expression once the compiler
-    // supports the `b:binary-size(bsize)` pattern on JS.
-    // \r\n--
-    <<13, 10, 45, 45, data:bytes>> -> {
-      case bit_array.slice(data, 0, boundary_size) {
-        // --boundary
-        Ok(prefix) if prefix == boundary -> {
-          let start = boundary_size
-          let length = bit_array.byte_size(data) - boundary_size
-          use rest <- result.try(bit_array.slice(data, start, length))
-          do_parse_headers(rest)
-        }
-        Ok(_) -> skip_preamble(data, boundary)
-        Error(_) -> Error(Nil)
-      }
-    }
-
-    <<_, data:bytes>> -> skip_preamble(data, boundary)
-
-    _ -> panic as "unreachable"
-  }
-}
-
-fn skip_whitespace(data: BitArray) -> BitArray {
-  case data {
-    // Space or tab.
-    <<32, data:bytes>> | <<9, data:bytes>> -> skip_whitespace(data)
-    _ -> data
-  }
-}
-
-fn do_parse_headers(data: BitArray) -> Result(MultipartHeaders, Nil) {
-  case data {
-    // \r\n\r\n
-    // We've reached the end, there are no headers.
-    <<13, 10, 13, 10, data:bytes>> -> Ok(MultipartHeaders([], remaining: data))
-
-    // \r\n
-    // Skip the line break after the boundary.
-    <<13, 10, data:bytes>> -> parse_header_name(data, [], <<>>)
-
-    <<13>> | <<>> -> more_please_headers(do_parse_headers, data)
-
-    _ -> Error(Nil)
-  }
-}
-
-fn parse_header_name(
-  data: BitArray,
-  headers: List(Header),
-  name: BitArray,
-) -> Result(MultipartHeaders, Nil) {
-  case skip_whitespace(data) {
-    // :
-    <<58, data:bytes>> ->
-      data
-      |> skip_whitespace
-      |> parse_header_value(headers, name, <<>>)
-
-    <<char, data:bytes>> ->
-      parse_header_name(data, headers, <<name:bits, char>>)
-
-    _ -> more_please_headers(parse_header_name(_, headers, name), data)
-  }
-}
-
-fn parse_header_value(
-  data: BitArray,
-  headers: List(Header),
-  name: BitArray,
-  value: BitArray,
-) -> Result(MultipartHeaders, Nil) {
-  let size = bit_array.byte_size(data)
-  case data {
-    // We need at least 4 bytes to check for the end of the headers.
-    _ if size < 4 ->
-      fn(data) {
-        data
-        |> skip_whitespace
-        |> parse_header_value(headers, name, value)
-      }
-      |> more_please_headers(data)
-
-    // \r\n\r\n
-    <<13, 10, 13, 10, data:bytes>> -> {
-      use name <- result.try(bit_array.to_string(name))
-      use value <- result.map(bit_array.to_string(value))
-      let headers = list.reverse([#(string.lowercase(name), value), ..headers])
-      MultipartHeaders(headers, data)
-    }
-
-    // \r\n\s
-    // \r\n\t
-    <<13, 10, 32, data:bytes>> | <<13, 10, 9, data:bytes>> ->
-      parse_header_value(data, headers, name, value)
-
-    // \r\n
-    <<13, 10, data:bytes>> -> {
-      use name <- result.try(bit_array.to_string(name))
-      use value <- result.try(bit_array.to_string(value))
-      let headers = [#(string.lowercase(name), value), ..headers]
-      parse_header_name(data, headers, <<>>)
-    }
-
-    <<char, rest:bytes>> -> {
-      let value = <<value:bits, char>>
-      parse_header_value(rest, headers, name, value)
-    }
-
-    _ -> Error(Nil)
   }
 }
 
 fn more_please_headers(
-  continuation: fn(BitArray) -> Result(MultipartHeaders, Nil),
   existing: BitArray,
+  continuation: fn(BitArray) -> Result(MultipartHeaders, Nil),
 ) -> Result(MultipartHeaders, Nil) {
   Ok(
     MoreRequiredForHeaders(fn(more) {
+      use <- bool.guard(more == <<>>, return: Error(Nil))
+      continuation(<<existing:bits, more:bits>>)
+    }),
+  )
+}
+
+fn more_please_body(
+  chunk: BitArray,
+  existing: BitArray,
+  continuation: fn(BitArray) -> Result(MultipartBody, Nil),
+) -> Result(MultipartBody, Nil) {
+  Ok(
+    MoreRequiredForBody(chunk, fn(more) {
       use <- bool.guard(more == <<>>, return: Error(Nil))
       continuation(<<existing:bits, more:bits>>)
     }),
@@ -642,19 +648,6 @@ fn parse_rfc_2045_parameter_unquoted_value(
     Ok(#(grapheme, rest)) ->
       parse_rfc_2045_parameter_unquoted_value(rest, name, value <> grapheme)
   }
-}
-
-fn more_please_body(
-  continuation: fn(BitArray) -> Result(MultipartBody, Nil),
-  chunk: BitArray,
-  existing: BitArray,
-) -> Result(MultipartBody, Nil) {
-  fn(more) {
-    use <- bool.guard(more == <<>>, return: Error(Nil))
-    continuation(<<existing:bits, more:bits>>)
-  }
-  |> MoreRequiredForBody(chunk, _)
-  |> Ok
 }
 
 /// A HTTP header is a key-value pair. Header keys must be all lowercase
