@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v4.3.0 - 2025-10-02
 
 - The performance of the `parse_multipart_headers` and `parse_multipart_body`
   functions has been improved.
