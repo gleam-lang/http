@@ -1,4 +1,5 @@
 import gleam/http
+import gleam/uri
 
 pub fn parse_method_test() {
   assert http.parse_method("Connect") == Ok(http.Other("Connect"))
@@ -144,4 +145,145 @@ pub fn parse_content_disposition_1_test() {
     == Ok(http.ContentDisposition("file", [#("filename", "file2\".gif")]))
 
   assert http.parse_content_disposition("file; filename=\"file2") == Error(Nil)
+}
+
+pub fn parse_link_header_test() {
+  let assert Ok(uri1) = uri.parse("https://example.com/page2")
+  let assert Ok(uri2) = uri.parse("https://example.com")
+
+  assert http.parse_link_header("<https://example.com/page2>; rel=\"next\"")
+    == Ok([http.LinkHeader(uri1, [#("rel", "next")])])
+
+  assert http.parse_link_header(
+      "<https://example.com/page2>; rel=\"next\"; title=\"next chapter\"",
+    )
+    == Ok([
+      http.LinkHeader(uri1, [
+        #("rel", "next"),
+        #("title", "next chapter"),
+      ]),
+    ])
+
+  assert http.parse_link_header("<https://example.com>; REL=\"next\"")
+    == Ok([http.LinkHeader(uri2, [#("rel", "next")])])
+
+  assert http.parse_link_header("<https://example.com>; rel=next")
+    == Ok([http.LinkHeader(uri2, [#("rel", "next")])])
+
+  assert http.parse_link_header(
+      "<https://example.com>; title=foo; rel=\"next\"",
+    )
+    == Ok([http.LinkHeader(uri2, [#("title", "foo"), #("rel", "next")])])
+
+  assert http.parse_link_header("<https://example.com>")
+    == Ok([http.LinkHeader(uri2, [])])
+
+  assert http.parse_link_header("<https://example.com>; rel=\"next\"; anchor")
+    == Ok([
+      http.LinkHeader(uri2, [#("rel", "next"), #("anchor", "")]),
+    ])
+
+  assert http.parse_link_header("<https://example.com>; rel = \"next\"")
+    == Ok([http.LinkHeader(uri2, [#("rel", "next")])])
+
+  assert http.parse_link_header(
+      "<https://example.com>; rel=\"next\"; rel=\"prev\"",
+    )
+    == Ok([
+      http.LinkHeader(uri2, [#("rel", "next"), #("rel", "prev")]),
+    ])
+
+  assert http.parse_link_header("") == Ok([])
+}
+
+pub fn parse_link_header_multiple_links_test() {
+  let assert Ok(uri1) = uri.parse("https://example.com/page1")
+  let assert Ok(uri2) = uri.parse("https://example.com/page3")
+  assert http.parse_link_header(
+      "<https://example.com/page1>; rel=\"prev\", <https://example.com/page3>; rel=\"next\"",
+    )
+    == Ok([
+      http.LinkHeader(uri1, [#("rel", "prev")]),
+      http.LinkHeader(uri2, [#("rel", "next")]),
+    ])
+
+  let assert Ok(uri3) = uri.parse("/TheBook/chapter2")
+  let assert Ok(uri4) = uri.parse("/TheBook/chapter4")
+  assert http.parse_link_header(
+      "</TheBook/chapter2>; rel=\"previous\"; title*=UTF-8'de'letztes%20Kapitel, </TheBook/chapter4>; rel=\"next\"; title*=UTF-8'de'n%c3%a4chstes%20Kapitel",
+    )
+    == Ok([
+      http.LinkHeader(uri3, [
+        #("rel", "previous"),
+        #("title*", "UTF-8'de'letztes%20Kapitel"),
+      ]),
+      http.LinkHeader(uri4, [
+        #("rel", "next"),
+        #("title*", "UTF-8'de'n%c3%a4chstes%20Kapitel"),
+      ]),
+    ])
+}
+
+pub fn parse_link_header_quoting_test() {
+  let assert Ok(uri1) = uri.parse("https://example.com/page2")
+  let assert Ok(uri2) = uri.parse("https://example.com/page1")
+  assert http.parse_link_header(
+      "<https://example.com/page2>; rel=\"next\"; title=\"page, two\", <https://example.com/page1>; rel=\"prev\"",
+    )
+    == Ok([
+      http.LinkHeader(uri1, [#("rel", "next"), #("title", "page, two")]),
+      http.LinkHeader(uri2, [#("rel", "prev")]),
+    ])
+
+  assert http.parse_link_header(
+      "<https://example.com/page2>; rel=\"next\"; title=\"say \\\"hello\\\"\"",
+    )
+    == Ok([
+      http.LinkHeader(uri1, [
+        #("rel", "next"),
+        #("title", "say \"hello\""),
+      ]),
+    ])
+}
+
+pub fn parse_link_header_empty_elements_test() {
+  let assert Ok(uri1) = uri.parse("https://example.com")
+  let assert Ok(uri2) = uri.parse("https://a.com")
+  let assert Ok(uri3) = uri.parse("https://b.com")
+
+  assert http.parse_link_header(", <https://example.com>; rel=\"next\"")
+    == Ok([http.LinkHeader(uri1, [#("rel", "next")])])
+
+  assert http.parse_link_header(
+      "<https://a.com>; rel=\"prev\", , <https://b.com>; rel=\"next\"",
+    )
+    == Ok([
+      http.LinkHeader(uri2, [#("rel", "prev")]),
+      http.LinkHeader(uri3, [#("rel", "next")]),
+    ])
+
+  assert http.parse_link_header("<https://example.com>; rel=\"next\",")
+    == Ok([http.LinkHeader(uri1, [#("rel", "next")])])
+}
+
+pub fn parse_link_header_error_test() {
+  assert http.parse_link_header("https://example.com; rel=\"next\"")
+    == Error(Nil)
+
+  assert http.parse_link_header("garbage<https://example.com>; rel=\"next\"")
+    == Error(Nil)
+
+  assert http.parse_link_header("<https://example.com>; rel=") == Error(Nil)
+
+  assert http.parse_link_header("<https://example.com> rel=\"next\"")
+    == Error(Nil)
+
+  assert http.parse_link_header(
+      "<https://example.com>; rel=\"next\" title=\"foo\"",
+    )
+    == Error(Nil)
+
+  assert http.parse_link_header("<https://example.com>;") == Error(Nil)
+
+  assert http.parse_link_header("<https://example.com>;  ") == Error(Nil)
 }
