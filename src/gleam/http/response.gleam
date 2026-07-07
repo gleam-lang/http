@@ -45,7 +45,10 @@ pub fn new(status: Int) -> Response(String) {
 ///
 /// If the response does not have that header then `Error(Nil)` is returned.
 ///
-pub fn get_header(response: Response(body), key: String) -> Result(String, Nil) {
+pub fn get_header(
+  response: Response(body),
+  key: String,
+) -> Result(String, Nil) {
   list.key_find(response.headers, string.lowercase(key))
 }
 

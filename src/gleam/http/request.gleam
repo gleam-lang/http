@@ -143,7 +143,9 @@ pub fn path_segments(request: Request(body)) -> List(String) {
 }
 
 /// Decode the query of a request.
-pub fn get_query(request: Request(body)) -> Result(List(#(String, String)), Nil) {
+pub fn get_query(
+  request: Request(body),
+) -> Result(List(#(String, String)), Nil) {
   case request.query {
     option.Some(query_string) -> uri.parse_query(query_string)
     option.None -> Ok([])

@@ -1,5 +1,9 @@
 # Changelog
 
+## v4.4.0 - 2026-07-07
+
+- Add `QUERY` HTTP method.
+
 ## v4.3.0 - 2025-10-02
 
 - The performance of the `parse_multipart_headers` and `parse_multipart_body`
