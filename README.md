@@ -4,18 +4,18 @@ Types and functions for HTTP clients and servers!
 
 ## Server adapters
 
-In the example above the Elli Erlang web server is used to run the Gleam HTTP
-service. Here's a full list of the servers and adapters available, sorted
+Server adapters can be used to run Gleam HTTP services written using this
+package. Here's a full list of the servers and adapters available, sorted
 alphabetically.
 
-| Adapter                        | About                                                         |
-| ---                            | ---                                                           |
-| [cgi][cgi]                     | [Cgi][cgi] is a adapter for the Common Gateway Interface.     |
-| [ewe][ewe]                     | [Ewe][ewe] is a Gleam HTTP2 & HTTP1.1 web server              |
-| [gleam_cowboy][cowboy-adapter] | [Cowboy][cowboy] is an Erlang HTTP2 & HTTP1.1 web server      |
-| [gleam_elli][elli-adapter]     | [Elli][elli] is an Erlang HTTP1.1 web server                  |
-| [gleam_plug][plug-adapter]     | [Plug][plug] is an Elixir web application interface           |
-| [mist][mist]                   | [Mist][mist] is a high performance pure Gleam HTTP1.1 server  |
+| Adapter                        | About                                                          |
+| ---                            | ---                                                            |
+| [cgi][cgi]                     | [Cgi][cgi] is a adapter for the Common Gateway Interface.      |
+| [fcgi][fcgi]                   | [Cgi][cgi] is a adapter for the Fast Common Gateway Interface. |
+| [ewe][ewe]                     | [Ewe][ewe] is a Gleam HTTP2 & HTTP1.1 web server               |
+| [gleam_cowboy][cowboy-adapter] | [Cowboy][cowboy] is an Erlang HTTP2 & HTTP1.1 web server       |
+| [gleam_elli][elli-adapter]     | [Elli][elli] is an Erlang HTTP1.1 web server                   |
+| [mist][mist]                   | [Mist][mist] is a Gleam HTTP1.1 server                         |
 
 [cgi]: https://github.com/lpil/cgi
 [cowboy-adapter]: https://github.com/gleam-lang/cowboy
@@ -23,8 +23,8 @@ alphabetically.
 [elli-adapter]: https://github.com/gleam-lang/elli
 [elli]:https://github.com/elli-lib/elli
 [ewe]:https://github.com/vshakitskiy/ewe
+[fcgi]: https://github.com/jtdowney/fcgi
 [mist]: https://github.com/rawhat/mist
-[plug-adapter]: https://github.com/gleam-lang/plug
 [plug]:https://github.com/elixir-plug/plug
 
 ## Client adapters
