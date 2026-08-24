@@ -371,7 +371,11 @@ fn parse_header_name(
   }
 }
 
-fn parse_header_name_loop(data: BitArray, headers: List(Header), name: BitArray) {
+fn parse_header_name_loop(
+  data: BitArray,
+  headers: List(Header),
+  name: BitArray,
+) {
   case data {
     // We've found the end of the header, we can now start parsing its value.
     <<":", data:bits>> ->

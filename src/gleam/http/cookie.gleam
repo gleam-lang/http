@@ -81,7 +81,11 @@ fn cookie_attributes_to_list(attributes: Attributes) -> List(String) {
   |> list.filter_map(option.to_result(_, Nil))
 }
 
-pub fn set_header(name: String, value: String, attributes: Attributes) -> String {
+pub fn set_header(
+  name: String,
+  value: String,
+  attributes: Attributes,
+) -> String {
   [name <> "=" <> value, ..cookie_attributes_to_list(attributes)]
   |> string.join("; ")
 }
