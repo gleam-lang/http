@@ -12,7 +12,8 @@ import gleam/result
 import gleam/string
 
 /// HTTP standard method as defined by [RFC 2616](https://tools.ietf.org/html/rfc2616),
-/// and PATCH which is defined by [RFC 5789](https://tools.ietf.org/html/rfc5789).
+/// PATCH which is defined by [RFC 5789](https://tools.ietf.org/html/rfc5789).
+/// and QUERY which is defined by [RFC 10008](https://tools.ietf.org/html/rfc10008).
 pub type Method {
   Get
   Post
@@ -23,6 +24,7 @@ pub type Method {
   Connect
   Options
   Patch
+  Query
 
   /// Non-standard but valid HTTP methods.
   Other(String)
@@ -39,6 +41,7 @@ pub fn parse_method(method: String) -> Result(Method, Nil) {
     "POST" -> Ok(Post)
     "PUT" -> Ok(Put)
     "TRACE" -> Ok(Trace)
+    "QUERY" -> Ok(Query)
     method ->
       case is_valid_token(method) {
         True -> Ok(Other(method))
@@ -170,6 +173,7 @@ pub fn method_to_string(method: Method) -> String {
     Post -> "POST"
     Put -> "PUT"
     Trace -> "TRACE"
+    Query -> "QUERY"
     Other(method) -> method
   }
 }
@@ -284,7 +288,9 @@ fn do_parse_multipart_headers(
 ) -> Result(MultipartHeaders, Nil) {
   case data {
     // The headers start right away with a boundary.
-    <<"--", found:size(boundary_bytes)-bytes, rest:bits>> if found == boundary ->
+    <<"--", found:size(boundary_bytes)-bytes, rest:bits>>
+      if found == boundary
+    ->
       case rest {
         // Final boundary `--boundary--`.
         <<"--", rest:bits>> -> Ok(MultipartHeaders([], remaining: rest))
