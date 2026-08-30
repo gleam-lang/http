@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- The deprecated `gleam/http/service` module has been removed.
+
 ## v4.3.0 - 2025-10-02
 
 - The performance of the `parse_multipart_headers` and `parse_multipart_body`
