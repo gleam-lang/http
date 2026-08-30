@@ -669,7 +669,6 @@ fn parse_rfc_2045_parameter_unquoted_value(
   }
 }
 
-/// A HTTP header is a key-value pair. Header keys must be all lowercase
-/// characters.
+@deprecated("Use #(String, String) instead")
 pub type Header =
   #(String, String)
