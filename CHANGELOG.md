@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- The deprecated `gleam/http/service` module has been removed.
+
 ## v4.4.0 - 2026-09-01
 
 - The `http.Header` alias has been deprecated.
