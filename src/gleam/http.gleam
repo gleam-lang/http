@@ -1,9 +1,4 @@
-//// Functions for working with HTTP data structures in Gleam.
-////
-//// This module makes it easy to create and modify Requests and Responses, data types.
-//// A general HTTP message type is defined that enables functions to work on both requests and responses.
-////
-//// This module does not implement a HTTP client or HTTP server, but it can be used as a base for them.
+//// Functions and types for working with HTTP Gleam.
 
 import gleam/bit_array
 import gleam/bool
@@ -11,18 +6,38 @@ import gleam/list
 import gleam/result
 import gleam/string
 
-/// HTTP standard method as defined by [RFC 2616](https://tools.ietf.org/html/rfc2616),
-/// and PATCH which is defined by [RFC 5789](https://tools.ietf.org/html/rfc5789).
+/// HTTP standard methods as defined by [RFC 2616](https://tools.ietf.org/html/rfc2616),
+/// [RFC 5789](https://tools.ietf.org/html/rfc5789),
+/// and [RFC 10008](https://www.rfc-editor.org/rfc/rfc10008.html).
 pub type Method {
+  /// GET requests a resource from a server. It is safe, idempotent, cachable,
+  /// and should not have a request body.
   Get
+  /// POST sends data to a server.
   Post
-  Head
-  Put
-  Delete
-  Trace
-  Connect
-  Options
+  /// PATCH performs a partial update to a resource on a server.
   Patch
+  /// PUT sends data to a server. It is idempotent.
+  Put
+  /// DELETE deletes a resource from a server. It should not have a request
+  /// body.
+  Delete
+  /// HEAD requests metadata about a resource from a server. It is safe,
+  /// idempotent, cachable, and should not have a request body.
+  Head
+  /// TRACE performs a message loop-back test along the path to the target
+  /// resource. It should not have a request body.
+  /// OPTIONS requests information about what requests are permitted to a
+  /// resource, i.e. HTTP methods and CORS.
+  Options
+  Trace
+  /// CONNECT requests that a proxy connects to a specified server and forward
+  /// data to and from it. It should not have a request body or a response
+  /// body.
+  ///
+  /// Proxies that support this should only do so for known trustworthy
+  /// clients.
+  Connect
 
   /// Non-standard but valid HTTP methods.
   Other(String)
