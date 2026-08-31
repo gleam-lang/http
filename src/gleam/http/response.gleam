@@ -1,5 +1,6 @@
 import gleam/http.{type Header}
 import gleam/http/cookie
+import gleam/http/status
 import gleam/list
 import gleam/option
 import gleam/result
@@ -12,7 +13,7 @@ import gleam/string
 ///
 pub type Response(body) {
   Response(
-    status: Int,
+    status: status.Code,
     /// The request headers. The keys must always be lowercase.
     headers: List(Header),
     body: body,
@@ -37,7 +38,7 @@ pub fn try_map(
 /// The body type of the returned response is `String` and could be set with a
 /// call to `set_body`.
 ///
-pub fn new(status: Int) -> Response(String) {
+pub fn new(status: status.Code) -> Response(String) {
   Response(status:, headers: [], body: "")
 }
 
@@ -109,7 +110,7 @@ pub fn map(
 ///
 pub fn redirect(uri: String) -> Response(String) {
   Response(
-    status: 303,
+    status: status.see_other,
     headers: [#("location", uri)],
     body: string.append("You are being redirected to ", uri),
   )
