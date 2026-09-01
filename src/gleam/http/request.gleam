@@ -1,4 +1,4 @@
-import gleam/http.{type Header, type Method, type Scheme, Get}
+import gleam/http.{type Method, type Scheme, Get}
 import gleam/http/cookie
 import gleam/list
 import gleam/option.{type Option}
@@ -15,7 +15,7 @@ pub type Request(body) {
   Request(
     method: Method,
     /// The request headers. The keys must always be lowercase.
-    headers: List(Header),
+    headers: List(#(String, String)),
     body: body,
     scheme: Scheme,
     host: String,

@@ -1,4 +1,3 @@
-import gleam/http.{type Header}
 import gleam/http/cookie
 import gleam/list
 import gleam/option
@@ -14,7 +13,7 @@ pub type Response(body) {
   Response(
     status: Int,
     /// The request headers. The keys must always be lowercase.
-    headers: List(Header),
+    headers: List(#(String, String)),
     body: body,
   )
 }
