@@ -233,7 +233,7 @@ pub type MultipartHeaders {
   /// The headers for the part have been fully parsed.
   /// Header keys are all lowercase.
   MultipartHeaders(
-    headers: List(Header),
+    headers: List(#(String, String)),
     /// The remaining content that has not yet been parsed. This will contain
     /// the body for this part, if any, and can be parsed with the
     /// `parse_multipart_body` function.
@@ -373,7 +373,7 @@ fn do_parse_headers(data: BitArray) -> Result(MultipartHeaders, Nil) {
 
 fn parse_header_name(
   data: BitArray,
-  headers: List(Header),
+  headers: List(#(String, String)),
 ) -> Result(MultipartHeaders, Nil) {
   case data {
     // We first have to skip all whitespace preceding the name.
@@ -388,7 +388,7 @@ fn parse_header_name(
 
 fn parse_header_name_loop(
   data: BitArray,
-  headers: List(Header),
+  headers: List(#(String, String)),
   name: BitArray,
 ) {
   case data {
@@ -409,7 +409,11 @@ fn parse_header_name_loop(
   }
 }
 
-fn parse_header_value(data: BitArray, headers: List(Header), name: String) {
+fn parse_header_value(
+  data: BitArray,
+  headers: List(#(String, String)),
+  name: String,
+) {
   case data {
     // We first have to skip all whitespace preceding the value.
     <<" ", rest:bits>> | <<"\t", rest:bits>> ->
@@ -425,7 +429,7 @@ fn parse_header_value(data: BitArray, headers: List(Header), name: String) {
 
 fn parse_header_value_loop(
   data: BitArray,
-  headers: List(Header),
+  headers: List(#(String, String)),
   name: String,
   value: BitArray,
 ) -> Result(MultipartHeaders, Nil) {
