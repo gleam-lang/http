@@ -5,6 +5,8 @@ import gleam/bool
 import gleam/list
 import gleam/result
 import gleam/string
+import gleam/uri
+import splitter
 
 /// HTTP standard methods as defined by [RFC 2616](https://tools.ietf.org/html/rfc2616),
 /// [RFC 5789](https://tools.ietf.org/html/rfc5789),
@@ -670,6 +672,240 @@ fn parse_rfc_2045_parameter_unquoted_value(
 
     Ok(#(grapheme, rest)) ->
       parse_rfc_2045_parameter_unquoted_value(rest, name, value <> grapheme)
+  }
+}
+
+/// A link parsed from a Link header value.
+///
+/// Link headers are used in REST APIs for pagination and discoverability,
+/// as described by [RFC 8288](https://www.rfc-editor.org/rfc/rfc8288.html).
+///
+/// The `uri` field contains the parsed URI reference from within the angle brackets,
+/// and the `parameters` field contains any link parameters such as `rel`,
+/// `title`, etc. Parameter names are lowercased. Extended parameters
+/// (e.g. `title*`) are not decoded and are returned as raw strings.
+///
+pub type LinkHeader {
+  LinkHeader(uri: uri.Uri, parameters: List(#(String, String)))
+}
+
+/// Parse a Link header value into its component links and parameters.
+///
+/// Parses the syntax described by
+/// [RFC 8288](https://www.rfc-editor.org/rfc/rfc8288.html).
+/// Link headers are commonly used in REST APIs for pagination and resource
+/// navigation. For example, an API might return:
+///
+/// ```
+/// Link: <https://api.example.com/items?page=2>; rel="next",
+///       <https://api.example.com/items?page=5>; rel="last"
+/// ```
+///
+/// Parameters are returned in the order they appear. Duplicate parameters
+/// (such as multiple `rel` or `title` values) are preserved as-is; it is
+/// the caller's responsibility to select the appropriate value, for example
+/// by using `list.find` to get the first occurrence.
+///
+pub fn parse_link_header(header: String) -> Result(List(LinkHeader), Nil) {
+  let sep = splitter.new([",", "\"", "\\"])
+  header
+  |> split_link_values(sep, _, [])
+  |> list.try_map(parse_link_value)
+}
+
+// Link values are comma-separated, but commas can also appear inside quoted
+// parameter values like `title="page, two"`. We split in two phases:
+//
+// 1. Use `split_once(_, ">")` to quickly jump past the URI (which is always
+//    enclosed in angle brackets). The `>` character is not valid in URIs
+//    per RFC 3986, so the first `>` always closes the URI.
+//
+// 2. Scan the remaining params character-by-character to find the comma
+//    separator, skipping commas inside quoted strings.
+//
+fn split_link_values(
+  sep: splitter.Splitter,
+  remaining: String,
+  acc: List(String),
+) -> List(String) {
+  case string.trim(remaining) {
+    "" -> list.reverse(acc)
+    "," <> rest -> split_link_values(sep, rest, acc)
+    trimmed -> {
+      case string.split_once(trimmed, ">") {
+        // No closing `>`, so include the text as-is. parse_link_value
+        // will reject it, propagating Error through try_map.
+        Error(_) -> list.reverse([trimmed, ..acc])
+        Ok(#(before_close, after_close)) ->
+          find_link_separator(sep, after_close, before_close <> ">", acc, False)
+      }
+    }
+  }
+}
+
+// Walk the params portion after `>` looking for an unquoted comma.
+// Escaped characters inside quotes (e.g. `\"`) are consumed in pairs
+// so they don't toggle the quote state.
+fn find_link_separator(
+  sep: splitter.Splitter,
+  remaining: String,
+  current: String,
+  acc: List(String),
+  in_quote: Bool,
+) -> List(String) {
+  case splitter.split(sep, remaining) {
+    // No delimiter found — end of input.
+    #(rest, "", "") -> {
+      case string.trim(current <> rest) {
+        "" -> list.reverse(acc)
+        trimmed -> list.reverse([trimmed, ..acc])
+      }
+    }
+
+    // Inside quotes, a backslash escapes the next character.
+    #(before, "\\", rest) if in_quote -> {
+      case string.pop_grapheme(rest) {
+        Ok(#(escaped, rest)) ->
+          find_link_separator(
+            sep,
+            rest,
+            current <> before <> "\\" <> escaped,
+            acc,
+            in_quote,
+          )
+        Error(_) ->
+          find_link_separator(
+            sep,
+            rest,
+            current <> before <> "\\",
+            acc,
+            in_quote,
+          )
+      }
+    }
+
+    // Backslash outside quotes — not special, just include it.
+    #(before, "\\", rest) ->
+      find_link_separator(sep, rest, current <> before <> "\\", acc, in_quote)
+
+    // Quote toggles in_quote state.
+    #(before, "\"", rest) ->
+      find_link_separator(sep, rest, current <> before <> "\"", acc, !in_quote)
+
+    // Comma inside quotes — not a separator, keep going.
+    #(before, ",", rest) if in_quote ->
+      find_link_separator(sep, rest, current <> before <> ",", acc, in_quote)
+
+    // Unquoted comma means this link value is complete.
+    #(before, ",", rest) ->
+      split_link_values(sep, rest, [string.trim(current <> before), ..acc])
+
+    #(before, delim, rest) ->
+      find_link_separator(sep, rest, current <> before <> delim, acc, in_quote)
+  }
+}
+
+fn parse_link_value(link_value: String) -> Result(LinkHeader, Nil) {
+  case string.trim_start(link_value) {
+    "<" <> after_open -> {
+      use #(uri_string, params) <- result.try(string.split_once(after_open, ">"))
+      use uri <- result.try(uri.parse(uri_string))
+
+      parse_link_parameters(params, [])
+      |> result.map(LinkHeader(uri, _))
+    }
+    _ -> Error(Nil)
+  }
+}
+
+fn parse_link_parameters(
+  header: String,
+  parameters: List(#(String, String)),
+) -> Result(List(#(String, String)), Nil) {
+  case string.pop_grapheme(header) {
+    Error(Nil) -> Ok(list.reverse(parameters))
+
+    Ok(#(" ", rest)) | Ok(#("\t", rest)) ->
+      parse_link_parameters(rest, parameters)
+
+    Ok(#(";", rest)) -> parse_link_parameters_after_semicolon(rest, parameters)
+
+    _ -> Error(Nil)
+  }
+}
+
+fn parse_link_parameters_after_semicolon(
+  header: String,
+  parameters: List(#(String, String)),
+) -> Result(List(#(String, String)), Nil) {
+  case string.pop_grapheme(header) {
+    // Trailing semicolon with no parameter name is malformed
+    Error(Nil) -> Error(Nil)
+
+    Ok(#(" ", rest)) | Ok(#("\t", rest)) ->
+      parse_link_parameters_after_semicolon(rest, parameters)
+
+    Ok(#(grapheme, rest)) -> {
+      let name = string.lowercase(grapheme)
+      use #(parameter, rest) <- result.try(parse_link_parameter_name(rest, name))
+      parse_link_parameters(rest, [parameter, ..parameters])
+    }
+  }
+}
+
+fn parse_link_parameter_name(
+  header: String,
+  name: String,
+) -> Result(#(#(String, String), String), Nil) {
+  let sep = splitter.new(["=", " ", "\t", ";"])
+  case splitter.split(sep, header) {
+    #(prefix, "", "") -> Ok(#(#(name <> string.lowercase(prefix), ""), ""))
+
+    #(prefix, "=", rest) ->
+      parse_link_parameter_value(
+        string.trim_start(rest),
+        name <> string.lowercase(prefix),
+      )
+
+    #(prefix, " ", rest) | #(prefix, "\t", rest) ->
+      parse_link_parameter_after_name(
+        string.trim_start(rest),
+        name <> string.lowercase(prefix),
+      )
+
+    #(prefix, ";", rest) ->
+      Ok(#(#(name <> string.lowercase(prefix), ""), ";" <> rest))
+
+    #(prefix, _, rest) -> Ok(#(#(name <> string.lowercase(prefix), ""), rest))
+  }
+}
+
+fn parse_link_parameter_after_name(
+  header: String,
+  name: String,
+) -> Result(#(#(String, String), String), Nil) {
+  case header {
+    "" -> Ok(#(#(name, ""), ""))
+    "=" <> rest -> parse_rfc_2045_parameter_value(string.trim_start(rest), name)
+    _ -> Ok(#(#(name, ""), header))
+  }
+}
+
+fn parse_link_parameter_value(
+  header: String,
+  name: String,
+) -> Result(#(#(String, String), String), Nil) {
+  case header {
+    "" -> Error(Nil)
+    "\"" <> rest -> parse_rfc_2045_parameter_quoted_value(rest, name, "")
+    _ -> {
+      let sep = splitter.new([";", " ", "\t"])
+      case splitter.split(sep, header) {
+        #("", _, _) -> Error(Nil)
+        #(value, ";", after) -> Ok(#(#(name, value), ";" <> after))
+        #(value, _, after) -> Ok(#(#(name, value), after))
+      }
+    }
   }
 }
 
