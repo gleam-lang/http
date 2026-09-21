@@ -38,11 +38,9 @@ pub fn get_header_test() {
   let response =
     response.new(200)
     |> response.prepend_header("x-foo", "x")
-    |> response.prepend_header("x-BAR", "y")
+    |> response.prepend_header("x-bar", "y")
 
   assert response.get_header(response, "x-foo") == Ok("x")
-
-  assert response.get_header(response, "X-Foo") == Ok("x")
 
   assert response.get_header(response, "x-baz") == Error(Nil)
 

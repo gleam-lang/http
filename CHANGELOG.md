@@ -3,6 +3,13 @@
 ## Unreleased
 
 - The deprecated `gleam/http/service` module has been removed.
+- The `get_header`, `set_header`, and `prepend_header` functions of the
+  `gleam/http/request` module and the `gleam/http/response` module previously
+  accepted uppercase header names and lowercased them to make them possibly
+  valid `gleam_http` header names. This is wasted work for correct use of the
+  API, and for incorrect use it is inconsistent with other interactions with
+  the headers collection, so it has been removed. Always use lowercase header
+  names.
 
 ## v4.4.0 - 2026-09-01
 
