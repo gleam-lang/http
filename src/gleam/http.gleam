@@ -573,6 +573,16 @@ pub type ContentDisposition {
   ContentDisposition(String, parameters: List(#(String, String)))
 }
 
+/// Parse the value of a `content-disposition` header.
+///
+/// ```gleam
+/// let header = "attachment; filename=genome.jpeg;"
+/// assert http.parse_content_disposition(header)
+///   == Ok(
+///     http.ContentDisposition("attachment", [#("filename", "genome.jpeg")]),
+///   )
+/// ```
+///
 pub fn parse_content_disposition(
   header: String,
 ) -> Result(ContentDisposition, Nil) {
