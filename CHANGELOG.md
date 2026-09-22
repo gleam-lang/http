@@ -10,6 +10,7 @@
   API, and for incorrect use it is inconsistent with other interactions with
   the headers collection, so it has been removed. Always use lowercase header
   names.
+- Added HTTP QUERY method support.
 
 ## v4.4.0 - 2026-09-01
 
