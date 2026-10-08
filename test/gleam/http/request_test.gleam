@@ -157,12 +157,9 @@ pub fn get_req_header_test() {
     )
   }
 
-  let header_key = "GLEAM"
   let request = make_request([#("answer", "42"), #("gleam", "awesome")])
-  assert request.get_header(request, header_key) == Ok("awesome")
-
-  let request = make_request([#("answer", "42")])
-  assert request.get_header(request, header_key) == Error(Nil)
+  assert request.get_header(request, "gleam") == Ok("awesome")
+  assert request.get_header(request, "GLEAM") == Error(Nil)
 }
 
 pub fn set_req_body_test() {
@@ -315,23 +312,6 @@ pub fn set_request_header_maintains_value_casing_test() {
     |> request.set_header("gleam", "UPPERCASE_AWESOME")
 
   assert request.headers == [#("gleam", "UPPERCASE_AWESOME")]
-}
-
-pub fn set_request_header_lowercases_key_test() {
-  let request =
-    Request(
-      method: http.Get,
-      headers: [],
-      body: Nil,
-      scheme: http.Https,
-      host: "example.com",
-      port: None,
-      path: "/",
-      query: None,
-    )
-    |> request.set_header("UPPERCASE_GLEAM", "awesome")
-
-  assert request.headers == [#("uppercase_gleam", "awesome")]
 }
 
 pub fn prepend_req_header_test() {

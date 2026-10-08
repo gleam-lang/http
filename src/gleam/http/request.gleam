@@ -73,7 +73,7 @@ pub fn from_uri(uri: Uri) -> Result(Request(String), Nil) {
 /// letter is invalid.
 ///
 pub fn get_header(request: Request(body), key: String) -> Result(String, Nil) {
-  list.key_find(request.headers, string.lowercase(key))
+  list.key_find(request.headers, key)
 }
 
 /// Set the header with the given value under the given header key.
@@ -88,7 +88,7 @@ pub fn set_header(
   key: String,
   value: String,
 ) -> Request(body) {
-  let headers = list.key_set(request.headers, string.lowercase(key), value)
+  let headers = list.key_set(request.headers, key, value)
   Request(..request, headers:)
 }
 
@@ -105,7 +105,7 @@ pub fn prepend_header(
   key: String,
   value: String,
 ) -> Request(body) {
-  let headers = [#(string.lowercase(key), value), ..request.headers]
+  let headers = [#(key, value), ..request.headers]
   Request(..request, headers:)
 }
 

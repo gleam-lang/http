@@ -55,6 +55,12 @@ pub fn parse_method_test() {
 
   assert http.parse_method("trace") == Ok(http.Other("trace"))
 
+  assert http.parse_method("Query") == Ok(http.Other("Query"))
+
+  assert http.parse_method("QUERY") == Ok(http.Query)
+
+  assert http.parse_method("query") == Ok(http.Other("query"))
+
   assert http.parse_method("thingy") == Ok(http.Other("thingy"))
 
   assert http.parse_method("!#$%&'*+-.^_`|~abcABC123")
@@ -81,6 +87,8 @@ pub fn method_to_string_test() {
   assert http.method_to_string(http.Put) == "PUT"
 
   assert http.method_to_string(http.Trace) == "TRACE"
+
+  assert http.method_to_string(http.Query) == "QUERY"
 
   assert http.method_to_string(http.Other("ok")) == "ok"
 

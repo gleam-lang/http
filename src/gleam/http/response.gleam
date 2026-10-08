@@ -48,7 +48,7 @@ pub fn get_header(
   response: Response(body),
   key: String,
 ) -> Result(String, Nil) {
-  list.key_find(response.headers, string.lowercase(key))
+  list.key_find(response.headers, key)
 }
 
 /// Set the header with the given value under the given header key.
@@ -63,7 +63,7 @@ pub fn set_header(
   key: String,
   value: String,
 ) -> Response(body) {
-  let headers = list.key_set(response.headers, string.lowercase(key), value)
+  let headers = list.key_set(response.headers, key, value)
   Response(..response, headers:)
 }
 
@@ -80,7 +80,7 @@ pub fn prepend_header(
   key: String,
   value: String,
 ) -> Response(body) {
-  let headers = [#(string.lowercase(key), value), ..response.headers]
+  let headers = [#(key, value), ..response.headers]
   Response(..response, headers:)
 }
 
