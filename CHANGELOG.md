@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- The `gleam/http` module gains the `LinkHeader` type and `parse_link_header`
+- The `gleam/http` module gains the `HeaderLink` type and `parse_link_header`
   function for parsing Link headers.
 
 ## v4.4.0 - 2026-09-01

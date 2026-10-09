@@ -685,8 +685,8 @@ fn parse_rfc_2045_parameter_unquoted_value(
 /// `title`, etc. Parameter names are lowercased. Extended parameters
 /// (e.g. `title*`) are not decoded and are returned as raw strings.
 ///
-pub type LinkHeader {
-  LinkHeader(uri: uri.Uri, parameters: List(#(String, String)))
+pub type HeaderLink {
+  HeaderLink(uri: uri.Uri, parameters: List(#(String, String)))
 }
 
 /// Parse a Link header value into its component links and parameters.
@@ -706,7 +706,7 @@ pub type LinkHeader {
 /// the caller's responsibility to select the appropriate value, for example
 /// by using `list.find` to get the first occurrence.
 ///
-pub fn parse_link_header(header: String) -> Result(List(LinkHeader), Nil) {
+pub fn parse_link_header(header: String) -> Result(List(HeaderLink), Nil) {
   let sep = splitter.new([",", "\"", "\\"])
   header
   |> split_link_values(sep, _, [])
@@ -805,14 +805,14 @@ fn find_link_separator(
   }
 }
 
-fn parse_link_value(link_value: String) -> Result(LinkHeader, Nil) {
+fn parse_link_value(link_value: String) -> Result(HeaderLink, Nil) {
   case string.trim_start(link_value) {
     "<" <> after_open -> {
       use #(uri_string, params) <- result.try(string.split_once(after_open, ">"))
       use uri <- result.try(uri.parse(uri_string))
 
       parse_link_parameters(params, [])
-      |> result.map(LinkHeader(uri, _))
+      |> result.map(HeaderLink(uri, _))
     }
     _ -> Error(Nil)
   }
